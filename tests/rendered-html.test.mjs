@@ -282,15 +282,21 @@ test("defaults to video-led motion unless the visitor asks for reduced motion", 
 
 // Focused CTA-surface tripwire at tests/rendered-html.test.mjs for future page
 // editors. Activation: execute `npm test`. Its server-rendered HTML and
-// production CSS consumers require the fixed ORDER NOW header, the Hungry Yet
-// / Order Now lockup on Poke Bowl, the shared display face, the pill-shaped
-// header action, and one fixed bottom-center order action outside the moving
-// passage, with both directional arrows held to the same approved deep green.
-// Retire if the owner approves a different CTA composition or order language.
+// production CSS consumers require the fixed ORDER NOW header with a
+// decorative green up-right arrow, gold Loco heading, white Poke heading,
+// the Hungry Yet / Order Now lockup on Poke Bowl staying gold, the shared
+// display face, the pill-shaped header action, and one fixed bottom-center
+// order action outside the moving passage, with directional arrows held to
+// the same approved deep green. Retire if the owner approves a different
+// CTA composition, heading color split, or order language.
 test("keeps the visitor calls to action on the display face", async () => {
   const html = await (await render()).text();
   assert.match(html, /<h3>HUNGRY YET\?<\/h3>/);
   assert.match(html, /ORDER NOW/);
+  assert.match(
+    html,
+    /class="order-link"[^>]*>\s*Order Now\s*<span aria-hidden="true">↗<\/span>/,
+  );
   assert.match(html, /class="floating-order"/);
   assert.doesNotMatch(html, /Order online/i);
   assert.doesNotMatch(html, /dish-detail|Marinated boneless chicken|Get the plate/);
@@ -316,6 +322,8 @@ test("keeps the visitor calls to action on the display face", async () => {
   const hungryBlock = blockFor(".dish-poke .dish-cta h3 {");
   const orderBlock = blockFor(".dish-cta a,\n.visit-order {");
   const headerOrderBlock = blockFor(".order-link {");
+  const locoHeadingBlock = blockFor(".dish-loco h2 {");
+  const pokeHeadingBlock = blockFor(".dish-poke h2 {");
   const floatingOrderBlock = blockFor(".floating-order {");
   const headerBlock = blockFor(".site-header {");
   const openingNextBlocks = [...css.matchAll(/\.opening-next\s*\{([^}]*)\}/g)]
@@ -324,13 +332,21 @@ test("keeps the visitor calls to action on the display face", async () => {
 
   assert.doesNotMatch(ctaBlock, /\bbackground(?:-color)?\s*:/);
   assert.match(hungryBlock, /color:\s*var\(--gold\)/);
+  assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
+  assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
+  assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
   assert.match(orderBlock, /white-space:\s*nowrap/);
   assert.match(headerOrderBlock, /font-family:\s*"Arial Black"/);
   assert.match(headerOrderBlock, /background:\s*var\(--gold\)/);
+  assert.match(headerOrderBlock, /color:\s*var\(--ink\)/);
   assert.match(headerOrderBlock, /border-radius:\s*999px/);
+  assert.match(
+    css,
+    /\.order-link\s*>\s*span\s*\{[^}]*color:\s*var\(--green\)/s,
+  );
   assert.match(floatingOrderBlock, /position:\s*fixed/);
   assert.match(floatingOrderBlock, /left:\s*50%/);
   assert.match(floatingOrderBlock, /border-radius:\s*999px/);
@@ -363,7 +379,11 @@ test("keeps the visitor calls to action on the display face", async () => {
 // Activation: execute `node --test tests/rendered-html.test.mjs` after
 // `vinext build`.
 // Behavioral check: exercises the generated export and rejects return of the
-// Teri beat or loss of offer/menu links/motion contract.
+// Teri beat, a short 1.65s/13% shutoff, a scaled rectangular burst silhouette,
+// offer leak during the black hold, or loss of offer/menu links/motion
+// contract. The visitor contract is a 3.2s held-breath: ~320ms slam to black,
+// ~1.28s empty hold, then a circular/edgeless flash/burst, with offer copy
+// appearing only after `settled`.
 // Retirement: only when the offer beat is intentionally removed or replaced
 // and the corresponding production consumer contract changes.
 test("exports the offer climax and first-party dish carousel", async () => {
@@ -439,15 +459,103 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-transition \{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.offer-passage \{/);
   assert.doesNotMatch(css, /\.offer-passage[^{]*\{[^}]*\b(?:filter|backdrop-filter)\s*:/);
+  assert.match(climaxSource, /climaxDurationMs = 3200/);
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?13% \{[\s\S]*?transform:\s*scaleY\(1\);/,
-    "shutters must be fully closed by 13% of the 1.65s climax (~215ms)",
+    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 3\.2s linear forwards/,
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-action,[\s\S]*?\.offer-terms,[\s\S]*?\.offer-carousel \{[\s\S]*?opacity:\s*0;/,
-    "terms must stay hidden with the action during the playing state",
+    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 3\.2s linear forwards/,
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="playing"\] \.offer-burst \{[\s\S]*?offer-burst-expand 3\.2s linear forwards/,
+  );
+  assert.doesNotMatch(
+    css,
+    /offer-shutter-close 1\.65s|offer-flash-line 1\.65s|offer-burst-expand 1\.65s/,
+    "the obsolete 1.65s shutoff clock must not remain",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-shutter-close \{[\s\S]*?10% \{[\s\S]*?transform:\s*scaleY\(1\);/,
+    "shutters must be fully closed by 10% of the 3.2s climax (~320ms)",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-shutter-close \{[\s\S]*?50% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
+    "the black hold must stay fully closed through 50% (~1.28s after slam)",
+  );
+  assert.doesNotMatch(
+    css,
+    /@keyframes offer-shutter-close \{[\s\S]*?13% \{/,
+    "the obsolete 13% close keyframe must not remain",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*50% \{[\s\S]*?opacity:\s*0;/,
+    "the white flash must wait until after the black hold",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-flash-white \{[\s\S]*?52% \{[\s\S]*?opacity:\s*0\.97;/,
+    "ignition must be a near-white flash",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-burst-expand \{[\s\S]*?0%,\s*50% \{[\s\S]*?opacity:\s*0;/,
+    "the chromatic burst must stay dark through the black hold",
+  );
+  const burstRule = css.match(/\.offer-burst \{([^}]+)\}/)?.[1] ?? "";
+  const burstBeforeRule = css.match(/\.offer-burst::before \{([^}]+)\}/)?.[1] ?? "";
+  const burstExpandStart = css.indexOf("@keyframes offer-burst-expand {");
+  const burstCoreStart = css.indexOf("@keyframes offer-burst-core {");
+  assert.ok(burstExpandStart >= 0 && burstCoreStart > burstExpandStart);
+  const burstExpand = css.slice(burstExpandStart, burstCoreStart);
+
+  assert.match(
+    burstRule,
+    /clip-path:\s*circle\(/,
+    "the burst layer must open through a circular aperture",
+  );
+  assert.doesNotMatch(
+    burstRule,
+    /transform:\s*scale\(/,
+    "the rest-state burst must not start as a scaled rectangle",
+  );
+  assert.match(
+    burstExpand,
+    /clip-path:\s*circle\(/,
+    "ignition must grow as a circle, not a scaled box",
+  );
+  assert.doesNotMatch(
+    burstExpand,
+    /transform:\s*scale\(/,
+    "do not scale the rectangular burst layer; its box becomes a silhouette",
+  );
+  assert.doesNotMatch(
+    burstBeforeRule,
+    /linear-gradient\(/,
+    "directional light must not be broad linear wedges",
+  );
+  assert.match(
+    burstBeforeRule,
+    /repeating-conic-gradient\(/,
+    "rays should leave the core as thin conic light",
+  );
+  assert.match(css, /\.offer-flash \{[\s\S]*?background:\s*#fff;/);
+  assert.match(css, /\.offer-burst::before \{/);
+  assert.match(css, /\.offer-burst::after \{/);
+  assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*0;/);
+  assert.match(
+    css,
+    /html\[data-offer-climax="settled"\] \.offer-field,[\s\S]*?main:not\(\.force-motion\) \.offer-field \{[\s\S]*?opacity:\s*1;/,
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="playing"\] \.offer-field,[\s\S]*?\.offer-action,[\s\S]*?\.offer-terms,[\s\S]*?\.offer-carousel \{[\s\S]*?opacity:\s*0;/,
+    "field, action, terms, and carousel must stay hidden through playing",
   );
   assert.match(css, /\.offer-terms \{[\s\S]*?font-size:\s*1rem;/);
   assert.match(css, /\.offer-track \{[\s\S]*?scrollbar-width:\s*none;/);

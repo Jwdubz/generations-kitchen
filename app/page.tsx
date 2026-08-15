@@ -132,7 +132,7 @@ export default async function Home({ searchParams }: HomeProps) {
             target="_blank"
             rel="noreferrer"
           >
-            Order Now
+            Order Now <span aria-hidden="true">↗</span>
           </a>
         </nav>
       </header>

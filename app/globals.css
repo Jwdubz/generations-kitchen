@@ -216,6 +216,9 @@ nav a:not(.order-link):focus-visible {
 }
 
 .order-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.9rem 1.25rem;
   color: var(--ink);
   background: var(--gold);
@@ -225,6 +228,11 @@ nav a:not(.order-link):focus-visible {
   font-weight: 950;
   letter-spacing: -0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.order-link > span {
+  color: var(--green);
 }
 
 .order-link:hover,
@@ -232,6 +240,11 @@ nav a:not(.order-link):focus-visible {
   color: var(--white);
   background: var(--red);
   border-color: var(--red);
+}
+
+.order-link:hover > span,
+.order-link:focus-visible > span {
+  color: var(--white);
 }
 
 .floating-order {
@@ -446,6 +459,7 @@ h1 strong {
 
 .dish-loco h2 {
   max-width: 6ch;
+  color: var(--gold);
 }
 
 .dish-poke .passage-content {
@@ -457,7 +471,7 @@ h1 strong {
 }
 
 .dish-poke h2 {
-  color: var(--gold);
+  color: var(--white);
   max-width: 6ch;
 }
 
@@ -682,7 +696,7 @@ h1 strong {
   }
 
   .dish-poke h2 {
-    color: var(--gold);
+    color: var(--white);
   }
 
   .visit-actions {
@@ -847,6 +861,7 @@ h1 strong {
   position: fixed;
   inset: 0;
   z-index: 30;
+  overflow: hidden;
   pointer-events: none;
   visibility: hidden;
 }
@@ -880,20 +895,8 @@ main:not(.force-motion) .offer-transition {
 
 .offer-flash {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(92vw, 72rem);
-  height: 0.28rem;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--cream) 18%,
-    #fff 50%,
-    var(--gold) 82%,
-    transparent
-  );
-  transform: translate(-50%, -50%) scaleX(0);
-  transform-origin: center;
+  inset: 0;
+  background: #fff;
   opacity: 0;
 }
 
@@ -901,35 +904,84 @@ main:not(.force-motion) .offer-transition {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 250, 240, 0.95) 0 0.35rem, transparent 0.55rem),
-    radial-gradient(circle at 50% 50%, rgba(242, 173, 36, 0.72) 0 8%, transparent 24%),
-    radial-gradient(circle at 42% 48%, rgba(179, 24, 31, 0.55) 0 16%, transparent 38%),
-    radial-gradient(circle at 58% 52%, rgba(11, 107, 58, 0.48) 0 16%, transparent 38%),
-    repeating-conic-gradient(
-      from 90deg at 50% 50%,
-      transparent 0 9deg,
-      rgba(242, 173, 36, 0.22) 10deg 12deg,
-      transparent 13deg 21deg,
-      rgba(179, 24, 31, 0.16) 22deg 24deg,
-      transparent 25deg 33deg,
-      rgba(11, 107, 58, 0.16) 34deg 36deg,
-      transparent 37deg 45deg
-    );
+    radial-gradient(circle at 50% 50%, #fff 0 0.9%, rgba(255, 250, 240, 0.94) 2.2%, transparent 7%),
+    radial-gradient(circle at 50% 50%, rgba(242, 173, 36, 0.9) 0 12%, transparent 36%),
+    radial-gradient(circle at 40% 46%, rgba(179, 24, 31, 0.7) 0 14%, transparent 38%),
+    radial-gradient(circle at 61% 55%, rgba(11, 107, 58, 0.66) 0 14%, transparent 40%),
+    radial-gradient(circle at 57% 38%, rgba(242, 173, 36, 0.4) 0 10%, transparent 28%);
   opacity: 0;
-  transform: scale(0.08);
-  transform-origin: center;
+  -webkit-clip-path: circle(0% at 50% 50%);
+  clip-path: circle(0% at 50% 50%);
+}
+
+.offer-burst::before,
+.offer-burst::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.offer-burst::before {
+  background:
+    repeating-conic-gradient(
+      from 8deg at 50% 50%,
+      transparent 0 8.8deg,
+      rgba(179, 24, 31, 0) 8.8deg,
+      rgba(179, 24, 31, 0.82) 9.05deg,
+      rgba(179, 24, 31, 0) 9.45deg,
+      transparent 9.45deg 16.6deg,
+      rgba(11, 107, 58, 0) 16.6deg,
+      rgba(11, 107, 58, 0.74) 16.8deg,
+      rgba(11, 107, 58, 0) 17.2deg,
+      transparent 17.2deg 26.4deg,
+      rgba(242, 173, 36, 0) 26.4deg,
+      rgba(242, 173, 36, 0.9) 26.55deg,
+      rgba(242, 173, 36, 0) 26.95deg,
+      transparent 26.95deg 31.1deg,
+      rgba(179, 24, 31, 0) 31.1deg,
+      rgba(179, 24, 31, 0.38) 31.2deg,
+      rgba(179, 24, 31, 0) 31.4deg,
+      transparent 31.4deg 38deg
+    ),
+    repeating-conic-gradient(
+      from 29deg at 50% 50%,
+      transparent 0 12.4deg,
+      rgba(242, 173, 36, 0) 12.4deg,
+      rgba(242, 173, 36, 0.55) 12.55deg,
+      rgba(242, 173, 36, 0) 12.85deg,
+      transparent 12.85deg 23.6deg,
+      rgba(11, 107, 58, 0) 23.6deg,
+      rgba(11, 107, 58, 0.42) 23.72deg,
+      rgba(11, 107, 58, 0) 23.95deg,
+      transparent 23.95deg 36deg
+    );
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 38%, transparent 90%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 0 38%, transparent 90%);
+}
+
+.offer-burst::after {
+  background: radial-gradient(
+    circle at 50% 50%,
+    #fff 0 1.1%,
+    rgba(255, 255, 255, 0.96) 2.2%,
+    transparent 6.5%
+  );
 }
 
 html[data-offer-climax="playing"] .offer-shutter {
-  animation: offer-shutter-close 1.65s linear forwards;
+  animation: offer-shutter-close 3.2s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-flash {
-  animation: offer-flash-line 1.65s linear forwards;
+  animation: offer-flash-white 3.2s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-burst {
-  animation: offer-burst-expand 1.65s linear forwards;
+  animation: offer-burst-expand 3.2s linear forwards;
+}
+
+html[data-offer-climax="playing"] .offer-burst::after {
+  animation: offer-burst-core 3.2s linear forwards;
 }
 
 @keyframes offer-shutter-close {
@@ -937,15 +989,20 @@ html[data-offer-climax="playing"] .offer-burst {
     transform: scaleY(0);
   }
 
-  10% {
-    transform: scaleY(0.94);
+  8% {
+    transform: scaleY(0.96);
   }
 
-  13% {
+  10% {
     transform: scaleY(1);
   }
 
-  82% {
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  88% {
     transform: scaleY(1);
     opacity: 1;
   }
@@ -956,26 +1013,22 @@ html[data-offer-climax="playing"] .offer-burst {
   }
 }
 
-@keyframes offer-flash-line {
+@keyframes offer-flash-white {
   0%,
-  12% {
+  50% {
     opacity: 0;
-    transform: translate(-50%, -50%) scaleX(0.08);
   }
 
-  18% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scaleX(1);
+  52% {
+    opacity: 0.97;
   }
 
-  26% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scaleX(0.04) scaleY(1.4);
+  56% {
+    opacity: 0.97;
   }
 
-  34% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0);
+  78% {
+    opacity: 0.22;
   }
 
   100% {
@@ -985,24 +1038,65 @@ html[data-offer-climax="playing"] .offer-burst {
 
 @keyframes offer-burst-expand {
   0%,
-  42% {
+  50% {
     opacity: 0;
-    transform: scale(0.08);
+    -webkit-clip-path: circle(0% at 50% 50%);
+    clip-path: circle(0% at 50% 50%);
   }
 
   52% {
     opacity: 1;
-    transform: scale(0.42);
+    -webkit-clip-path: circle(1.35vmax at 50% 50%);
+    clip-path: circle(1.35vmax at 50% 50%);
   }
 
-  84% {
+  54% {
     opacity: 1;
-    transform: scale(1.18);
+    -webkit-clip-path: circle(14vmax at 50% 50%);
+    clip-path: circle(14vmax at 50% 50%);
+  }
+
+  58% {
+    opacity: 1;
+    -webkit-clip-path: circle(52vmax at 50% 50%);
+    clip-path: circle(52vmax at 50% 50%);
+  }
+
+  68% {
+    opacity: 1;
+    -webkit-clip-path: circle(88vmax at 50% 50%);
+    clip-path: circle(88vmax at 50% 50%);
+  }
+
+  86% {
+    opacity: 0.58;
+    -webkit-clip-path: circle(118vmax at 50% 50%);
+    clip-path: circle(118vmax at 50% 50%);
   }
 
   100% {
     opacity: 0;
-    transform: scale(1.35);
+    -webkit-clip-path: circle(140vmax at 50% 50%);
+    clip-path: circle(140vmax at 50% 50%);
+  }
+}
+
+@keyframes offer-burst-core {
+  0%,
+  50% {
+    opacity: 0;
+  }
+
+  52% {
+    opacity: 1;
+  }
+
+  62% {
+    opacity: 0.94;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 
@@ -1025,6 +1119,7 @@ html[data-offer-climax="playing"] .offer-burst {
     radial-gradient(circle at 36% 46%, rgba(179, 24, 31, 0.32) 0 18%, transparent 42%),
     radial-gradient(circle at 64% 46%, rgba(11, 107, 58, 0.28) 0 18%, transparent 42%),
     #000;
+  opacity: 0;
 }
 
 .offer-ray {
@@ -1039,6 +1134,11 @@ html[data-offer-climax="playing"] .offer-burst {
     transparent 38deg 47deg
   );
   opacity: 0.85;
+}
+
+html[data-offer-climax="settled"] .offer-field,
+main:not(.force-motion) .offer-field {
+  opacity: 1;
 }
 
 html[data-offer-climax="settled"] main.force-motion .offer-field {
@@ -1219,6 +1319,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-terms {
   animation: offer-terms-in 0.45s 0.18s ease forwards;
 }
 
+html[data-offer-climax="playing"] .offer-field,
 html[data-offer-climax="playing"] .offer-action,
 html[data-offer-climax="playing"] .offer-terms,
 html[data-offer-climax="playing"] .offer-carousel {
