@@ -1,0 +1,309 @@
+/* eslint-disable @next/next/no-img-element */
+
+import { DesktopSmoothScroll } from "./desktop-smooth-scroll";
+
+const orderUrl = "https://generationskitchenvegas.com/menu";
+const instagramUrl = "https://www.instagram.com/generationskitchenlv/";
+const directionsUrl =
+  "https://www.google.com/maps/search/?api=1&query=6280+S+Valley+View+Blvd+Building+A+Suite+100%2C+Las+Vegas%2C+NV+89118%2C+USA&query_place_id=ChIJ6TpkRVnFyIARaUhmkEEl8jg";
+
+type HomeProps = {
+  searchParams: Promise<{ motion?: string }>;
+};
+
+type FoodPassageProps = {
+  id: string;
+  mediaName: string;
+  alt: string;
+  title: React.ReactNode;
+  className: string;
+  children?: React.ReactNode;
+};
+
+function FoodPassage({
+  id,
+  mediaName,
+  alt,
+  title,
+  className,
+  children,
+}: FoodPassageProps) {
+  const titleId = `${id}-title`;
+
+  return (
+    <section
+      className={`food-passage ${className}`}
+      id={id}
+      data-scroll-beat={id}
+      aria-labelledby={titleId}
+    >
+      <div className="passage-media" aria-hidden="true">
+        <video
+          className="passage-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={`/media/${mediaName}-desktop.jpg?v=peopleclean1`}
+        >
+          <source
+            media="(max-width: 760px)"
+            src={`/media/${mediaName}-mobile.mp4?v=peopleclean1`}
+            type="video/mp4"
+          />
+          <source
+            src={`/media/${mediaName}-desktop.mp4?v=peopleclean1`}
+            type="video/mp4"
+          />
+        </video>
+
+        <picture className="passage-poster">
+          <source
+            media="(max-width: 760px)"
+            srcSet={`/media/${mediaName}-mobile.jpg?v=peopleclean1`}
+          />
+          <img src={`/media/${mediaName}-desktop.jpg?v=peopleclean1`} alt={alt} />
+        </picture>
+      </div>
+
+      <div className="passage-shade" aria-hidden="true" />
+
+      <div className="passage-content">
+        <h2 id={titleId}>{title}</h2>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+  const { motion } = await searchParams;
+
+  return (
+    <main className={motion === "full" ? "force-motion" : undefined}>
+      <DesktopSmoothScroll />
+
+      <header className="site-header">
+        <a className="brand" href="#top" aria-label="Generations Kitchen home">
+          <img
+            src="/media/generations-kitchen-logo.png"
+            alt="Generations Kitchen"
+          />
+        </a>
+
+        <nav aria-label="Primary navigation">
+          <a href="#hurricane">Menu</a>
+          <a href={instagramUrl} target="_blank" rel="noreferrer">
+            Instagram
+          </a>
+          <a
+            className="order-link"
+            href={orderUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Order Now
+          </a>
+        </nav>
+      </header>
+
+      <a
+        className="floating-order"
+        href={orderUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Order Now <span aria-hidden="true">↗</span>
+      </a>
+
+      <div className="smooth-scroll-wrapper" data-scroll-tau="0.41">
+        <div className="smooth-scroll-content">
+      <section
+        className="opening"
+        id="top"
+        data-scroll-beat="top"
+        aria-labelledby="opening-title"
+      >
+        <div className="opening-media" aria-hidden="true">
+          {/*
+            Maintained asset:
+            public/media/max-holloway-opening-{desktop,mobile}.mp4.
+            Future consumer: the site's cold-load visitor. Activation:
+            auto-load through these responsive video sources. Behavioral check:
+            npm test ffprobes both encodes and browser review exercises the
+            entrance, handoff, loop, and reduced-motion path. Retire when this
+            restaurant-visit carrier is replaced or publication rights cannot
+            be cleared. The source-bound visit remains local-concept media until
+            those publication rights are cleared.
+          */}
+          <video
+            className="opening-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="/media/max-holloway-opening-poster.jpg?v=brandfree3"
+          >
+            <source
+              media="(max-width: 760px)"
+              src="/media/max-holloway-opening-mobile.mp4?v=brandfree3"
+              type="video/mp4"
+            />
+            <source
+              src="/media/max-holloway-opening-desktop.mp4?v=brandfree3"
+              type="video/mp4"
+            />
+          </video>
+
+          <div className="reduced-motion-sequence">
+            <img src="/media/max-holloway-entrance.jpg?v=brandfree3" alt="" />
+            <img src="/media/restaurant-owner.jpg?v=brandfree3" alt="" />
+            <img src="/media/hurricane-food.jpg?v=brandfree3" alt="" />
+          </div>
+        </div>
+
+        <div className="opening-shade" aria-hidden="true" />
+
+        <div className="opening-copy">
+          <h1 id="opening-title">
+            <span>The Ninth Island</span>
+            <span>
+              eats <strong>here.</strong>
+            </span>
+          </h1>
+        </div>
+
+        <a className="opening-next" href="#hurricane">
+          <span>Meet the plate</span>
+          <span aria-hidden="true">↓</span>
+        </a>
+      </section>
+
+      <FoodPassage
+        id="hurricane"
+        mediaName="hurricane-chicken"
+        alt="Hurricane Chicken being prepared and plated at Generations Kitchen"
+        className="dish-hurricane"
+        title={
+          <>
+            Hurricane
+            <br />
+            Chicken.
+          </>
+        }
+      />
+
+      <FoodPassage
+        id="loco-moco"
+        mediaName="loco-moco"
+        alt="Loco Moco plate, hamburger patties on the griddle, and eggs cooking"
+        className="dish-loco"
+        title={
+          <>
+            Loco
+            <br />
+            Moco.
+          </>
+        }
+      />
+
+      <FoodPassage
+        id="poke-bowl"
+        mediaName="poke-bowl"
+        alt="A fresh poke bowl being opened and sauced at Generations Kitchen"
+        className="dish-poke"
+        title={
+          <>
+            Poke
+            <br />
+            Bowl.
+          </>
+        }
+      />
+
+      <FoodPassage
+        id="teri-beef-fries"
+        mediaName="hurricane-fries"
+        alt="Teri Beef Fries with house sauces, furikake, and green onions"
+        className="dish-teri"
+        title={
+          <>
+            Teri Beef Fries.
+          </>
+        }
+      >
+        <div className="dish-cta">
+          <h3>Hungry?</h3>
+          <a href={orderUrl} target="_blank" rel="noreferrer">
+            Order Now <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </FoodPassage>
+
+      <section
+        className="visit-passage"
+        id="visit"
+        data-scroll-beat="visit"
+        aria-labelledby="visit-title"
+      >
+        <div className="visit-montage" aria-hidden="true">
+          <img
+            className="visit-frame visit-frame-one"
+            src="/media/visit-interior-lanterns.jpg"
+            alt=""
+          />
+          <img
+            className="visit-frame visit-frame-two"
+            src="/media/visit-counter-team.jpg"
+            alt=""
+          />
+          <img
+            className="visit-frame visit-frame-three"
+            src="/media/visit-interior-counter.jpg"
+            alt=""
+          />
+        </div>
+
+        <div className="visit-shade" aria-hidden="true" />
+
+        <div className="visit-content">
+          <h2 id="visit-title">
+            Pull up
+            <br />
+            hungry.
+          </h2>
+
+          <div className="visit-actions">
+            <p>
+              6280 S Valley View Blvd
+              <br />
+              Building A, Suite 100 · Las Vegas
+            </p>
+
+            <a
+              className="visit-order"
+              href={orderUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Order now <span aria-hidden="true">↗</span>
+            </a>
+
+            <div className="visit-links">
+              <a href={directionsUrl} target="_blank" rel="noreferrer">
+                Directions ↗
+              </a>
+              <a href={instagramUrl} target="_blank" rel="noreferrer">
+                Instagram ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+        </div>
+      </div>
+    </main>
+  );
+}
