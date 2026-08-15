@@ -22,10 +22,10 @@ async function render() {
 
 // Focused experience-boundary tripwire at tests/rendered-html.test.mjs for the
 // next Generations Kitchen page editor. Activation: execute `npm test`. The
-// exported HTML consumer requires the approved opening, four food beats,
-// current menu/directions/Instagram destinations, and the removed broadcast
-// name and retired order host to stay absent. Retire only if the owner approves
-// a different journey or destination contract.
+// exported HTML consumer requires the approved opening, three food beats,
+// the offer beat, current menu/directions/Instagram destinations, and the
+// removed broadcast name and retired order host to stay absent. Retire only
+// if the owner approves a different journey or destination contract.
 test("exports the complete Generations Kitchen passage", async () => {
   const response = await render();
   assert.equal(response.status, 200);
@@ -43,21 +43,20 @@ test("exports the complete Generations Kitchen passage", async () => {
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/);
 
   const foodPassages = html.match(/class="food-passage /g) ?? [];
-  assert.equal(foodPassages.length, 4, "the journey should contain four food beats");
+  assert.equal(foodPassages.length, 3, "the journey should contain three food beats");
 
-  for (const id of ["hurricane", "loco-moco", "poke-bowl", "teri-beef-fries"]) {
+  for (const id of ["hurricane", "loco-moco", "poke-bowl", "offer", "visit"]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
 
-  for (const mediaName of [
-    "hurricane-chicken",
-    "loco-moco",
-    "poke-bowl",
-    "hurricane-fries",
-  ]) {
+  for (const mediaName of ["hurricane-chicken", "loco-moco", "poke-bowl"]) {
     assert.match(html, new RegExp(`${mediaName}-desktop\\.mp4`));
     assert.match(html, new RegExp(`${mediaName}-mobile\\.mp4`));
   }
+
+  assert.doesNotMatch(html, /teri-beef-fries/);
+  assert.doesNotMatch(html, /Teri Beef Fries/);
+  assert.doesNotMatch(html, /hurricane-fries/);
 
   assert.match(html, /6280 S Valley View Blvd/);
   assert.match(html, /Directions/);
@@ -283,31 +282,25 @@ test("defaults to video-led motion unless the visitor asks for reduced motion", 
 
 // Focused CTA-surface tripwire at tests/rendered-html.test.mjs for future page
 // editors. Activation: execute `npm test`. Its server-rendered HTML and
-// production CSS consumers require the fixed ORDER NOW header, the Hungry /
-// Order Now lockup on Teri Beef Fries only, its single-line title, the shared
-// display face, the pill-shaped header action, and one fixed bottom-center order
-// action outside the moving passage, with both directional arrows held to the
-// same approved deep green.
+// production CSS consumers require the fixed ORDER NOW header, the Hungry Yet
+// / Order Now lockup on Poke Bowl, the shared display face, the pill-shaped
+// header action, and one fixed bottom-center order action outside the moving
+// passage, with both directional arrows held to the same approved deep green.
 // Retire if the owner approves a different CTA composition or order language.
 test("keeps the visitor calls to action on the display face", async () => {
   const html = await (await render()).text();
-  assert.match(html, /<h3>Hungry\?<\/h3>/);
-  assert.match(html, /Order Now/);
+  assert.match(html, /<h3>HUNGRY YET\?<\/h3>/);
+  assert.match(html, /ORDER NOW/);
   assert.match(html, /class="floating-order"/);
   assert.doesNotMatch(html, /Order online/i);
   assert.doesNotMatch(html, /dish-detail|Marinated boneless chicken|Get the plate/);
 
-  const teriStart = html.indexOf('id="teri-beef-fries"');
-  const visitStart = html.indexOf('id="visit"');
+  const pokeStart = html.indexOf('id="poke-bowl"');
+  const offerStart = html.indexOf('id="offer"');
   const dishCta = html.indexOf('class="dish-cta"');
   assert.ok(
-    teriStart >= 0 && dishCta > teriStart && dishCta < visitStart,
-    "the Hungry / Order Now lockup should live on Teri Beef Fries",
-  );
-  assert.match(
-    html,
-    /<h2 id="teri-beef-fries-title">Teri Beef Fries\.<\/h2>/,
-    "the Teri Beef Fries title should stay on one line",
+    pokeStart >= 0 && dishCta > pokeStart && dishCta < offerStart,
+    "the Hungry Yet / Order Now lockup should live on Poke Bowl",
   );
 
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
@@ -320,7 +313,7 @@ test("keeps the visitor calls to action on the display face", async () => {
   };
 
   const ctaBlock = blockFor(".dish-cta {");
-  const hungryBlock = blockFor(".dish-cta h3 {");
+  const hungryBlock = blockFor(".dish-poke .dish-cta h3 {");
   const orderBlock = blockFor(".dish-cta a,\n.visit-order {");
   const headerOrderBlock = blockFor(".order-link {");
   const floatingOrderBlock = blockFor(".floating-order {");
@@ -330,7 +323,8 @@ test("keeps the visitor calls to action on the display face", async () => {
     .join("\n");
 
   assert.doesNotMatch(ctaBlock, /\bbackground(?:-color)?\s*:/);
-  assert.match(hungryBlock, /font-family:\s*"Arial Black"/);
+  assert.match(hungryBlock, /color:\s*var\(--gold\)/);
+  assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
   assert.match(orderBlock, /white-space:\s*nowrap/);
@@ -363,6 +357,126 @@ test("keeps the visitor calls to action on the display face", async () => {
   );
 });
 
+// Focused tripwire: first-order offer climax and dish-carousel contract.
+// Canonical path: tests/rendered-html.test.mjs.
+// Future consumer: maintainers changing the Generations Kitchen passage/export.
+// Activation: execute `node --test tests/rendered-html.test.mjs` after
+// `vinext build`.
+// Behavioral check: exercises the generated export and rejects return of the
+// Teri beat or loss of offer/menu links/motion contract.
+// Retirement: only when the offer beat is intentionally removed or replaced
+// and the corresponding production consumer contract changes.
+test("exports the offer climax and first-party dish carousel", async () => {
+  const html = await (await render()).text();
+  const pageSource = await readFile(
+    new URL("../app/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const css = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  const climaxSource = await readFile(
+    new URL("../app/offer-climax.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(html, /data-scroll-beat="offer"/);
+  assert.match(html, /\$10 OFF YOUR FIRST ORDER/);
+  assert.match(html, /FIRST10/);
+  assert.match(html, /\$30 MINIMUM/);
+  assert.match(html, /Previous dishes/);
+  assert.match(html, /Next dishes/);
+  assert.match(
+    html,
+    /<a href="https:\/\/generationskitchenvegas\.com\/menu" target="_blank" rel="noreferrer">\s*Menu\s*<\/a>/,
+  );
+  assert.doesNotMatch(html, /<a href="#hurricane">Menu<\/a>/);
+
+  for (const file of [
+    "furikake-chicken.webp",
+    "hurricane-chicken.webp",
+    "garlic-chicken.webp",
+    "hamburger-steak.webp",
+    "loco-moco.webp",
+  ]) {
+    assert.match(html, new RegExp(`/media/menu/${file}`));
+  }
+
+  for (const href of [
+    "furikake-chicken-BLaD",
+    "hurricane-chicken-V3Ln",
+    "garlic-chicken-9tBv",
+    "hamburger-steak-7e8E",
+    "loco-moco-mvzn",
+  ]) {
+    assert.match(
+      html,
+      new RegExp(
+        `https://generationskitchenvegas\\.com/menu\\?item=${href}`,
+      ),
+    );
+  }
+
+  const pokeStart = html.indexOf('id="poke-bowl"');
+  const offerStart = html.indexOf('id="offer"');
+  const visitStart = html.indexOf('id="visit"');
+  const hungry = html.indexOf("HUNGRY YET?");
+  assert.ok(
+    pokeStart >= 0 &&
+      hungry > pokeStart &&
+      hungry < offerStart &&
+      offerStart < visitStart,
+    "HUNGRY YET? belongs on Poke, before the offer beat",
+  );
+
+  assert.ok(
+    html.indexOf('class="offer-transition"') <
+      html.indexOf('class="smooth-scroll-wrapper"'),
+    "the offer transition must stay outside transformed passage content",
+  );
+  assert.match(html, /class="offer-transition"[^>]*pointer-events:\s*none/);
+  assert.match(css, /\.offer-transition \{[\s\S]*?pointer-events:\s*none;/);
+  assert.match(css, /\.offer-passage \{/);
+  assert.doesNotMatch(css, /\.offer-passage[^{]*\{[^}]*\b(?:filter|backdrop-filter)\s*:/);
+  assert.match(
+    css,
+    /@keyframes offer-shutter-close \{[\s\S]*?13% \{[\s\S]*?transform:\s*scaleY\(1\);/,
+    "shutters must be fully closed by 13% of the 1.65s climax (~215ms)",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="playing"\] \.offer-action,[\s\S]*?\.offer-terms,[\s\S]*?\.offer-carousel \{[\s\S]*?opacity:\s*0;/,
+    "terms must stay hidden with the action during the playing state",
+  );
+  assert.match(css, /\.offer-terms \{[\s\S]*?font-size:\s*1rem;/);
+  assert.match(css, /\.offer-track \{[\s\S]*?scrollbar-width:\s*none;/);
+  assert.match(css, /\.offer-track::-webkit-scrollbar \{[\s\S]*?display:\s*none;/);
+  assert.match(css, /\.offer-track \{[\s\S]*?touch-action:\s*pan-x pan-y;/);
+  assert.doesNotMatch(
+    css,
+    /\.offer-track \{[^}]*overscroll-behavior-y:\s*none/,
+    "vertical swipes that start on the carousel must be able to leave the beat",
+  );
+  assert.match(climaxSource, /data-active-scroll-beat/);
+  assert.match(climaxSource, /IntersectionObserver/);
+  assert.match(climaxSource, /motion"\) === "reduced"/);
+  assert.match(pageSource, /motion !== "reduced" \? "force-motion"/);
+
+  for (const file of [
+    "public/media/menu/furikake-chicken.webp",
+    "public/media/menu/hurricane-chicken.webp",
+    "public/media/menu/garlic-chicken.webp",
+    "public/media/menu/hamburger-steak.webp",
+    "public/media/menu/loco-moco.webp",
+  ]) {
+    const url = new URL(file, projectRoot);
+    await access(url);
+    const info = await stat(url);
+    assert.ok(info.size > 1_000, `${file} should be a real menu photograph`);
+  }
+});
+
 // Focused desktop-scroll tripwire at tests/rendered-html.test.mjs for the next
 // passage editor. Canonical path: tests/rendered-html.test.mjs. Future consumer:
 // the next Generations Kitchen passage editor. Activation: execute `npm test`.
@@ -386,7 +500,7 @@ test("keeps all six beats on the 0.41-second passage clock", async () => {
   assert.equal(
     html.match(/data-scroll-beat="[^"]+"/g)?.length,
     6,
-    "the opening, four food scenes, and visit scene should each be a snap beat",
+    "the opening, three food scenes, offer, and visit scene should each be a snap beat",
   );
   assert.ok(
     html.indexOf('class="site-header"') <
@@ -583,7 +697,6 @@ test("keeps every menu encode responsive, native-crop, and long enough to read a
     ["hurricane-chicken", 9],
     ["loco-moco", 6],
     ["poke-bowl", 7],
-    ["hurricane-fries", 4],
   ];
 
   for (const [name, minimumDuration] of names) {

@@ -1,11 +1,40 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { DesktopSmoothScroll } from "./desktop-smooth-scroll";
+import { OfferMenuTrack, OfferTransition } from "./offer-climax";
 
 const orderUrl = "https://generationskitchenvegas.com/menu";
 const instagramUrl = "https://www.instagram.com/generationskitchenlv/";
 const directionsUrl =
   "https://www.google.com/maps/search/?api=1&query=6280+S+Valley+View+Blvd+Building+A+Suite+100%2C+Las+Vegas%2C+NV+89118%2C+USA&query_place_id=ChIJ6TpkRVnFyIARaUhmkEEl8jg";
+
+const offerDishes = [
+  {
+    name: "Furikake Chicken",
+    src: "/media/menu/furikake-chicken.webp",
+    href: "https://generationskitchenvegas.com/menu?item=furikake-chicken-BLaD",
+  },
+  {
+    name: "Hurricane Chicken",
+    src: "/media/menu/hurricane-chicken.webp",
+    href: "https://generationskitchenvegas.com/menu?item=hurricane-chicken-V3Ln",
+  },
+  {
+    name: "Garlic Chicken",
+    src: "/media/menu/garlic-chicken.webp",
+    href: "https://generationskitchenvegas.com/menu?item=garlic-chicken-9tBv",
+  },
+  {
+    name: "Hamburger Steak",
+    src: "/media/menu/hamburger-steak.webp",
+    href: "https://generationskitchenvegas.com/menu?item=hamburger-steak-7e8E",
+  },
+  {
+    name: "Loco Moco",
+    src: "/media/menu/loco-moco.webp",
+    href: "https://generationskitchenvegas.com/menu?item=loco-moco-mvzn",
+  },
+];
 
 type HomeProps = {
   searchParams: Promise<{ motion?: string }>;
@@ -91,7 +120,9 @@ export default async function Home({ searchParams }: HomeProps) {
         </a>
 
         <nav aria-label="Primary navigation">
-          <a href="#hurricane">Menu</a>
+          <a href={orderUrl} target="_blank" rel="noreferrer">
+            Menu
+          </a>
           <a href={instagramUrl} target="_blank" rel="noreferrer">
             Instagram
           </a>
@@ -115,6 +146,8 @@ export default async function Home({ searchParams }: HomeProps) {
         Order Now <span aria-hidden="true">↗</span>
       </a>
 
+      <OfferTransition />
+
       <div className="smooth-scroll-wrapper" data-scroll-tau="0.41">
         <div className="smooth-scroll-content">
       <section
@@ -130,10 +163,9 @@ export default async function Home({ searchParams }: HomeProps) {
             Future consumer: the site's cold-load visitor. Activation:
             auto-load through these responsive video sources. Behavioral check:
             npm test ffprobes both encodes and browser review exercises the
-            entrance, handoff, loop, and reduced-motion path. Retire when this
-            restaurant-visit carrier is replaced or publication rights cannot
-            be cleared. The source-bound visit remains local-concept media until
-            those publication rights are cleared.
+            entrance, handoff, loop, and reduced-motion path. Owner has
+            confirmed permission to publish this opening footage. Retire when
+            this restaurant-visit carrier is replaced.
           */}
           <video
             className="opening-video"
@@ -217,26 +249,56 @@ export default async function Home({ searchParams }: HomeProps) {
             Bowl.
           </>
         }
-      />
-
-      <FoodPassage
-        id="teri-beef-fries"
-        mediaName="hurricane-fries"
-        alt="Teri Beef Fries with house sauces, furikake, and green onions"
-        className="dish-teri"
-        title={
-          <>
-            Teri Beef Fries.
-          </>
-        }
       >
         <div className="dish-cta">
-          <h3>Hungry?</h3>
+          <h3>HUNGRY YET?</h3>
           <a href={orderUrl} target="_blank" rel="noreferrer">
-            Order Now <span aria-hidden="true">↗</span>
+            ORDER NOW
           </a>
         </div>
       </FoodPassage>
+
+      <section
+        className="offer-passage"
+        id="offer"
+        data-scroll-beat="offer"
+        aria-labelledby="offer-title"
+      >
+        <div className="offer-field" aria-hidden="true">
+          <span className="offer-ray" />
+        </div>
+
+        <div className="offer-stage">
+          <h2 id="offer-title" className="visually-hidden">
+            First-order offer
+          </h2>
+
+          <a
+            className="offer-action"
+            href={orderUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            $10 OFF YOUR FIRST ORDER
+          </a>
+          <p className="offer-terms">USE CODE FIRST10 · $30 MINIMUM</p>
+
+          <OfferMenuTrack>
+            {offerDishes.map((dish) => (
+              <a
+                key={dish.href}
+                className="offer-card"
+                href={dish.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img src={dish.src} alt={dish.name} />
+                <span>{dish.name}</span>
+              </a>
+            ))}
+          </OfferMenuTrack>
+        </div>
+      </section>
 
       <section
         className="visit-passage"
