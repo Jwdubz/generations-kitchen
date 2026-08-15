@@ -208,13 +208,16 @@ test("keeps the visitor calls to action on the display face", async () => {
 });
 
 // Focused desktop-scroll tripwire at tests/rendered-html.test.mjs for the next
-// passage editor. Activation: execute `npm test`. The rendered-page and source
-// consumers require the fixed header to remain outside one fixed smooth wrapper,
+// passage editor. Canonical path: tests/rendered-html.test.mjs. Future consumer:
+// the next Generations Kitchen passage editor. Activation: execute `npm test`.
+// The rendered-page and source consumers require the fixed header to remain outside one fixed smooth wrapper,
 // the easing to use the owner-selected 0.41-second exponential time constant,
-// all six viewport beats to expose real snap boundaries, and wheel/keyboard
-// travel to change only the target of that one clock. Retire if the owner selects
-// free desktop scrolling or replaces this passage with another single-clock,
-// beat-settled implementation.
+// all six viewport beats to expose real snap boundaries, mobile to use one
+// dynamic-height scrollport instead of the shorter `svh` frame that leaked the
+// next scene on expanding browser chrome, and wheel/keyboard travel to change
+// only the target of the desktop clock. Retire if the owner selects free
+// scrolling or replaces this passage with another single-clock, beat-settled
+// implementation.
 test("keeps all six beats on the 0.41-second passage clock", async () => {
   const html = await (await render()).text();
   const source = await readFile(
@@ -251,7 +254,13 @@ test("keeps all six beats on the 0.41-second passage clock", async () => {
     /html\.smooth-scroll-active \.smooth-scroll-wrapper \{[\s\S]*?position:\s*fixed;[\s\S]*?overflow:\s*clip;/,
   );
   assert.match(css, /\[data-scroll-beat\] \{[\s\S]*?scroll-snap-align:\s*start;[\s\S]*?scroll-snap-stop:\s*always;/);
-  assert.match(css, /height:\s*100svh;/);
+  assert.match(css, /--beat-viewport-height:\s*100vh;/);
+  assert.match(css, /@supports \(height:\s*100dvh\)\s*\{[\s\S]*?--beat-viewport-height:\s*100dvh;/);
+  assert.match(
+    css,
+    /@media \(max-width:\s*760px\)\s*\{[\s\S]*?main\s*\{[\s\S]*?height:\s*var\(--beat-viewport-height\);[\s\S]*?overflow-y:\s*auto;[\s\S]*?scroll-snap-type:\s*y mandatory;/,
+  );
+  assert.doesNotMatch(css, /100svh/);
   assert.match(css, /scroll-snap-type:\s*y mandatory;/);
 });
 

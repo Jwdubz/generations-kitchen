@@ -1,3 +1,12 @@
+/*
+Maintained asset: one-beat mobile viewport isolation.
+Canonical path: app/globals.css.
+Future consumer: mobile visitors scrolling the six-scene food passage.
+Activation: auto-load through the max-width 760px main scrollport rules below.
+Behavioral check: npm test plus rendered forward/reverse mobile traversal must
+leave exactly one beat at top 0 and bottom visualViewport.height.
+Retirement: remove if mobile adopts another verified single-beat scroll owner.
+*/
 :root {
   --ink: #120b08;
   --cream: #f4e9cf;
@@ -5,6 +14,13 @@
   --green: #0b6b3a;
   --gold: #f2ad24;
   --white: #fffaf0;
+  --beat-viewport-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --beat-viewport-height: 100dvh;
+  }
 }
 
 * {
@@ -67,8 +83,8 @@ html.smooth-scroll-active .smooth-scroll-wrapper {
 .food-passage,
 .visit-passage {
   position: relative;
-  height: 100svh;
-  min-height: 100svh;
+  height: var(--beat-viewport-height);
+  min-height: var(--beat-viewport-height);
   overflow: hidden;
   isolation: isolate;
 }
@@ -79,7 +95,22 @@ html.smooth-scroll-active .smooth-scroll-wrapper {
 }
 
 @media (max-width: 760px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   html {
+    scroll-snap-type: none;
+  }
+
+  main {
+    height: var(--beat-viewport-height);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
     scroll-snap-type: y mandatory;
   }
 }
@@ -355,7 +386,7 @@ h1 strong {
 .passage-content {
   position: relative;
   z-index: 1;
-  min-height: 100svh;
+  min-height: var(--beat-viewport-height);
   display: flex;
   padding: clamp(3rem, 7vw, 6.5rem) clamp(1.25rem, 4.2vw, 4.5rem);
 }
@@ -517,7 +548,7 @@ h1 strong {
 }
 
 .visit-content {
-  min-height: 100svh;
+  min-height: var(--beat-viewport-height);
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(19rem, 0.6fr);
   align-items: end;
@@ -640,7 +671,7 @@ h1 strong {
   .passage-content,
   .dish-hurricane .passage-content,
   .visit-content {
-    min-height: 100svh;
+    min-height: var(--beat-viewport-height);
     padding: 2.4rem 1.25rem 5.4rem;
   }
 
