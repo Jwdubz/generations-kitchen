@@ -86,7 +86,8 @@ test("exports the complete Generations Kitchen passage", async () => {
 
 // Focused GitHub Pages export tripwire at tests/rendered-html.test.mjs for the
 // next deployment editor. Activation: execute `npm test`. The static-hosting
-// consumer requires output: "export", a complete dist/client/index.html, and a
+// consumer requires output: "export", a complete dist/client/index.html, a
+// video-led default mobile path with an explicit reduced-motion opt-out, and a
 // Pages workflow that publishes that exact directory. Retire if the owner moves
 // the canonical site away from static GitHub Pages hosting.
 test("emits the complete passage as a GitHub Pages artifact", async () => {
@@ -115,7 +116,8 @@ test("emits the complete passage as a GitHub Pages artifact", async () => {
   assert.match(exportedHtml, /The Ninth Island/);
   assert.match(exportedHtml, /max-holloway-opening-desktop\.mp4/);
   assert.match(exportedHtml, /https:\/\/generations\.jarrettwroten\.com/);
-  assert.match(scrollSource, /get\("motion"\)\s*===\s*"full"/);
+  assert.match(scrollSource, /motionPreference\s*===\s*"full"/);
+  assert.match(scrollSource, /mobileMotionDefault\s*&&\s*motionPreference\s*!==\s*"reduced"/);
   assert.match(scrollSource, /classList\.add\("force-motion"\)/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /path:\s*dist\/client/);

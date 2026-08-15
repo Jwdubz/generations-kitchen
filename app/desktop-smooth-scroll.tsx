@@ -32,8 +32,15 @@ export function DesktopSmoothScroll() {
     const html = document.documentElement;
     const body = document.body;
     const main = document.querySelector<HTMLElement>("main");
+    const motionPreference = new URLSearchParams(window.location.search).get(
+      "motion",
+    );
+    // The public mobile experience is video-led by default. Keep an explicit
+    // reduced path for visitors who choose `?motion=reduced`.
+    const mobileMotionDefault = window.matchMedia("(max-width: 760px)").matches;
     const forceMotion =
-      new URLSearchParams(window.location.search).get("motion") === "full";
+      motionPreference === "full" ||
+      (mobileMotionDefault && motionPreference !== "reduced");
     const wrapper = document.querySelector<HTMLElement>(
       ".smooth-scroll-wrapper",
     );
