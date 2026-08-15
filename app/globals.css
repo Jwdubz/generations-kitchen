@@ -7,6 +7,16 @@ Behavioral check: npm test plus rendered forward/reverse mobile traversal must
 leave exactly one beat at top 0 and bottom visualViewport.height.
 Retirement: remove if mobile adopts another verified single-beat scroll owner.
 */
+/*
+Maintained asset: source-authored media presentation without full-frame darkening.
+Canonical paths: app/page.tsx and app/globals.css.
+Future consumer: every visitor moving through the opening, menu, and visit beats.
+Activation: auto-load through the page media and production stylesheet.
+Behavioral check: npm test plus representative desktop/mobile browser traversal
+must show zero media shade elements, no header background, and `filter: none` on
+every video. Retirement: replace only if the owner explicitly approves a new
+rendered treatment over the footage.
+*/
 :root {
   --ink: #120b08;
   --cream: #f4e9cf;
@@ -126,7 +136,6 @@ html.smooth-scroll-active .smooth-scroll-wrapper {
 }
 
 .opening-media,
-.opening-shade,
 .opening-video,
 .reduced-motion-sequence,
 .reduced-motion-sequence img {
@@ -155,14 +164,6 @@ html.smooth-scroll-active .smooth-scroll-wrapper {
   opacity: 0;
 }
 
-.opening-shade {
-  z-index: -2;
-  background:
-    linear-gradient(180deg, rgba(7, 4, 3, 0.7) 0%, transparent 30%),
-    linear-gradient(90deg, rgba(7, 4, 3, 0.86) 0%, rgba(7, 4, 3, 0.3) 54%, rgba(7, 4, 3, 0.12) 100%),
-    linear-gradient(0deg, rgba(7, 4, 3, 0.9) 0%, transparent 48%);
-}
-
 .site-header {
   position: fixed;
   z-index: 20;
@@ -174,7 +175,6 @@ html.smooth-scroll-active .smooth-scroll-wrapper {
   justify-content: space-between;
   gap: 2rem;
   padding: clamp(1.25rem, 2.8vw, 2.7rem) clamp(1.25rem, 4.2vw, 4.5rem);
-  background: linear-gradient(180deg, rgba(7, 4, 3, 0.76) 0%, rgba(7, 4, 3, 0.22) 72%, transparent 100%);
   pointer-events: none;
 }
 
@@ -353,7 +353,6 @@ h1 strong {
 }
 
 .passage-media,
-.passage-shade,
 .passage-video,
 .passage-poster,
 .passage-poster img {
@@ -378,11 +377,6 @@ h1 strong {
   display: none;
 }
 
-.passage-shade {
-  z-index: -2;
-  pointer-events: none;
-}
-
 .passage-content {
   position: relative;
   z-index: 1;
@@ -398,12 +392,6 @@ h1 strong {
   font-size: clamp(4.7rem, 10.2vw, 10rem);
   line-height: 0.77;
   text-shadow: 0 0.2rem 1.2rem rgba(0, 0, 0, 0.32);
-}
-
-.dish-hurricane .passage-shade {
-  background:
-    linear-gradient(90deg, rgba(12, 5, 3, 0.92) 0%, rgba(12, 5, 3, 0.42) 48%, rgba(12, 5, 3, 0.08) 76%),
-    linear-gradient(0deg, rgba(12, 5, 3, 0.9) 0%, transparent 54%);
 }
 
 .dish-hurricane .passage-content {
@@ -456,12 +444,6 @@ h1 strong {
   border-color: var(--white);
 }
 
-.dish-loco .passage-shade {
-  background:
-    linear-gradient(270deg, rgba(8, 4, 2, 0.9) 0%, rgba(8, 4, 2, 0.36) 48%, rgba(8, 4, 2, 0.08) 72%),
-    linear-gradient(0deg, rgba(8, 4, 2, 0.88) 0%, transparent 56%);
-}
-
 .dish-loco .passage-content {
   align-items: flex-end;
   justify-content: flex-end;
@@ -472,12 +454,6 @@ h1 strong {
   max-width: 6ch;
 }
 
-.dish-poke .passage-shade {
-  background:
-    linear-gradient(90deg, rgba(6, 3, 2, 0.89) 0%, rgba(6, 3, 2, 0.3) 47%, rgba(6, 3, 2, 0.08) 70%),
-    linear-gradient(180deg, rgba(6, 3, 2, 0.42) 0%, transparent 40%);
-}
-
 .dish-poke .passage-content {
   align-items: center;
   justify-content: flex-start;
@@ -486,12 +462,6 @@ h1 strong {
 .dish-poke h2 {
   color: var(--gold);
   max-width: 6ch;
-}
-
-.dish-teri .passage-shade {
-  background:
-    linear-gradient(90deg, rgba(8, 4, 2, 0.88) 0%, rgba(8, 4, 2, 0.27) 54%, rgba(8, 4, 2, 0.04) 75%),
-    linear-gradient(0deg, rgba(8, 4, 2, 0.92) 0%, transparent 58%);
 }
 
 .dish-teri h2 {
@@ -505,7 +475,6 @@ h1 strong {
 }
 
 .visit-montage,
-.visit-shade,
 .visit-frame {
   position: absolute;
   inset: 0;
@@ -538,13 +507,6 @@ h1 strong {
 .visit-frame-three {
   object-position: center 55%;
   animation-delay: 12s;
-}
-
-.visit-shade {
-  z-index: -2;
-  background:
-    linear-gradient(90deg, rgba(8, 3, 2, 0.93) 0%, rgba(8, 3, 2, 0.46) 50%, rgba(8, 3, 2, 0.16) 75%),
-    linear-gradient(0deg, rgba(8, 3, 2, 0.93) 0%, transparent 58%);
 }
 
 .visit-content {
@@ -647,12 +609,6 @@ h1 strong {
     padding: 0.76rem 0.9rem;
   }
 
-  .opening-shade {
-    background:
-      linear-gradient(180deg, rgba(7, 4, 3, 0.76) 0%, transparent 31%),
-      linear-gradient(0deg, rgba(7, 4, 3, 0.96) 0%, rgba(7, 4, 3, 0.18) 62%);
-  }
-
   .opening-copy {
     bottom: 6.7rem;
   }
@@ -709,14 +665,6 @@ h1 strong {
     font-size: clamp(1.55rem, 7.2vw, 2.25rem);
   }
 
-  .dish-hurricane .passage-shade,
-  .dish-loco .passage-shade,
-  .dish-poke .passage-shade,
-  .dish-teri .passage-shade {
-    background:
-      linear-gradient(180deg, rgba(8, 4, 2, 0.1) 0%, rgba(8, 4, 2, 0.13) 42%, rgba(8, 4, 2, 0.96) 100%);
-  }
-
   .dish-loco .passage-content {
     align-items: flex-end;
     justify-content: flex-end;
@@ -734,11 +682,6 @@ h1 strong {
 
   .dish-teri h2 {
     font-size: clamp(2rem, 8.5vw, 3rem);
-  }
-
-  .visit-shade {
-    background:
-      linear-gradient(180deg, rgba(8, 3, 2, 0.16) 0%, rgba(8, 3, 2, 0.2) 42%, rgba(8, 3, 2, 0.97) 100%);
   }
 
   .visit-actions {

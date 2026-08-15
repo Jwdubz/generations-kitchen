@@ -84,6 +84,44 @@ test("exports the complete Generations Kitchen passage", async () => {
   );
 });
 
+// Focused unfiltered-media tripwire at tests/rendered-html.test.mjs for the next
+// Generations Kitchen media editor. Activation: execute `npm test`. Its exported
+// HTML and production-CSS consumers require authored source frames with no
+// full-frame shade elements, header background, or CSS video filter. Retire only
+// if the owner explicitly approves a new treatment over the footage and its
+// representative rendered states.
+test("leaves the opening and food media visually unfiltered", async () => {
+  const html = await (await render()).text();
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.doesNotMatch(
+    html,
+    /class="(?:opening-shade|passage-shade|visit-shade)"/,
+    "the passage should not render dark overlay elements over its media",
+  );
+  assert.doesNotMatch(
+    css,
+    /\.(?:opening-shade|passage-shade|visit-shade)\b/,
+    "the removed overlay family should not survive in production CSS",
+  );
+
+  const videoBlocks = [...css.matchAll(/([^{}]*(?:opening-video|passage-video)[^{}]*)\{([^{}]*)\}/g)]
+    .map((match) => match[2])
+    .join("\n");
+  assert.doesNotMatch(videoBlocks, /\b(?:filter|backdrop-filter)\s*:/);
+
+  const headerStart = css.indexOf(".site-header {");
+  assert.ok(headerStart >= 0, "the fixed header should have a style block");
+  const headerOpen = css.indexOf("{", headerStart);
+  const headerClose = css.indexOf("}", headerOpen);
+  const headerBlock = css.slice(headerOpen + 1, headerClose);
+  assert.doesNotMatch(
+    headerBlock,
+    /\bbackground(?:-image)?\s*:/,
+    "the fixed header should not darken the footage behind it",
+  );
+});
+
 // Focused GitHub Pages export tripwire at tests/rendered-html.test.mjs for the
 // next deployment editor. Activation: execute `npm test`. The static-hosting
 // consumer requires output: "export", a complete dist/client/index.html, a

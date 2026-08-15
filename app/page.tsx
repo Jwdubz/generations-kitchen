@@ -67,8 +67,6 @@ function FoodPassage({
         </picture>
       </div>
 
-      <div className="passage-shade" aria-hidden="true" />
-
       <div className="passage-content">
         <h2 id={titleId}>{title}</h2>
         {children}
@@ -163,8 +161,6 @@ export default async function Home({ searchParams }: HomeProps) {
             <img src="/media/hurricane-food.jpg?v=brandfree3" alt="" />
           </div>
         </div>
-
-        <div className="opening-shade" aria-hidden="true" />
 
         <div className="opening-copy">
           <h1 id="opening-title">
@@ -265,8 +261,6 @@ export default async function Home({ searchParams }: HomeProps) {
             alt=""
           />
         </div>
-
-        <div className="visit-shade" aria-hidden="true" />
 
         <div className="visit-content">
           <h2 id="visit-title">
