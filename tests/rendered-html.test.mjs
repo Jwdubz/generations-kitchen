@@ -84,6 +84,62 @@ test("exports the complete Generations Kitchen passage", async () => {
   );
 });
 
+// Focused cache-bust tripwire at tests/rendered-html.test.mjs for the next
+// media-URL editor. Activation: execute `npm test`. Its page-source consumer
+// requires nativecrop1 on every rebuilt menu video/poster and the rebuilt
+// mobile opening, while unchanged opening desktop, poster, and fallback
+// stills stay on brandfree3. Retire when a later media rebuild needs a new
+// cache key.
+test("busts cached enlarged menu and mobile-opening media", async () => {
+  const pageSource = await readFile(
+    new URL("../app/page.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    pageSource,
+    /\$\{mediaName\}-desktop\.jpg\?v=nativecrop1/,
+  );
+  assert.match(
+    pageSource,
+    /\$\{mediaName\}-mobile\.mp4\?v=nativecrop1/,
+  );
+  assert.match(
+    pageSource,
+    /\$\{mediaName\}-desktop\.mp4\?v=nativecrop1/,
+  );
+  assert.match(
+    pageSource,
+    /\$\{mediaName\}-mobile\.jpg\?v=nativecrop1/,
+  );
+  assert.match(
+    pageSource,
+    /max-holloway-opening-mobile\.mp4\?v=nativecrop1/,
+  );
+  assert.match(
+    pageSource,
+    /max-holloway-opening-desktop\.mp4\?v=brandfree3/,
+  );
+  assert.match(
+    pageSource,
+    /max-holloway-opening-poster\.jpg\?v=brandfree3/,
+  );
+  assert.match(
+    pageSource,
+    /max-holloway-entrance\.jpg\?v=brandfree3/,
+  );
+  assert.doesNotMatch(
+    pageSource,
+    /peopleclean1/,
+    "rebuilt menu assets must not keep the pre-native-crop cache key",
+  );
+  assert.doesNotMatch(
+    pageSource,
+    /max-holloway-opening-mobile\.mp4\?v=brandfree3/,
+    "the rebuilt mobile opening must not keep the pre-native-crop cache key",
+  );
+});
+
 // Focused unfiltered-media tripwire at tests/rendered-html.test.mjs for the next
 // Generations Kitchen media editor. Activation: execute `npm test`. Its exported
 // HTML and production-CSS consumers require authored source frames with no
@@ -387,23 +443,26 @@ test("preserves the approved people-free menu edit boundaries", async () => {
 
 // Focused encode-quality tripwire at tests/rendered-html.test.mjs for the next
 // menu-media encoder. Activation: execute `npm test`. Its script consumer
-// requires the approved 1080-class lanczos crops, browser-safe H.264/yuv420p/
-// faststart, and CRF 21 — the smallest setting that matched this ~3.2 Mbps
-// source without a visible generation-loss win at lower CRF. Retire only if a
-// higher-quality source is adopted or the owner accepts a new encode contract.
+// requires native 1728x972 desktop and 506x900 mobile crops with no baked
+// scale-up, browser-safe H.264/yuv420p/faststart, and CRF 21. Retire only if
+// a higher-quality source is adopted or the owner accepts a new encode contract.
 test("keeps the menu encoder on the source-preserving CRF 21 contract", async () => {
   const script = await readFile(
     new URL("../scripts/build-menu-media.ps1", import.meta.url),
     "utf8",
   );
 
-  assert.match(
+  assert.match(script, /crop=1728:972:96:0,setsar=1/);
+  assert.match(script, /crop=506:900:707:0,setsar=1/);
+  assert.doesNotMatch(
     script,
-    /crop=1728:972:96:0,scale=1920:1080:flags=lanczos,setsar=1/,
+    /scale=1920:1080/,
+    "desktop menu output must stay at the native 1728x972 crop",
   );
-  assert.match(
+  assert.doesNotMatch(
     script,
-    /crop=506:900:707:0,scale=1080:1920:flags=lanczos,setsar=1/,
+    /scale=1080:1920/,
+    "mobile menu output must stay at the native 506x900 crop",
   );
   assert.match(script, /-c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p/);
   assert.match(script, /-movflags \+faststart/);
@@ -456,15 +515,14 @@ test("ships every responsive motion source, poster, place image, and brand mark"
 });
 
 // Focused tripwire at tests/rendered-html.test.mjs for future opening-media
-// editors. Activation: execute `npm test`. Its real ffprobe consumer checks both
-// shipped files and prevents a quiet return to the earlier upscaled 360p source
-// or a shortened entrance / branded end transition. Retire only if the opening
-// carrier stops using
-// responsive raster video or its approved resolution/duration contract changes.
-test("keeps both opening encodes 1080-class and preserves the full entrance", async () => {
+// editors. Activation: execute `npm test`. Desktop stays 1920x1080. Mobile
+// must be the native 506x900 portrait crop from the UFC 1080p source, not a
+// baked 1080x1920 upscale, and must keep the 23.5-24.0s approved entrance.
+// Retire only if the opening carrier or source-native crop changes.
+test("keeps the opening desktop 1080-class and the mobile opening at native crop", async () => {
   const expected = [
     ["public/media/max-holloway-opening-desktop.mp4", 1920, 1080],
-    ["public/media/max-holloway-opening-mobile.mp4", 1080, 1920],
+    ["public/media/max-holloway-opening-mobile.mp4", 506, 900],
   ];
 
   for (const [path, width, height] of expected) {
@@ -493,15 +551,34 @@ test("keeps both opening encodes 1080-class and preserves the full entrance", as
       `${path} should keep the complete entrance, Max eating, and the clean closing food beat`,
     );
   }
+
+  const openingScript = await readFile(
+    new URL("../scripts/build-opening-media.ps1", import.meta.url),
+    "utf8",
+  );
+  assert.match(openingScript, /trim=start=207\.30:end=218\.733/);
+  assert.match(openingScript, /trim=start=110\.80:end=113\.000/);
+  assert.match(openingScript, /trim=start=145\.40:end=147\.300/);
+  assert.match(openingScript, /trim=start=218\.80:end=220\.534/);
+  assert.match(openingScript, /trim=start=240\.20:end=240\.800/);
+  assert.match(openingScript, /trim=start=241\.00:end=242\.600/);
+  assert.match(openingScript, /trim=start=275\.00:end=276\.833/);
+  assert.match(openingScript, /trim=start=284\.40:end=286\.700/);
+  assert.match(openingScript, /crop=506:900:/);
+  assert.doesNotMatch(
+    openingScript,
+    /scale=1080:1920/,
+    "do not bake a 1080x1920 upscale into the mobile opening",
+  );
 });
 
 // Focused menu-media tripwire at tests/rendered-html.test.mjs for the next site
 // editor changing featured food footage. Activation: execute `npm test`. Its
-// real ffprobe consumer requires every desktop/mobile pair to retain the
-// intended geometry and enough duration to read as a complete food beat.
-// Retire only if the menu passage stops using responsive raster video or the
-// owner approves a different resolution/duration contract.
-test("keeps every menu encode responsive, 1080-class, and long enough to read as a beat", async () => {
+// real ffprobe consumer requires desktop 1728x972 and mobile 506x900 native
+// crops, and enough duration to read as a complete food beat. Retire only if
+// the menu passage stops using responsive raster video or the owner approves
+// a different resolution/duration contract.
+test("keeps every menu encode responsive, native-crop, and long enough to read as a beat", async () => {
   const names = [
     ["hurricane-chicken", 9],
     ["loco-moco", 6],
@@ -511,8 +588,8 @@ test("keeps every menu encode responsive, 1080-class, and long enough to read as
 
   for (const [name, minimumDuration] of names) {
     for (const [variant, width, height] of [
-      ["desktop", 1920, 1080],
-      ["mobile", 1080, 1920],
+      ["desktop", 1728, 972],
+      ["mobile", 506, 900],
     ]) {
       const path = `public/media/${name}-${variant}.mp4`;
       const filePath = fileURLToPath(new URL(path, projectRoot));

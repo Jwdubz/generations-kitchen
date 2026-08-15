@@ -45,15 +45,15 @@ function FoodPassage({
           loop
           playsInline
           preload="metadata"
-          poster={`/media/${mediaName}-desktop.jpg?v=peopleclean1`}
+          poster={`/media/${mediaName}-desktop.jpg?v=nativecrop1`}
         >
           <source
             media="(max-width: 760px)"
-            src={`/media/${mediaName}-mobile.mp4?v=peopleclean1`}
+            src={`/media/${mediaName}-mobile.mp4?v=nativecrop1`}
             type="video/mp4"
           />
           <source
-            src={`/media/${mediaName}-desktop.mp4?v=peopleclean1`}
+            src={`/media/${mediaName}-desktop.mp4?v=nativecrop1`}
             type="video/mp4"
           />
         </video>
@@ -61,9 +61,9 @@ function FoodPassage({
         <picture className="passage-poster">
           <source
             media="(max-width: 760px)"
-            srcSet={`/media/${mediaName}-mobile.jpg?v=peopleclean1`}
+            srcSet={`/media/${mediaName}-mobile.jpg?v=nativecrop1`}
           />
-          <img src={`/media/${mediaName}-desktop.jpg?v=peopleclean1`} alt={alt} />
+          <img src={`/media/${mediaName}-desktop.jpg?v=nativecrop1`} alt={alt} />
         </picture>
       </div>
 
@@ -146,7 +146,7 @@ export default async function Home({ searchParams }: HomeProps) {
           >
             <source
               media="(max-width: 760px)"
-              src="/media/max-holloway-opening-mobile.mp4?v=brandfree3"
+              src="/media/max-holloway-opening-mobile.mp4?v=nativecrop1"
               type="video/mp4"
             />
             <source

@@ -6,9 +6,10 @@ the featured food footage.
 Activation: execute `pwsh -File scripts/build-menu-media.ps1` from the project
 root, optionally overriding SourcePath and OutputDirectory.
 Behavioral check: `npm test` pins the approved people-frame edit boundaries and
-ffprobes the shipped desktop/mobile consumers for the expected 1080-class
-geometry and complete clip durations; the script was also executed against the
-current source to produce the visually reviewed assets.
+ffprobes the shipped desktop/mobile consumers for native 1728x972 desktop and
+native 506x900 mobile (no baked upscale), and complete clip durations; the
+script was also executed against the current source to produce the visually
+reviewed assets.
 Retirement: remove when the site stops consuming responsive raster menu video
 or the source footage is replaced by a different production pipeline.
 #>
@@ -24,14 +25,13 @@ $OutputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
 
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 
-# Approved composition, then lanczos back to 1080-class. CRF 21 is the
-# evidence-backed encode: the local UFC 1080p source is already ~3.2 Mbps
-# H.264, a fresh CRF 16 ladder gained ~2 dB PSNR against a lossless filtered
-# reference but no visible plate/rice/sesame detail at 1280x720 or 100% crops,
-# while growing files 70–90%. Do not lower CRF or add sharpening without a
-# higher-quality source.
-$desktopFilter = "crop=1728:972:96:0,scale=1920:1080:flags=lanczos,setsar=1"
-$mobileFilter = "crop=506:900:707:0,scale=1080:1920:flags=lanczos,setsar=1"
+# Desktop keeps the approved 1728x972 punch-in at native source pixels — do
+# not scale it back to 1920x1080. Mobile keeps the approved 506x900 portrait
+# window at native source pixels — do not scale it to 1080x1920. CRF 21 is
+# the evidence-backed encode against this ~3.2 Mbps source. Do not add
+# sharpening or invent detail.
+$desktopFilter = "crop=1728:972:96:0,setsar=1"
+$mobileFilter = "crop=506:900:707:0,setsar=1"
 
 function Encode-Clip {
   param(
