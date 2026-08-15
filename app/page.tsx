@@ -79,7 +79,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const { motion } = await searchParams;
 
   return (
-    <main className={motion === "full" ? "force-motion" : undefined}>
+    <main className={motion !== "reduced" ? "force-motion" : undefined}>
       <DesktopSmoothScroll />
 
       <header className="site-header">

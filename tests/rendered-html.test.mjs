@@ -125,9 +125,9 @@ test("leaves the opening and food media visually unfiltered", async () => {
 // Focused GitHub Pages export tripwire at tests/rendered-html.test.mjs for the
 // next deployment editor. Activation: execute `npm test`. The static-hosting
 // consumer requires output: "export", a complete dist/client/index.html, a
-// video-led default mobile path with an explicit reduced-motion opt-out, and a
-// Pages workflow that publishes that exact directory. Retire if the owner moves
-// the canonical site away from static GitHub Pages hosting.
+// video-led default desktop and mobile path with an explicit reduced-motion
+// opt-out, and a Pages workflow that publishes that exact directory. Retire if
+// the owner moves the canonical site away from static GitHub Pages hosting.
 test("emits the complete passage as a GitHub Pages artifact", async () => {
   const exportedHtml = await readFile(
     new URL("../dist/client/index.html", import.meta.url),
@@ -154,13 +154,75 @@ test("emits the complete passage as a GitHub Pages artifact", async () => {
   assert.match(exportedHtml, /The Ninth Island/);
   assert.match(exportedHtml, /max-holloway-opening-desktop\.mp4/);
   assert.match(exportedHtml, /https:\/\/generations\.jarrettwroten\.com/);
-  assert.match(scrollSource, /motionPreference\s*===\s*"full"/);
-  assert.match(scrollSource, /mobileMotionDefault\s*&&\s*motionPreference\s*!==\s*"reduced"/);
+  assert.match(exportedHtml, /<main class="force-motion"/);
+  assert.match(scrollSource, /motionPreference\s*!==\s*"reduced"/);
   assert.match(scrollSource, /classList\.add\("force-motion"\)/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /path:\s*dist\/client/);
   assert.equal(customDomain.trim(), "generations.jarrettwroten.com");
   await access(new URL("../public/.nojekyll", import.meta.url));
+});
+
+// Focused motion-default tripwire at tests/rendered-html.test.mjs for the next
+// motion-preference editor. Activation: execute `npm test`. Its page, client,
+// CSS, and exported-HTML consumers require video-led motion as the public
+// default on desktop and mobile, even when the OS reports reduced motion, with
+// the static presentation available only through `?motion=reduced`.
+// `?motion=full` remains an accepted full-motion URL. Retire only if the owner
+// changes the default-vs-explicit-reduced contract.
+test("defaults to video-led motion unless the visitor asks for reduced motion", async () => {
+  const pageSource = await readFile(
+    new URL("../app/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const scrollSource = await readFile(
+    new URL("../app/desktop-smooth-scroll.tsx", import.meta.url),
+    "utf8",
+  );
+  const css = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  const exportedHtml = await readFile(
+    new URL("../dist/client/index.html", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    pageSource,
+    /<main className=\{motion !== "reduced" \? "force-motion" : undefined\}>/,
+  );
+  assert.doesNotMatch(
+    pageSource,
+    /motion === "full" \? "force-motion"/,
+    "the server default must not wait for ?motion=full",
+  );
+  assert.match(
+    exportedHtml,
+    /<main class="force-motion"/,
+    "the static export must ship force-motion so videos are visible before JS",
+  );
+
+  assert.match(scrollSource, /motionPreference\s*!==\s*"reduced"/);
+  assert.match(
+    scrollSource,
+    /if \(forceMotion\) main\?\.classList\.add\("force-motion"\);\s*else main\?\.classList\.remove\("force-motion"\);/,
+  );
+  assert.doesNotMatch(
+    scrollSource,
+    /mobileMotionDefault/,
+    "desktop and mobile must share the same video-led default",
+  );
+  assert.match(scrollSource, /\?motion=full/);
+
+  assert.match(
+    css,
+    /@media \(prefers-reduced-motion:\s*reduce\) \{[\s\S]*?\.opening-video,[\s\S]*?\.passage-video \{[\s\S]*?display:\s*none;/,
+  );
+  assert.match(
+    css,
+    /\.force-motion \.opening-video,[\s\S]*?\.force-motion \.passage-video \{[\s\S]*?display:\s*block;/,
+  );
 });
 
 // Focused CTA-surface tripwire at tests/rendered-html.test.mjs for future page
@@ -320,6 +382,40 @@ test("preserves the approved people-free menu edit boundaries", async () => {
   assert.match(
     script,
     /Encode-Clip -Name "poke-bowl" -Start 184\.2 -Duration 7\.5/,
+  );
+});
+
+// Focused encode-quality tripwire at tests/rendered-html.test.mjs for the next
+// menu-media encoder. Activation: execute `npm test`. Its script consumer
+// requires the approved 1080-class lanczos crops, browser-safe H.264/yuv420p/
+// faststart, and CRF 21 — the smallest setting that matched this ~3.2 Mbps
+// source without a visible generation-loss win at lower CRF. Retire only if a
+// higher-quality source is adopted or the owner accepts a new encode contract.
+test("keeps the menu encoder on the source-preserving CRF 21 contract", async () => {
+  const script = await readFile(
+    new URL("../scripts/build-menu-media.ps1", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    script,
+    /crop=1728:972:96:0,scale=1920:1080:flags=lanczos,setsar=1/,
+  );
+  assert.match(
+    script,
+    /crop=506:900:707:0,scale=1080:1920:flags=lanczos,setsar=1/,
+  );
+  assert.match(script, /-c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p/);
+  assert.match(script, /-movflags \+faststart/);
+  assert.doesNotMatch(
+    script,
+    /-crf (?:1[0-9]|[0-9])\b/,
+    "do not drop below CRF 21 without a higher-quality source",
+  );
+  assert.doesNotMatch(
+    script,
+    /\b(?:unsharp|eq=|noise|hue|sharpen)\b/,
+    "do not invent detail with filters",
   );
 });
 

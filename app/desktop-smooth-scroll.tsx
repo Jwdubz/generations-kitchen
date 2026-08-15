@@ -35,12 +35,10 @@ export function DesktopSmoothScroll() {
     const motionPreference = new URLSearchParams(window.location.search).get(
       "motion",
     );
-    // The public mobile experience is video-led by default. Keep an explicit
-    // reduced path for visitors who choose `?motion=reduced`.
-    const mobileMotionDefault = window.matchMedia("(max-width: 760px)").matches;
-    const forceMotion =
-      motionPreference === "full" ||
-      (mobileMotionDefault && motionPreference !== "reduced");
+    // The public experience is video-led by default on desktop and mobile,
+    // even when the OS reports reduced motion. Reduced remains available
+    // only through `?motion=reduced`. `?motion=full` stays accepted.
+    const forceMotion = motionPreference !== "reduced";
     const wrapper = document.querySelector<HTMLElement>(
       ".smooth-scroll-wrapper",
     );
@@ -49,6 +47,7 @@ export function DesktopSmoothScroll() {
     );
 
     if (forceMotion) main?.classList.add("force-motion");
+    else main?.classList.remove("force-motion");
 
     if (!wrapper || !content) {
       return () => main?.classList.remove("force-motion");
