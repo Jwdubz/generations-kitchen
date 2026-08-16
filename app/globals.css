@@ -901,11 +901,11 @@ main:not(.force-motion) .offer-transition {
 }
 
 html[data-offer-climax="playing"] .offer-shutter {
-  animation: offer-shutter-close 2.8s linear forwards;
+  animation: offer-shutter-close 4.4s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-flash {
-  animation: offer-flash-white 2.8s linear forwards;
+  animation: offer-flash-white 4.4s linear forwards;
 }
 
 @keyframes offer-shutter-close {
@@ -913,25 +913,25 @@ html[data-offer-climax="playing"] .offer-flash {
     transform: scaleY(0);
   }
 
-  8% {
+  7% {
     transform: scaleY(0.96);
   }
 
-  10% {
+  9% {
     transform: scaleY(1);
   }
 
-  27% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-
-  31% {
+  40% {
     transform: scaleY(1);
     opacity: 1;
   }
 
-  48%,
+  43% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  57%,
   100% {
     transform: scaleY(0);
     opacity: 1;
@@ -940,23 +940,23 @@ html[data-offer-climax="playing"] .offer-flash {
 
 @keyframes offer-flash-white {
   0%,
-  27% {
+  40% {
     opacity: 0;
   }
 
-  29% {
+  42% {
     opacity: 1;
   }
 
-  36% {
+  47% {
     opacity: 0.96;
   }
 
-  54% {
+  62% {
     opacity: 0.18;
   }
 
-  72%,
+  77%,
   100% {
     opacity: 0;
   }
@@ -1020,11 +1020,11 @@ html[data-offer-climax="playing"] .offer-flash {
 }
 
 html[data-offer-climax="playing"] main.force-motion .offer-ray {
-  animation: offer-ray-erupt 2.8s linear forwards;
+  animation: offer-ray-erupt 4.4s linear forwards;
 }
 
 html[data-offer-climax="playing"] main.force-motion .offer-field::after {
-  animation: offer-field-core 2.8s linear forwards;
+  animation: offer-field-core 4.4s linear forwards;
 }
 
 html[data-offer-climax="settled"] main.force-motion .offer-field {
@@ -1044,31 +1044,31 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
 
 @keyframes offer-ray-erupt {
   0%,
-  27% {
+  40% {
     opacity: 0;
     -webkit-clip-path: circle(0 at 50% 38%);
     clip-path: circle(0 at 50% 38%);
   }
 
-  29% {
+  42% {
     opacity: 1;
     -webkit-clip-path: circle(0.8vmax at 50% 38%);
     clip-path: circle(0.8vmax at 50% 38%);
   }
 
-  36% {
+  47% {
     opacity: 1;
     -webkit-clip-path: circle(15vmax at 50% 38%);
     clip-path: circle(15vmax at 50% 38%);
   }
 
-  55% {
+  63% {
     opacity: 0.98;
     -webkit-clip-path: circle(78vmax at 50% 38%);
     clip-path: circle(78vmax at 50% 38%);
   }
 
-  76% {
+  80% {
     opacity: 0.86;
     -webkit-clip-path: circle(132vmax at 50% 38%);
     clip-path: circle(132vmax at 50% 38%);
@@ -1083,19 +1083,19 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
 
 @keyframes offer-field-core {
   0%,
-  27% {
+  40% {
     opacity: 0;
   }
 
-  29% {
+  42% {
     opacity: 1;
   }
 
-  48% {
+  57% {
     opacity: 0.84;
   }
 
-  72% {
+  77% {
     opacity: 0.18;
   }
 
@@ -1219,6 +1219,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   flex: 0 0 auto;
   width: min(16.5rem, 72vw);
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   color: var(--cream);
 }
 

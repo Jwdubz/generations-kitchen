@@ -4,6 +4,14 @@ import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import {
+  adjacentOfferCardTarget,
+  nearestOfferCardIndex,
+  offerWheelGestureDecision,
+  offerWheelGestureIdleMs,
+  resyncOfferCarouselFromUserScroll,
+  stepOfferCarousel,
+} from "../app/offer-carousel-nav.mjs";
 
 const projectRoot = new URL("../", import.meta.url);
 const execFileAsync = promisify(execFile);
@@ -404,11 +412,12 @@ test("keeps the visitor calls to action on the display face", async () => {
 // Activation: execute `node --test tests/rendered-html.test.mjs` after
 // `vinext build`.
 // Behavioral check: exercises the generated export and rejects return of the
-// Teri video beat, a slow black hold, a second burst background, one-degree
-// colored spokes, offer leak during the transition, or loss of the twelve
-// menu images/links. The visitor contract is a 2.8s held-breath: ~280ms slam
-// to black, shutters release at 27%, then a white ignition grows the broad
-// final-scene rays in the same persistent field. Coupon and carousel fade in
+// Teri video beat, the 2.8s climax clock, a short black hold, a second burst
+// background, one-degree colored spokes, offer leak during the transition, or
+// loss of the twelve menu images/links. The visitor contract is a 4.4s
+// held-breath: ~350-400ms slam to black, true black held through 40%
+// (~1.3-1.4s more), then a white ignition grows the broad final-scene rays
+// in the same persistent field over ~2.6s. Coupon and carousel fade in
 // together only after `settled`.
 // Retirement: only when the offer beat is intentionally removed or replaced
 // and the corresponding production consumer contract changes.
@@ -505,19 +514,29 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-transition \{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.offer-passage \{/);
   assert.doesNotMatch(css, /\.offer-passage[^{]*\{[^}]*\b(?:filter|backdrop-filter)\s*:/);
-  assert.match(climaxSource, /climaxDurationMs = 2800/);
-  assert.match(
-    css,
-    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 2\.8s linear forwards/,
+  assert.match(climaxSource, /climaxDurationMs = 4400/);
+  assert.doesNotMatch(
+    climaxSource,
+    /climaxDurationMs = 2800/,
+    "the obsolete 2.8s settle timer must not remain",
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 2\.8s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 4\.4s linear forwards/,
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-ray \{[\s\S]*?offer-ray-erupt 2\.8s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 4\.4s linear forwards/,
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-ray \{[\s\S]*?offer-ray-erupt 4\.4s linear forwards/,
     "the broad final-scene rays must carry the full explosion clock",
+  );
+  assert.doesNotMatch(
+    css,
+    /offer-shutter-close 2\.8s|offer-flash-white 2\.8s|offer-ray-erupt 2\.8s|offer-field-core 2\.8s/,
+    "the obsolete 2.8s climax clock must not remain",
   );
   assert.doesNotMatch(
     css,
@@ -532,32 +551,42 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?10% \{[\s\S]*?transform:\s*scaleY\(1\);/,
-    "shutters must be fully closed by 10% of the 2.8s climax (~280ms)",
+    /@keyframes offer-shutter-close \{[\s\S]*?9% \{[\s\S]*?transform:\s*scaleY\(1\);/,
+    "shutters must be fully closed by 9% of the 4.4s climax (~396ms)",
+  );
+  assert.doesNotMatch(
+    css,
+    /@keyframes offer-shutter-close \{[^@]*10% \{[^@]*transform:\s*scaleY\(1\);/,
+    "the obsolete 10% / ~280ms slam must not remain",
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?27% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
-    "the shorter black hold must release at 27%",
+    /@keyframes offer-shutter-close \{[\s\S]*?40% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
+    "true black must stay held through 40% of the 4.4s climax (~1.36s after slam)",
+  );
+  assert.doesNotMatch(
+    css,
+    /@keyframes offer-shutter-close \{[^@]*27% \{/,
+    "the obsolete 27% short black hold must not remain",
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?48%,\s*100% \{[\s\S]*?transform:\s*scaleY\(0\);/,
+    /@keyframes offer-shutter-close \{[\s\S]*?57%,\s*100% \{[\s\S]*?transform:\s*scaleY\(0\);/,
     "the shutters must open onto the same final offer scene",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*27% \{[\s\S]*?opacity:\s*0;/,
+    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*40% \{[\s\S]*?opacity:\s*0;/,
     "the white flash must wait until after the black hold",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?29% \{[\s\S]*?opacity:\s*1;/,
+    /@keyframes offer-flash-white \{[\s\S]*?42% \{[\s\S]*?opacity:\s*1;/,
     "ignition must open through a white flash",
   );
   assert.match(
     css,
-    /@keyframes offer-ray-erupt \{[\s\S]*?0%,\s*27% \{[\s\S]*?opacity:\s*0;[\s\S]*?clip-path:\s*circle\(0 at 50% 38%\);/,
+    /@keyframes offer-ray-erupt \{[\s\S]*?0%,\s*40% \{[\s\S]*?opacity:\s*0;[\s\S]*?clip-path:\s*circle\(0 at 50% 38%\);/,
     "the final-scene rays must ignite from the light source after the black hold",
   );
   assert.match(
@@ -580,7 +609,7 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*1;/);
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-field::after \{[\s\S]*?offer-field-core 2\.8s linear forwards/,
+    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-field::after \{[\s\S]*?offer-field-core 4\.4s linear forwards/,
     "the flash core must happen inside the persistent final field",
   );
   assert.match(
@@ -626,6 +655,49 @@ test("exports the offer climax and first-party dish carousel", async () => {
     /\.offer-track \{[^}]*overscroll-behavior-y:\s*none/,
     "vertical swipes that start on the carousel must be able to leave the beat",
   );
+  assert.match(
+    css,
+    /\.offer-card \{[\s\S]*?scroll-snap-stop:\s*always;/,
+    "each card must be a hard snap stop so momentum cannot skip dishes",
+  );
+  assert.match(
+    climaxSource,
+    /stepOfferCarousel\(/,
+    "desktop arrows must step the selected DOM index through the shared helper",
+  );
+  assert.match(climaxSource, /selectedIndexRef/);
+  assert.match(climaxSource, /pendingIndexRef/);
+  assert.match(climaxSource, /programmaticRef/);
+  assert.match(climaxSource, /resyncOfferCarouselFromUserScroll\(/);
+  assert.doesNotMatch(
+    climaxSource,
+    /track\.scrollBy\s*\(|scrollByCard\s*\(/,
+    "relative multi-card scrollBy jumps must not return",
+  );
+  assert.doesNotMatch(
+    climaxSource,
+    /innerWidth|offsetWidth|clientWidth\s*[+*]/,
+    "carousel steps must not use viewport or page-sized jumps",
+  );
+  assert.match(
+    climaxSource,
+    /scrollWidth\s*-\s*track\.clientWidth/,
+    "physical scrollTo must clamp to the real scroll range",
+  );
+  assert.match(
+    climaxSource,
+    /offerWheelGestureDecision\(/,
+    "horizontal wheel/trackpad gestures must reuse the one-card decision helper",
+  );
+  assert.match(
+    climaxSource,
+    /addEventListener\("wheel", onWheel, \{ passive: false \}\)/,
+  );
+  assert.doesNotMatch(
+    climaxSource,
+    /stopPropagation\s*\(/,
+    "vertical wheel intent must keep bubbling so the visitor can leave the beat",
+  );
   assert.match(climaxSource, /data-active-scroll-beat/);
   assert.match(climaxSource, /IntersectionObserver/);
   assert.match(climaxSource, /motion"\) === "reduced"/);
@@ -650,6 +722,244 @@ test("exports the offer climax and first-party dish carousel", async () => {
     const info = await stat(url);
     assert.ok(info.size > 1_000, `${file} should be a real menu photograph`);
   }
+});
+
+// Focused tripwire: one-card offer-carousel navigation.
+// Canonical path: tests/rendered-html.test.mjs.
+// Future consumer: maintainers changing OfferMenuTrack or offer-carousel-nav.
+// Activation: execute `node --test tests/rendered-html.test.mjs`.
+// Behavioral check: walks the real helper through 0..11 and 11..0 on
+// realistic geometry whose maxScrollLeft is below the last raw offsets,
+// clamps only the physical target, rejects page-width jumps, and ignores a
+// second step while pending. Retire when the offer carousel is removed or
+// its one-card contract is intentionally replaced.
+test("advances the offer carousel one measured card at a time", () => {
+  const offsets = [
+    0, 173, 401, 588, 910, 1095, 1322, 1500, 1788, 1961, 2210, 2444,
+  ];
+  const maxScrollLeft = offsets[8];
+  assert.equal(offsets.length, 12);
+  assert.ok(maxScrollLeft < offsets[9]);
+  assert.ok(maxScrollLeft < offsets[10]);
+  assert.ok(maxScrollLeft < offsets[11]);
+  assert.equal(nearestOfferCardIndex(maxScrollLeft, offsets), 8);
+
+  const forward = [0];
+  let selectedIndex = 0;
+  let scrollLeft = 0;
+  for (let step = 0; step < 20; step += 1) {
+    const next = adjacentOfferCardTarget({
+      selectedIndex,
+      offsets,
+      direction: 1,
+      maxScrollLeft,
+    });
+    assert.equal(
+      next.scrollLeft,
+      Math.min(offsets[next.index], maxScrollLeft),
+      "physical target must be the adjacent offset clamped to maxScrollLeft",
+    );
+    assert.ok(next.scrollLeft <= maxScrollLeft);
+    assert.notEqual(next.scrollLeft, 1200);
+    assert.ok(
+      next.index === selectedIndex || next.index === selectedIndex + 1,
+      "next must stay on the current card or move exactly one card forward",
+    );
+    if (next.index === selectedIndex) break;
+    selectedIndex = next.index;
+    scrollLeft = next.scrollLeft;
+    forward.push(selectedIndex);
+  }
+  assert.deepEqual(forward, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+  assert.equal(scrollLeft, maxScrollLeft);
+
+  const reverse = [11];
+  selectedIndex = 11;
+  scrollLeft = maxScrollLeft;
+  for (let step = 0; step < 20; step += 1) {
+    const previous = adjacentOfferCardTarget({
+      selectedIndex,
+      offsets,
+      direction: -1,
+      maxScrollLeft,
+    });
+    assert.equal(
+      previous.scrollLeft,
+      Math.min(offsets[previous.index], maxScrollLeft),
+    );
+    assert.ok(
+      previous.index === selectedIndex || previous.index === selectedIndex - 1,
+      "previous must stay on the current card or move exactly one card back",
+    );
+    if (previous.index === selectedIndex) break;
+    selectedIndex = previous.index;
+    scrollLeft = previous.scrollLeft;
+    reverse.push(selectedIndex);
+  }
+  assert.deepEqual(reverse, [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+  assert.equal(scrollLeft, offsets[0]);
+
+  assert.deepEqual(
+    adjacentOfferCardTarget({
+      selectedIndex: 0,
+      offsets,
+      direction: -1,
+      maxScrollLeft,
+    }),
+    { index: 0, scrollLeft: offsets[0] },
+  );
+  assert.deepEqual(
+    adjacentOfferCardTarget({
+      selectedIndex: 11,
+      offsets,
+      direction: 1,
+      maxScrollLeft,
+    }),
+    { index: 11, scrollLeft: maxScrollLeft },
+  );
+  assert.deepEqual(
+    adjacentOfferCardTarget({
+      selectedIndex: 8,
+      offsets,
+      direction: 1,
+      maxScrollLeft,
+    }),
+    { index: 9, scrollLeft: maxScrollLeft },
+  );
+
+  let state = {
+    selectedIndex: 0,
+    scrollLeft: 0,
+    pendingIndex: null,
+    offsets,
+    maxScrollLeft,
+  };
+  const afterFirst = stepOfferCarousel(state, 1);
+  assert.equal(afterFirst.selectedIndex, 1);
+  assert.equal(afterFirst.scrollLeft, offsets[1]);
+  assert.equal(afterFirst.pendingIndex, 1);
+  assert.deepEqual(stepOfferCarousel({ ...state, ...afterFirst }, 1), afterFirst);
+
+  const afterSettle = stepOfferCarousel(
+    { ...state, ...afterFirst, pendingIndex: null },
+    1,
+  );
+  assert.equal(afterSettle.selectedIndex, 2);
+
+  const trailing = stepOfferCarousel(
+    {
+      selectedIndex: 8,
+      scrollLeft: maxScrollLeft,
+      pendingIndex: null,
+      offsets,
+      maxScrollLeft,
+    },
+    1,
+  );
+  assert.equal(trailing.selectedIndex, 9);
+  assert.equal(trailing.scrollLeft, maxScrollLeft);
+  assert.equal(trailing.pendingIndex, null);
+
+  assert.deepEqual(
+    resyncOfferCarouselFromUserScroll(
+      { selectedIndex: 5, pendingIndex: 6, offsets },
+      0,
+    ),
+    { selectedIndex: 5, pendingIndex: 6 },
+  );
+  assert.deepEqual(
+    resyncOfferCarouselFromUserScroll(
+      { selectedIndex: 5, pendingIndex: null, offsets },
+      maxScrollLeft,
+    ),
+    { selectedIndex: 8, pendingIndex: null },
+  );
+});
+
+// Focused tripwire: one-card horizontal wheel/trackpad gestures.
+// Canonical path: tests/rendered-html.test.mjs.
+// Future consumer: maintainers changing OfferMenuTrack wheel handling.
+// Activation: execute `node --test tests/rendered-html.test.mjs`.
+// Behavioral check: one large horizontal delta requests a single adjacent
+// step, later events before the idle boundary do not, a later distinct
+// gesture can step again, and predominantly vertical input is not captured.
+// Retire when the offer carousel is removed or this wheel contract changes.
+test("takes only one adjacent card per horizontal wheel gesture", () => {
+  assert.equal(offerWheelGestureIdleMs, 180);
+
+  let gesture = { gestureActive: false };
+  const first = offerWheelGestureDecision(gesture, {
+    deltaX: 8000,
+    deltaY: 0,
+  });
+  assert.deepEqual(first, {
+    capture: true,
+    step: true,
+    direction: 1,
+    gestureActive: true,
+  });
+  gesture = { gestureActive: first.gestureActive };
+
+  const sameGesture = [
+    offerWheelGestureDecision(gesture, { deltaX: 8000, deltaY: 0 }),
+    offerWheelGestureDecision(gesture, { deltaX: 1200, deltaY: 40 }),
+    offerWheelGestureDecision(gesture, { deltaX: 400, deltaY: 0 }),
+  ];
+  for (const event of sameGesture) {
+    assert.equal(event.capture, true);
+    assert.equal(event.step, false);
+    assert.equal(event.direction, 1);
+    assert.equal(event.gestureActive, true);
+  }
+
+  const verticalDuringGesture = offerWheelGestureDecision(gesture, {
+    deltaX: 0,
+    deltaY: 800,
+  });
+  assert.equal(verticalDuringGesture.capture, false);
+  assert.equal(verticalDuringGesture.step, false);
+  assert.equal(verticalDuringGesture.direction, 0);
+
+  gesture = { gestureActive: false };
+  const nextGesture = offerWheelGestureDecision(gesture, {
+    deltaX: 640,
+    deltaY: 12,
+  });
+  assert.deepEqual(nextGesture, {
+    capture: true,
+    step: true,
+    direction: 1,
+    gestureActive: true,
+  });
+
+  const backward = offerWheelGestureDecision(
+    { gestureActive: false },
+    { deltaX: -8000, deltaY: 0 },
+  );
+  assert.deepEqual(backward, {
+    capture: true,
+    step: true,
+    direction: -1,
+    gestureActive: true,
+  });
+
+  const vertical = offerWheelGestureDecision(
+    { gestureActive: false },
+    { deltaX: 40, deltaY: 800 },
+  );
+  assert.deepEqual(vertical, {
+    capture: false,
+    step: false,
+    direction: 0,
+    gestureActive: false,
+  });
+
+  const pinch = offerWheelGestureDecision(
+    { gestureActive: false },
+    { deltaX: 8000, deltaY: 0, ctrlKey: true },
+  );
+  assert.equal(pinch.capture, false);
+  assert.equal(pinch.step, false);
 });
 
 // Focused desktop-scroll tripwire at tests/rendered-html.test.mjs for the next
