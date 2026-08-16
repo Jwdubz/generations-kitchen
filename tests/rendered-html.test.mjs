@@ -412,13 +412,12 @@ test("keeps the visitor calls to action on the display face", async () => {
 // Activation: execute `node --test tests/rendered-html.test.mjs` after
 // `vinext build`.
 // Behavioral check: exercises the generated export and rejects return of the
-// Teri video beat, the 2.8s climax clock, a short black hold, a second burst
-// background, one-degree colored spokes, offer leak during the transition, or
-// loss of the twelve menu images/links. The visitor contract is a 4.4s
-// held-breath: ~350-400ms slam to black, true black held through 40%
-// (~1.3-1.4s more), then a white ignition grows the broad final-scene rays
-// in the same persistent field over ~2.6s. Coupon and carousel fade in
-// together only after `settled`.
+// Teri video beat, a short black hold, a second burst background, one-degree
+// colored spokes, offer leak during the transition, visible chrome during
+// black, beat-skipping while playing, or loss of the twelve menu images/links.
+// The visitor contract is a 4.8s held-breath: slam to empty black, a
+// full-frame whiteout, then multi-speed Generations color growing into the
+// persistent field. Coupon, carousel, and chrome return only after `settled`.
 // Retirement: only when the offer beat is intentionally removed or replaced
 // and the corresponding production consumer contract changes.
 test("exports the offer climax and first-party dish carousel", async () => {
@@ -514,24 +513,41 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-transition \{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.offer-passage \{/);
   assert.doesNotMatch(css, /\.offer-passage[^{]*\{[^}]*\b(?:filter|backdrop-filter)\s*:/);
-  assert.match(climaxSource, /climaxDurationMs = 4400/);
+  assert.match(climaxSource, /climaxDurationMs = 4800/);
   assert.doesNotMatch(
     climaxSource,
-    /climaxDurationMs = 2800/,
-    "the obsolete 2.8s settle timer must not remain",
+    /climaxDurationMs = 2800|climaxDurationMs = 4400/,
+    "obsolete climax settle timers must not remain",
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 4\.4s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 4\.8s linear forwards/,
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 4\.4s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 4\.8s linear forwards/,
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-ray \{[\s\S]*?offer-ray-erupt 4\.4s linear forwards/,
-    "the broad final-scene rays must carry the full explosion clock",
+    /html\[data-offer-climax="playing"\] \.offer-volume-gold \{[\s\S]*?offer-volume-gold 4\.8s linear forwards/,
+    "gold volume must run on the shared climax clock",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="playing"\] \.offer-volume-red \{[\s\S]*?offer-volume-red 4\.8s linear forwards/,
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="playing"\] \.offer-volume-green \{[\s\S]*?offer-volume-green 4\.8s linear forwards/,
+  );
+  assert.match(html, /class="offer-detonation"/);
+  assert.match(climaxSource, /buildDetonationGeometry\(/);
+  assert.match(climaxSource, /requestAnimationFrame\(drawDetonation\)/);
+  assert.match(climaxSource, /cancelAnimationFrame/);
+  assert.doesNotMatch(
+    css,
+    /offer-shutter-close 4\.4s|offer-flash-white 4\.4s|offer-ray-erupt 4\.4s|offer-field-core 4\.4s/,
+    "the obsolete 4.4s climax clock must not remain",
   );
   assert.doesNotMatch(
     css,
@@ -544,25 +560,16 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "the obsolete 1.65s shutoff clock must not remain",
   );
   assert.doesNotMatch(css, /\.offer-burst/, "a second burst background must not exist");
-  assert.doesNotMatch(
-    climaxSource,
-    /offer-burst/,
-    "the fixed transition may only shutter and flash the final offer field",
+  assert.doesNotMatch(css, /@keyframes offer-ray-erupt/);
+  assert.match(
+    css,
+    /@keyframes offer-shutter-close \{[\s\S]*?8% \{[\s\S]*?transform:\s*scaleY\(1\);/,
+    "shutters must be fully closed by 8% of the 4.8s climax (~384ms)",
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?9% \{[\s\S]*?transform:\s*scaleY\(1\);/,
-    "shutters must be fully closed by 9% of the 4.4s climax (~396ms)",
-  );
-  assert.doesNotMatch(
-    css,
-    /@keyframes offer-shutter-close \{[^@]*10% \{[^@]*transform:\s*scaleY\(1\);/,
-    "the obsolete 10% / ~280ms slam must not remain",
-  );
-  assert.match(
-    css,
-    /@keyframes offer-shutter-close \{[\s\S]*?40% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
-    "true black must stay held through 40% of the 4.4s climax (~1.36s after slam)",
+    /@keyframes offer-shutter-close \{[\s\S]*?36% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
+    "true black must stay held through 36% of the 4.8s climax",
   );
   assert.doesNotMatch(
     css,
@@ -571,28 +578,28 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?57%,\s*100% \{[\s\S]*?transform:\s*scaleY\(0\);/,
-    "the shutters must open onto the same final offer scene",
+    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*36% \{[\s\S]*?opacity:\s*0;/,
+    "the white flash must wait until after the empty black hold",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*40% \{[\s\S]*?opacity:\s*0;/,
-    "the white flash must wait until after the black hold",
+    /@keyframes offer-flash-white \{[\s\S]*?38% \{[\s\S]*?opacity:\s*1;/,
+    "ignition must open through a full-frame white blowout",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?42% \{[\s\S]*?opacity:\s*1;/,
-    "ignition must open through a white flash",
+    /@keyframes offer-flash-white \{[\s\S]*?43% \{[\s\S]*?opacity:\s*0\.97;/,
+    "the blowout must remain near-white long enough to be perceived",
   );
   assert.match(
     css,
-    /@keyframes offer-ray-erupt \{[\s\S]*?0%,\s*40% \{[\s\S]*?opacity:\s*0;[\s\S]*?clip-path:\s*circle\(0 at 50% 38%\);/,
-    "the final-scene rays must ignite from the light source after the black hold",
+    /@keyframes offer-field-grow \{[\s\S]*?0%,\s*36% \{[\s\S]*?opacity:\s*0;/,
+    "the persistent field must stay dark until the rupture, then grow under the flash",
   );
   assert.match(
     css,
-    /@keyframes offer-ray-erupt \{[\s\S]*?100% \{[\s\S]*?opacity:\s*0\.74;[\s\S]*?circle\(160vmax at 50% 38%\);/,
-    "the explosion must finish at the exact opacity and extent of the final rays",
+    /@keyframes offer-ray-afterlife \{[\s\S]*?100% \{[\s\S]*?opacity:\s*0\.74;/,
+    "settled rays must arrive as afterlife, not as the explosion itself",
   );
   assert.match(
     css,
@@ -609,23 +616,49 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*1;/);
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-field::after \{[\s\S]*?offer-field-core 4\.4s linear forwards/,
-    "the flash core must happen inside the persistent final field",
+    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-field::after \{[\s\S]*?offer-field-core 4\.8s linear forwards/,
+    "the delayed world-light core must happen inside the persistent final field",
   );
   assert.match(
     css,
     /html\[data-offer-climax="playing"\] \.offer-content \{[\s\S]*?opacity:\s*0;/,
     "coupon and carousel must stay hidden until the explosion finishes",
   );
-  assert.doesNotMatch(
+  assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-field[^}]*opacity:\s*0;/,
-    "the background field must not be swapped or hidden during the explosion",
+    /html\[data-offer-climax="playing"\] \.site-header,[\s\S]*?\.floating-order \{[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/,
+    "logo, nav, and floating order must leave the empty black world",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="settled"\] main\.force-motion \.site-header,[\s\S]*?offer-chrome-in 0\.72s ease forwards/,
+    "chrome must return only after the new scene exists",
   );
   assert.match(
     css,
     /html\[data-offer-climax="settled"\] main\.force-motion \.offer-content \{[\s\S]*?offer-content-in 0\.72s ease forwards/,
     "coupon and carousel must fade in together after the final scene resolves",
+  );
+  assert.match(climaxSource, /function lockOfferClimaxInput/);
+  assert.match(
+    climaxSource,
+    /addEventListener\("wheel", lockOfferClimaxInput, \{\s*capture:\s*true,\s*passive:\s*false/,
+  );
+  assert.match(
+    climaxSource,
+    /addEventListener\("touchmove", lockOfferClimaxInput, \{\s*capture:\s*true,\s*passive:\s*false/,
+  );
+  assert.match(
+    climaxSource,
+    /addEventListener\("keydown", lockOfferClimaxInput, \{ capture: true \}/,
+  );
+  assert.match(climaxSource, /removeEventListener\("wheel", lockOfferClimaxInput/);
+  assert.match(climaxSource, /removeEventListener\("touchmove", lockOfferClimaxInput/);
+  assert.match(climaxSource, /removeEventListener\("keydown", lockOfferClimaxInput/);
+  assert.match(
+    climaxSource,
+    /if \(prefersExplicitReducedMotion\(\)\) \{\s*detachLock\(\);\s*stopDetonation\(\);\s*setClimax\("settled"\);/,
+    "reduced motion must skip the flash, canvas, and input lock",
   );
   assert.match(
     css,
@@ -695,8 +728,8 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.doesNotMatch(
     climaxSource,
-    /stopPropagation\s*\(/,
-    "vertical wheel intent must keep bubbling so the visitor can leave the beat",
+    /function onWheel\([\s\S]*?stopPropagation/,
+    "settled carousel vertical wheel intent must keep bubbling so the visitor can leave the beat",
   );
   assert.match(climaxSource, /data-active-scroll-beat/);
   assert.match(climaxSource, /IntersectionObserver/);
