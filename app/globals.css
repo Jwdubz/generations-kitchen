@@ -914,49 +914,10 @@ main:not(.force-motion) .offer-transition {
   clip-path: circle(0% at 50% 50%);
 }
 
-.offer-burst::before,
 .offer-burst::after {
   content: "";
   position: absolute;
   inset: 0;
-}
-
-.offer-burst::before {
-  background:
-    repeating-conic-gradient(
-      from 8deg at 50% 50%,
-      transparent 0 8.8deg,
-      rgba(179, 24, 31, 0) 8.8deg,
-      rgba(179, 24, 31, 0.82) 9.05deg,
-      rgba(179, 24, 31, 0) 9.45deg,
-      transparent 9.45deg 16.6deg,
-      rgba(11, 107, 58, 0) 16.6deg,
-      rgba(11, 107, 58, 0.74) 16.8deg,
-      rgba(11, 107, 58, 0) 17.2deg,
-      transparent 17.2deg 26.4deg,
-      rgba(242, 173, 36, 0) 26.4deg,
-      rgba(242, 173, 36, 0.9) 26.55deg,
-      rgba(242, 173, 36, 0) 26.95deg,
-      transparent 26.95deg 31.1deg,
-      rgba(179, 24, 31, 0) 31.1deg,
-      rgba(179, 24, 31, 0.38) 31.2deg,
-      rgba(179, 24, 31, 0) 31.4deg,
-      transparent 31.4deg 38deg
-    ),
-    repeating-conic-gradient(
-      from 29deg at 50% 50%,
-      transparent 0 12.4deg,
-      rgba(242, 173, 36, 0) 12.4deg,
-      rgba(242, 173, 36, 0.55) 12.55deg,
-      rgba(242, 173, 36, 0) 12.85deg,
-      transparent 12.85deg 23.6deg,
-      rgba(11, 107, 58, 0) 23.6deg,
-      rgba(11, 107, 58, 0.42) 23.72deg,
-      rgba(11, 107, 58, 0) 23.95deg,
-      transparent 23.95deg 36deg
-    );
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 38%, transparent 90%);
-  mask-image: radial-gradient(circle at 50% 50%, #000 0 38%, transparent 90%);
 }
 
 .offer-burst::after {
@@ -969,19 +930,19 @@ main:not(.force-motion) .offer-transition {
 }
 
 html[data-offer-climax="playing"] .offer-shutter {
-  animation: offer-shutter-close 3.2s linear forwards;
+  animation: offer-shutter-close 2.8s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-flash {
-  animation: offer-flash-white 3.2s linear forwards;
+  animation: offer-flash-white 2.8s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-burst {
-  animation: offer-burst-expand 3.2s linear forwards;
+  animation: offer-burst-expand 2.8s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-burst::after {
-  animation: offer-burst-core 3.2s linear forwards;
+  animation: offer-burst-core 2.8s linear forwards;
 }
 
 @keyframes offer-shutter-close {
@@ -997,7 +958,7 @@ html[data-offer-climax="playing"] .offer-burst::after {
     transform: scaleY(1);
   }
 
-  50% {
+  35% {
     transform: scaleY(1);
     opacity: 1;
   }
@@ -1015,19 +976,19 @@ html[data-offer-climax="playing"] .offer-burst::after {
 
 @keyframes offer-flash-white {
   0%,
-  50% {
+  35% {
     opacity: 0;
   }
 
-  52% {
+  37% {
     opacity: 0.97;
   }
 
-  56% {
+  42% {
     opacity: 0.97;
   }
 
-  78% {
+  72% {
     opacity: 0.22;
   }
 
@@ -1038,31 +999,31 @@ html[data-offer-climax="playing"] .offer-burst::after {
 
 @keyframes offer-burst-expand {
   0%,
-  50% {
+  35% {
     opacity: 0;
     -webkit-clip-path: circle(0% at 50% 50%);
     clip-path: circle(0% at 50% 50%);
   }
 
-  52% {
+  37% {
     opacity: 1;
     -webkit-clip-path: circle(1.35vmax at 50% 50%);
     clip-path: circle(1.35vmax at 50% 50%);
   }
 
-  54% {
+  42% {
     opacity: 1;
     -webkit-clip-path: circle(14vmax at 50% 50%);
     clip-path: circle(14vmax at 50% 50%);
   }
 
-  58% {
+  49% {
     opacity: 1;
     -webkit-clip-path: circle(52vmax at 50% 50%);
     clip-path: circle(52vmax at 50% 50%);
   }
 
-  68% {
+  62% {
     opacity: 1;
     -webkit-clip-path: circle(88vmax at 50% 50%);
     clip-path: circle(88vmax at 50% 50%);
@@ -1083,11 +1044,11 @@ html[data-offer-climax="playing"] .offer-burst::after {
 
 @keyframes offer-burst-core {
   0%,
-  50% {
+  35% {
     opacity: 0;
   }
 
-  52% {
+  37% {
     opacity: 1;
   }
 

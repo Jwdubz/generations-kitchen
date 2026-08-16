@@ -13,15 +13,16 @@ desktop arrow movement, mobile horizontal movement and vertical exit, plus
 `node --test tests/rendered-html.test.mjs`.
 Retirement: when the owner removes or replaces the first-order promotion or
 replaces this interaction with another verified offer-to-menu passage.
-The motion climax is a 3.2s held-breath: slam to true black, hold empty,
-then a near-white flash and brand-color burst. Offer copy stays hidden
-until `settled`. Keep CSS keyframe duration on the same 3.2s clock.
+The motion climax is a 2.8s held-breath: slam to true black, hold empty for
+roughly 0.7s, then a near-white flash and soft brand-color bloom with no
+transition ray lines. Offer copy stays hidden until `settled`. Keep CSS
+keyframe duration on the same 2.8s clock.
 */
 
 import { useEffect, useRef } from "react";
 
 const desktopQuery = "(min-width: 761px)";
-const climaxDurationMs = 3200;
+const climaxDurationMs = 2800;
 
 function prefersExplicitReducedMotion() {
   return new URLSearchParams(window.location.search).get("motion") === "reduced";

@@ -379,11 +379,12 @@ test("keeps the visitor calls to action on the display face", async () => {
 // Activation: execute `node --test tests/rendered-html.test.mjs` after
 // `vinext build`.
 // Behavioral check: exercises the generated export and rejects return of the
-// Teri beat, a short 1.65s/13% shutoff, a scaled rectangular burst silhouette,
-// offer leak during the black hold, or loss of offer/menu links/motion
-// contract. The visitor contract is a 3.2s held-breath: ~320ms slam to black,
-// ~1.28s empty hold, then a circular/edgeless flash/burst, with offer copy
-// appearing only after `settled`.
+// Teri beat, a slow black hold, transition ray lines, a scaled rectangular
+// burst silhouette, offer leak during the black hold, or loss of
+// offer/menu links/motion contract. The visitor contract is a 2.8s
+// held-breath: ~280ms slam to black, ~700ms empty hold, then a clean
+// circular/edgeless flash and soft color bloom, with offer copy appearing
+// only after `settled`. The settled field may retain its ambient rays.
 // Retirement: only when the offer beat is intentionally removed or replaced
 // and the corresponding production consumer contract changes.
 test("exports the offer climax and first-party dish carousel", async () => {
@@ -459,18 +460,18 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-transition \{[\s\S]*?pointer-events:\s*none;/);
   assert.match(css, /\.offer-passage \{/);
   assert.doesNotMatch(css, /\.offer-passage[^{]*\{[^}]*\b(?:filter|backdrop-filter)\s*:/);
-  assert.match(climaxSource, /climaxDurationMs = 3200/);
+  assert.match(climaxSource, /climaxDurationMs = 2800/);
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 3\.2s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-shutter \{[\s\S]*?offer-shutter-close 2\.8s linear forwards/,
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 3\.2s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 2\.8s linear forwards/,
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-burst \{[\s\S]*?offer-burst-expand 3\.2s linear forwards/,
+    /html\[data-offer-climax="playing"\] \.offer-burst \{[\s\S]*?offer-burst-expand 2\.8s linear forwards/,
   );
   assert.doesNotMatch(
     css,
@@ -480,12 +481,12 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(
     css,
     /@keyframes offer-shutter-close \{[\s\S]*?10% \{[\s\S]*?transform:\s*scaleY\(1\);/,
-    "shutters must be fully closed by 10% of the 3.2s climax (~320ms)",
+    "shutters must be fully closed by 10% of the 2.8s climax (~280ms)",
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?50% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
-    "the black hold must stay fully closed through 50% (~1.28s after slam)",
+    /@keyframes offer-shutter-close \{[\s\S]*?35% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
+    "the black hold must release by 35% (~700ms after slam)",
   );
   assert.doesNotMatch(
     css,
@@ -494,21 +495,20 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*50% \{[\s\S]*?opacity:\s*0;/,
+    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*35% \{[\s\S]*?opacity:\s*0;/,
     "the white flash must wait until after the black hold",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?52% \{[\s\S]*?opacity:\s*0\.97;/,
+    /@keyframes offer-flash-white \{[\s\S]*?37% \{[\s\S]*?opacity:\s*0\.97;/,
     "ignition must be a near-white flash",
   );
   assert.match(
     css,
-    /@keyframes offer-burst-expand \{[\s\S]*?0%,\s*50% \{[\s\S]*?opacity:\s*0;/,
+    /@keyframes offer-burst-expand \{[\s\S]*?0%,\s*35% \{[\s\S]*?opacity:\s*0;/,
     "the chromatic burst must stay dark through the black hold",
   );
   const burstRule = css.match(/\.offer-burst \{([^}]+)\}/)?.[1] ?? "";
-  const burstBeforeRule = css.match(/\.offer-burst::before \{([^}]+)\}/)?.[1] ?? "";
   const burstExpandStart = css.indexOf("@keyframes offer-burst-expand {");
   const burstCoreStart = css.indexOf("@keyframes offer-burst-core {");
   assert.ok(burstExpandStart >= 0 && burstCoreStart > burstExpandStart);
@@ -535,18 +535,17 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "do not scale the rectangular burst layer; its box becomes a silhouette",
   );
   assert.doesNotMatch(
-    burstBeforeRule,
-    /linear-gradient\(/,
-    "directional light must not be broad linear wedges",
-  );
-  assert.match(
-    burstBeforeRule,
-    /repeating-conic-gradient\(/,
-    "rays should leave the core as thin conic light",
+    css,
+    /\.offer-burst::before/,
+    "the initial burst must stay a clean bloom with no thin ray layer",
   );
   assert.match(css, /\.offer-flash \{[\s\S]*?background:\s*#fff;/);
-  assert.match(css, /\.offer-burst::before \{/);
   assert.match(css, /\.offer-burst::after \{/);
+  assert.match(
+    css,
+    /\.offer-ray \{\s*background:\s*repeating-conic-gradient\(/,
+    "the settled offer field should retain its ambient afterglow rays",
+  );
   assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*0;/);
   assert.match(
     css,
