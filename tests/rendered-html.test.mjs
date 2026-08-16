@@ -54,9 +54,9 @@ test("exports the complete Generations Kitchen passage", async () => {
     assert.match(html, new RegExp(`${mediaName}-mobile\\.mp4`));
   }
 
-  assert.doesNotMatch(html, /teri-beef-fries/);
-  assert.doesNotMatch(html, /Teri Beef Fries/);
-  assert.doesNotMatch(html, /hurricane-fries/);
+  assert.doesNotMatch(html, /teri-beef-fries-(?:desktop|mobile)\.mp4/);
+  assert.doesNotMatch(html, /id="teri-beef-fries"/);
+  assert.doesNotMatch(html, /hurricane-fries-(?:desktop|mobile)\.mp4/);
 
   assert.match(html, /6280 S Valley View Blvd/);
   assert.match(html, /Directions/);
@@ -218,14 +218,22 @@ test("emits the complete passage as a GitHub Pages artifact", async () => {
   await access(new URL("../public/.nojekyll", import.meta.url));
 });
 
-// Focused motion-default tripwire at tests/rendered-html.test.mjs for the next
-// motion-preference editor. Activation: execute `npm test`. Its page, client,
-// CSS, and exported-HTML consumers require video-led motion as the public
-// default on desktop and mobile, even when the OS reports reduced motion, with
-// the static presentation available only through `?motion=reduced`.
-// `?motion=full` remains an accepted full-motion URL. Retire only if the owner
-// changes the default-vs-explicit-reduced contract.
+// Focused tripwire: motion default and single-active-video lifecycle.
+// Canonical path: tests/rendered-html.test.mjs.
+// Future consumer: the next motion-preference or passage-video editor.
+// Activation: execute `node --test tests/rendered-html.test.mjs` after build.
+// Behavioral check: the page, client, CSS, and exported-HTML consumers require
+// video-led motion as the public desktop/mobile default, exactly one cold-load
+// autoplay, every video on the managed lifecycle, deferred passage loading,
+// and pause/play/visibility handling. The static presentation remains available
+// only through `?motion=reduced`; `?motion=full` remains accepted.
+// Retirement: when the owner changes the default-vs-explicit-reduced contract
+// and the passage no longer needs a single-active-video lifecycle.
 test("defaults to video-led motion unless the visitor asks for reduced motion", async () => {
+  const playbackSource = await readFile(
+    new URL('../app/viewport-video-playback.tsx', import.meta.url),
+    'utf8',
+  );
   const pageSource = await readFile(
     new URL("../app/page.tsx", import.meta.url),
     "utf8",
@@ -269,6 +277,23 @@ test("defaults to video-led motion unless the visitor asks for reduced motion", 
     "desktop and mobile must share the same video-led default",
   );
   assert.match(scrollSource, /\?motion=full/);
+
+  assert.equal(
+    exportedHtml.match(/\bautoPlay=/g)?.length,
+    1,
+    'only the cold-load opening may claim a decoder before intersection',
+  );
+  assert.equal(
+    exportedHtml.match(/data-managed-video=/g)?.length,
+    4,
+    'every motion beat must participate in the single-active-video lifecycle',
+  );
+  assert.match(pageSource, /preload=\x22none\x22/);
+  assert.match(pageSource, /autoPlay=\{motion !== \x22reduced\x22\}/);
+  assert.match(playbackSource, /new IntersectionObserver/);
+  assert.match(playbackSource, /video\.pause\(\)/);
+  assert.match(playbackSource, /void video\.play\(\)\.catch/);
+  assert.match(playbackSource, /document\.visibilityState/);
 
   assert.match(
     css,
@@ -379,12 +404,12 @@ test("keeps the visitor calls to action on the display face", async () => {
 // Activation: execute `node --test tests/rendered-html.test.mjs` after
 // `vinext build`.
 // Behavioral check: exercises the generated export and rejects return of the
-// Teri beat, a slow black hold, transition ray lines, a scaled rectangular
-// burst silhouette, offer leak during the black hold, or loss of
-// offer/menu links/motion contract. The visitor contract is a 2.8s
-// held-breath: ~280ms slam to black, ~700ms empty hold, then a clean
-// circular/edgeless flash and soft color bloom, with offer copy appearing
-// only after `settled`. The settled field may retain its ambient rays.
+// Teri video beat, a slow black hold, a second burst background, one-degree
+// colored spokes, offer leak during the transition, or loss of the twelve
+// menu images/links. The visitor contract is a 2.8s held-breath: ~280ms slam
+// to black, shutters release at 27%, then a white ignition grows the broad
+// final-scene rays in the same persistent field. Coupon and carousel fade in
+// together only after `settled`.
 // Retirement: only when the offer beat is intentionally removed or replaced
 // and the corresponding production consumer contract changes.
 test("exports the offer climax and first-party dish carousel", async () => {
@@ -420,9 +445,22 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "garlic-chicken.webp",
     "hamburger-steak.webp",
     "loco-moco.webp",
+    "teriyaki-beef.webp",
+    "chicken-katsu.webp",
+    "fried-chicken.webp",
+    "teri-beef-fries.webp",
+    "poke-bowl-spicy.webp",
+    "poke-bowl-hawaiian.webp",
+    "poke-nachos.webp",
   ]) {
     assert.match(html, new RegExp(`/media/menu/${file}`));
   }
+
+  assert.equal(
+    html.match(/class="offer-card"/g)?.length,
+    12,
+    "every distinct verified menu photograph should be represented once",
+  );
 
   for (const href of [
     "furikake-chicken-BLaD",
@@ -430,6 +468,13 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "garlic-chicken-9tBv",
     "hamburger-steak-7e8E",
     "loco-moco-mvzn",
+    "teriyaki-beef-Nr2Q",
+    "chicken-katsu-QqjI",
+    "fried-chicken-u5Ss",
+    "teri-beef-fries-sS8t",
+    "poke-bowl-spicy-v2TB",
+    "poke-bowl-hawaiian-xDrN",
+    "poke-nachos-spicy-hGMI",
   ]) {
     assert.match(
       html,
@@ -471,12 +516,19 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-burst \{[\s\S]*?offer-burst-expand 2\.8s linear forwards/,
+    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-ray \{[\s\S]*?offer-ray-erupt 2\.8s linear forwards/,
+    "the broad final-scene rays must carry the full explosion clock",
   );
   assert.doesNotMatch(
     css,
-    /offer-shutter-close 1\.65s|offer-flash-line 1\.65s|offer-burst-expand 1\.65s/,
+    /offer-shutter-close 1\.65s|offer-flash-line 1\.65s|offer-ray-erupt 1\.65s/,
     "the obsolete 1.65s shutoff clock must not remain",
+  );
+  assert.doesNotMatch(css, /\.offer-burst/, "a second burst background must not exist");
+  assert.doesNotMatch(
+    climaxSource,
+    /offer-burst/,
+    "the fixed transition may only shutter and flash the final offer field",
   );
   assert.match(
     css,
@@ -485,78 +537,87 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /@keyframes offer-shutter-close \{[\s\S]*?35% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
-    "the black hold must release by 35% (~700ms after slam)",
-  );
-  assert.doesNotMatch(
-    css,
-    /@keyframes offer-shutter-close \{[\s\S]*?13% \{/,
-    "the obsolete 13% close keyframe must not remain",
+    /@keyframes offer-shutter-close \{[\s\S]*?27% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
+    "the shorter black hold must release at 27%",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*35% \{[\s\S]*?opacity:\s*0;/,
+    /@keyframes offer-shutter-close \{[\s\S]*?48%,\s*100% \{[\s\S]*?transform:\s*scaleY\(0\);/,
+    "the shutters must open onto the same final offer scene",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-flash-white \{[\s\S]*?0%,\s*27% \{[\s\S]*?opacity:\s*0;/,
     "the white flash must wait until after the black hold",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?37% \{[\s\S]*?opacity:\s*0\.97;/,
-    "ignition must be a near-white flash",
+    /@keyframes offer-flash-white \{[\s\S]*?29% \{[\s\S]*?opacity:\s*1;/,
+    "ignition must open through a white flash",
   );
   assert.match(
     css,
-    /@keyframes offer-burst-expand \{[\s\S]*?0%,\s*35% \{[\s\S]*?opacity:\s*0;/,
-    "the chromatic burst must stay dark through the black hold",
-  );
-  const burstRule = css.match(/\.offer-burst \{([^}]+)\}/)?.[1] ?? "";
-  const burstExpandStart = css.indexOf("@keyframes offer-burst-expand {");
-  const burstCoreStart = css.indexOf("@keyframes offer-burst-core {");
-  assert.ok(burstExpandStart >= 0 && burstCoreStart > burstExpandStart);
-  const burstExpand = css.slice(burstExpandStart, burstCoreStart);
-
-  assert.match(
-    burstRule,
-    /clip-path:\s*circle\(/,
-    "the burst layer must open through a circular aperture",
-  );
-  assert.doesNotMatch(
-    burstRule,
-    /transform:\s*scale\(/,
-    "the rest-state burst must not start as a scaled rectangle",
+    /@keyframes offer-ray-erupt \{[\s\S]*?0%,\s*27% \{[\s\S]*?opacity:\s*0;[\s\S]*?clip-path:\s*circle\(0 at 50% 38%\);/,
+    "the final-scene rays must ignite from the light source after the black hold",
   );
   assert.match(
-    burstExpand,
-    /clip-path:\s*circle\(/,
-    "ignition must grow as a circle, not a scaled box",
+    css,
+    /@keyframes offer-ray-erupt \{[\s\S]*?100% \{[\s\S]*?opacity:\s*0\.74;[\s\S]*?circle\(160vmax at 50% 38%\);/,
+    "the explosion must finish at the exact opacity and extent of the final rays",
   );
-  assert.doesNotMatch(
-    burstExpand,
-    /transform:\s*scale\(/,
-    "do not scale the rectangular burst layer; its box becomes a silhouette",
+  assert.match(
+    css,
+    /\.offer-ray \{\s*background:\s*repeating-conic-gradient\([\s\S]*?9deg 13deg[\s\S]*?28deg 32deg[\s\S]*?47deg 51deg/,
+    "initial and settled rays must be broad, softly edged red, gold, and green beams",
   );
   assert.doesNotMatch(
     css,
-    /\.offer-burst::before/,
-    "the initial burst must stay a clean bloom with no thin ray layer",
+    /12deg 13deg|24deg 25deg|36deg 37deg/,
+    "the old one-degree colored spokes must not return",
   );
   assert.match(css, /\.offer-flash \{[\s\S]*?background:\s*#fff;/);
-  assert.match(css, /\.offer-burst::after \{/);
+  assert.match(css, /\.offer-field::after \{[\s\S]*?radial-gradient\(/);
+  assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*1;/);
   assert.match(
     css,
-    /\.offer-ray \{\s*background:\s*repeating-conic-gradient\(/,
-    "the settled offer field should retain its ambient afterglow rays",
-  );
-  assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*0;/);
-  assert.match(
-    css,
-    /html\[data-offer-climax="settled"\] \.offer-field,[\s\S]*?main:not\(\.force-motion\) \.offer-field \{[\s\S]*?opacity:\s*1;/,
+    /html\[data-offer-climax="playing"\] main\.force-motion \.offer-field::after \{[\s\S]*?offer-field-core 2\.8s linear forwards/,
+    "the flash core must happen inside the persistent final field",
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-field,[\s\S]*?\.offer-action,[\s\S]*?\.offer-terms,[\s\S]*?\.offer-carousel \{[\s\S]*?opacity:\s*0;/,
-    "field, action, terms, and carousel must stay hidden through playing",
+    /html\[data-offer-climax="playing"\] \.offer-content \{[\s\S]*?opacity:\s*0;/,
+    "coupon and carousel must stay hidden until the explosion finishes",
+  );
+  assert.doesNotMatch(
+    css,
+    /html\[data-offer-climax="playing"\] \.offer-field[^}]*opacity:\s*0;/,
+    "the background field must not be swapped or hidden during the explosion",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="settled"\] main\.force-motion \.offer-content \{[\s\S]*?offer-content-in 0\.72s ease forwards/,
+    "coupon and carousel must fade in together after the final scene resolves",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="settled"\] main\.force-motion \.offer-action \{[\s\S]*?offer-action-breathe 2\.8s 0\.72s ease-in-out infinite/,
   );
   assert.match(css, /\.offer-terms \{[\s\S]*?font-size:\s*1rem;/);
+  assert.match(
+    css,
+    /\.offer-content \{[\s\S]*?min-width:\s*0;/,
+    "the carousel must not widen the offer content past the mobile viewport",
+  );
+  assert.match(css, /\.offer-carousel \{[\s\S]*?max-width:\s*100%;/);
+  assert.match(
+    css,
+    /@media \(max-width: 760px\) \{[\s\S]*?\.offer-action \{[\s\S]*?font-size:\s*clamp\(1rem, 4\.7vw, 1\.15rem\);/,
+    "the complete coupon line must fit a representative mobile viewport",
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 760px\) \{[\s\S]*?\.offer-terms \{[\s\S]*?white-space:\s*nowrap;/,
+  );
   assert.match(css, /\.offer-track \{[\s\S]*?scrollbar-width:\s*none;/);
   assert.match(css, /\.offer-track::-webkit-scrollbar \{[\s\S]*?display:\s*none;/);
   assert.match(css, /\.offer-track \{[\s\S]*?touch-action:\s*pan-x pan-y;/);
@@ -576,6 +637,13 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "public/media/menu/garlic-chicken.webp",
     "public/media/menu/hamburger-steak.webp",
     "public/media/menu/loco-moco.webp",
+    "public/media/menu/teriyaki-beef.webp",
+    "public/media/menu/chicken-katsu.webp",
+    "public/media/menu/fried-chicken.webp",
+    "public/media/menu/teri-beef-fries.webp",
+    "public/media/menu/poke-bowl-spicy.webp",
+    "public/media/menu/poke-bowl-hawaiian.webp",
+    "public/media/menu/poke-nachos.webp",
   ]) {
     const url = new URL(file, projectRoot);
     await access(url);

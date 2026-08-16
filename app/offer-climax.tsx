@@ -13,9 +13,10 @@ desktop arrow movement, mobile horizontal movement and vertical exit, plus
 `node --test tests/rendered-html.test.mjs`.
 Retirement: when the owner removes or replaces the first-order promotion or
 replaces this interaction with another verified offer-to-menu passage.
-The motion climax is a 2.8s held-breath: slam to true black, hold empty for
-roughly 0.7s, then a near-white flash and soft brand-color bloom with no
-transition ray lines. Offer copy stays hidden until `settled`. Keep CSS
+The motion climax is a 2.8s held-breath: slam to true black, hold briefly,
+then open through a near-white flash as the final scene's broad brand-color
+rays erupt in place. The background never swaps; offer copy and dishes stay
+hidden until the rays finish and the state becomes `settled`. Keep CSS
 keyframe duration on the same 2.8s clock.
 */
 
@@ -112,7 +113,6 @@ export function OfferTransition() {
       <div className="offer-shutter offer-shutter-top" />
       <div className="offer-shutter offer-shutter-bottom" />
       <div className="offer-flash" />
-      <div className="offer-burst" />
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import { DesktopSmoothScroll } from "./desktop-smooth-scroll";
 import { OfferMenuTrack, OfferTransition } from "./offer-climax";
 
+import { ViewportVideoPlayback } from './viewport-video-playback';
+
 const orderUrl = "https://generationskitchenvegas.com/menu";
 const instagramUrl = "https://www.instagram.com/generationskitchenlv/";
 const directionsUrl =
@@ -33,6 +35,41 @@ const offerDishes = [
     name: "Loco Moco",
     src: "/media/menu/loco-moco.webp",
     href: "https://generationskitchenvegas.com/menu?item=loco-moco-mvzn",
+  },
+  {
+    name: "Teriyaki Beef",
+    src: "/media/menu/teriyaki-beef.webp",
+    href: "https://generationskitchenvegas.com/menu?item=teriyaki-beef-Nr2Q",
+  },
+  {
+    name: "Chicken Katsu",
+    src: "/media/menu/chicken-katsu.webp",
+    href: "https://generationskitchenvegas.com/menu?item=chicken-katsu-QqjI",
+  },
+  {
+    name: "Fried Chicken",
+    src: "/media/menu/fried-chicken.webp",
+    href: "https://generationskitchenvegas.com/menu?item=fried-chicken-u5Ss",
+  },
+  {
+    name: "Teri Beef Fries",
+    src: "/media/menu/teri-beef-fries.webp",
+    href: "https://generationskitchenvegas.com/menu?item=teri-beef-fries-sS8t",
+  },
+  {
+    name: "Spicy Poke Bowl",
+    src: "/media/menu/poke-bowl-spicy.webp",
+    href: "https://generationskitchenvegas.com/menu?item=poke-bowl-spicy-v2TB",
+  },
+  {
+    name: "Hawaiian Poke Bowl",
+    src: "/media/menu/poke-bowl-hawaiian.webp",
+    href: "https://generationskitchenvegas.com/menu?item=poke-bowl-hawaiian-xDrN",
+  },
+  {
+    name: "Spicy Poke Nachos",
+    src: "/media/menu/poke-nachos.webp",
+    href: "https://generationskitchenvegas.com/menu?item=poke-nachos-spicy-hGMI",
   },
 ];
 
@@ -69,11 +106,11 @@ function FoodPassage({
       <div className="passage-media" aria-hidden="true">
         <video
           className="passage-video"
-          autoPlay
+          data-managed-video
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           poster={`/media/${mediaName}-desktop.jpg?v=nativecrop1`}
         >
           <source
@@ -110,6 +147,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <main className={motion !== "reduced" ? "force-motion" : undefined}>
       <DesktopSmoothScroll />
+      <ViewportVideoPlayback />
 
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Generations Kitchen home">
@@ -169,11 +207,12 @@ export default async function Home({ searchParams }: HomeProps) {
           */}
           <video
             className="opening-video"
-            autoPlay
+            data-managed-video
+            autoPlay={motion !== "reduced"}
             muted
             loop
             playsInline
-            preload="auto"
+            preload={motion === "reduced" ? "none" : "auto"}
             poster="/media/max-holloway-opening-poster.jpg?v=brandfree3"
           >
             <source
@@ -273,30 +312,32 @@ export default async function Home({ searchParams }: HomeProps) {
             First-order offer
           </h2>
 
-          <a
-            className="offer-action"
-            href={orderUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            $10 OFF YOUR FIRST ORDER
-          </a>
-          <p className="offer-terms">USE CODE FIRST10 · $30 MINIMUM</p>
+          <div className="offer-content">
+            <a
+              className="offer-action"
+              href={orderUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              $10 OFF YOUR FIRST ORDER
+            </a>
+            <p className="offer-terms">USE CODE FIRST10 · $30 MINIMUM</p>
 
-          <OfferMenuTrack>
-            {offerDishes.map((dish) => (
-              <a
-                key={dish.href}
-                className="offer-card"
-                href={dish.href}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <img src={dish.src} alt={dish.name} />
-                <span>{dish.name}</span>
-              </a>
-            ))}
-          </OfferMenuTrack>
+            <OfferMenuTrack>
+              {offerDishes.map((dish) => (
+                <a
+                  key={dish.href}
+                  className="offer-card"
+                  href={dish.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <img src={dish.src} alt={dish.name} />
+                  <span>{dish.name}</span>
+                </a>
+              ))}
+            </OfferMenuTrack>
+          </div>
         </div>
       </section>
 

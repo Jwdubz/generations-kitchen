@@ -900,49 +900,12 @@ main:not(.force-motion) .offer-transition {
   opacity: 0;
 }
 
-.offer-burst {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, #fff 0 0.9%, rgba(255, 250, 240, 0.94) 2.2%, transparent 7%),
-    radial-gradient(circle at 50% 50%, rgba(242, 173, 36, 0.9) 0 12%, transparent 36%),
-    radial-gradient(circle at 40% 46%, rgba(179, 24, 31, 0.7) 0 14%, transparent 38%),
-    radial-gradient(circle at 61% 55%, rgba(11, 107, 58, 0.66) 0 14%, transparent 40%),
-    radial-gradient(circle at 57% 38%, rgba(242, 173, 36, 0.4) 0 10%, transparent 28%);
-  opacity: 0;
-  -webkit-clip-path: circle(0% at 50% 50%);
-  clip-path: circle(0% at 50% 50%);
-}
-
-.offer-burst::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-}
-
-.offer-burst::after {
-  background: radial-gradient(
-    circle at 50% 50%,
-    #fff 0 1.1%,
-    rgba(255, 255, 255, 0.96) 2.2%,
-    transparent 6.5%
-  );
-}
-
 html[data-offer-climax="playing"] .offer-shutter {
   animation: offer-shutter-close 2.8s linear forwards;
 }
 
 html[data-offer-climax="playing"] .offer-flash {
   animation: offer-flash-white 2.8s linear forwards;
-}
-
-html[data-offer-climax="playing"] .offer-burst {
-  animation: offer-burst-expand 2.8s linear forwards;
-}
-
-html[data-offer-climax="playing"] .offer-burst::after {
-  animation: offer-burst-core 2.8s linear forwards;
 }
 
 @keyframes offer-shutter-close {
@@ -958,104 +921,42 @@ html[data-offer-climax="playing"] .offer-burst::after {
     transform: scaleY(1);
   }
 
-  35% {
+  27% {
     transform: scaleY(1);
     opacity: 1;
   }
 
-  88% {
+  31% {
     transform: scaleY(1);
     opacity: 1;
   }
 
+  48%,
   100% {
-    transform: scaleY(1);
-    opacity: 0;
+    transform: scaleY(0);
+    opacity: 1;
   }
 }
 
 @keyframes offer-flash-white {
   0%,
-  35% {
+  27% {
     opacity: 0;
   }
 
-  37% {
-    opacity: 0.97;
-  }
-
-  42% {
-    opacity: 0.97;
-  }
-
-  72% {
-    opacity: 0.22;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes offer-burst-expand {
-  0%,
-  35% {
-    opacity: 0;
-    -webkit-clip-path: circle(0% at 50% 50%);
-    clip-path: circle(0% at 50% 50%);
-  }
-
-  37% {
-    opacity: 1;
-    -webkit-clip-path: circle(1.35vmax at 50% 50%);
-    clip-path: circle(1.35vmax at 50% 50%);
-  }
-
-  42% {
-    opacity: 1;
-    -webkit-clip-path: circle(14vmax at 50% 50%);
-    clip-path: circle(14vmax at 50% 50%);
-  }
-
-  49% {
-    opacity: 1;
-    -webkit-clip-path: circle(52vmax at 50% 50%);
-    clip-path: circle(52vmax at 50% 50%);
-  }
-
-  62% {
-    opacity: 1;
-    -webkit-clip-path: circle(88vmax at 50% 50%);
-    clip-path: circle(88vmax at 50% 50%);
-  }
-
-  86% {
-    opacity: 0.58;
-    -webkit-clip-path: circle(118vmax at 50% 50%);
-    clip-path: circle(118vmax at 50% 50%);
-  }
-
-  100% {
-    opacity: 0;
-    -webkit-clip-path: circle(140vmax at 50% 50%);
-    clip-path: circle(140vmax at 50% 50%);
-  }
-}
-
-@keyframes offer-burst-core {
-  0%,
-  35% {
-    opacity: 0;
-  }
-
-  37% {
+  29% {
     opacity: 1;
   }
 
-  62% {
-    opacity: 0.94;
+  36% {
+    opacity: 0.96;
   }
 
+  54% {
+    opacity: 0.18;
+  }
+
+  72%,
   100% {
     opacity: 0;
   }
@@ -1074,32 +975,56 @@ html[data-offer-climax="playing"] .offer-burst::after {
 
 .offer-field {
   z-index: 0;
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 38%, rgba(255, 250, 240, 0.22) 0 1.1rem, transparent 2.4rem),
     radial-gradient(circle at 50% 38%, rgba(242, 173, 36, 0.38) 0 14%, transparent 34%),
     radial-gradient(circle at 36% 46%, rgba(179, 24, 31, 0.32) 0 18%, transparent 42%),
     radial-gradient(circle at 64% 46%, rgba(11, 107, 58, 0.28) 0 18%, transparent 42%),
     #000;
+  opacity: 1;
+}
+
+.offer-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 38%,
+    #fff 0 0.65rem,
+    rgba(255, 250, 240, 0.96) 1.25rem,
+    rgba(242, 173, 36, 0.42) 3.8rem,
+    transparent 10rem
+  );
   opacity: 0;
 }
 
 .offer-ray {
   background: repeating-conic-gradient(
     from 90deg at 50% 38%,
-    transparent 0 11deg,
-    rgba(242, 173, 36, 0.12) 12deg 13deg,
-    transparent 14deg 23deg,
-    rgba(179, 24, 31, 0.1) 24deg 25deg,
-    transparent 26deg 35deg,
-    rgba(11, 107, 58, 0.1) 36deg 37deg,
-    transparent 38deg 47deg
+    transparent 0 4deg,
+    rgba(242, 173, 36, 0) 4deg,
+    rgba(242, 173, 36, 0.18) 9deg 13deg,
+    rgba(242, 173, 36, 0) 18deg,
+    transparent 18deg 23deg,
+    rgba(179, 24, 31, 0) 23deg,
+    rgba(179, 24, 31, 0.15) 28deg 32deg,
+    rgba(179, 24, 31, 0) 37deg,
+    transparent 37deg 42deg,
+    rgba(11, 107, 58, 0) 42deg,
+    rgba(11, 107, 58, 0.15) 47deg 51deg,
+    rgba(11, 107, 58, 0) 56deg,
+    transparent 56deg 60deg
   );
-  opacity: 0.85;
+  opacity: 0.74;
 }
 
-html[data-offer-climax="settled"] .offer-field,
-main:not(.force-motion) .offer-field {
-  opacity: 1;
+html[data-offer-climax="playing"] main.force-motion .offer-ray {
+  animation: offer-ray-erupt 2.8s linear forwards;
+}
+
+html[data-offer-climax="playing"] main.force-motion .offer-field::after {
+  animation: offer-field-core 2.8s linear forwards;
 }
 
 html[data-offer-climax="settled"] main.force-motion .offer-field {
@@ -1117,6 +1042,68 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   }
 }
 
+@keyframes offer-ray-erupt {
+  0%,
+  27% {
+    opacity: 0;
+    -webkit-clip-path: circle(0 at 50% 38%);
+    clip-path: circle(0 at 50% 38%);
+  }
+
+  29% {
+    opacity: 1;
+    -webkit-clip-path: circle(0.8vmax at 50% 38%);
+    clip-path: circle(0.8vmax at 50% 38%);
+  }
+
+  36% {
+    opacity: 1;
+    -webkit-clip-path: circle(15vmax at 50% 38%);
+    clip-path: circle(15vmax at 50% 38%);
+  }
+
+  55% {
+    opacity: 0.98;
+    -webkit-clip-path: circle(78vmax at 50% 38%);
+    clip-path: circle(78vmax at 50% 38%);
+  }
+
+  76% {
+    opacity: 0.86;
+    -webkit-clip-path: circle(132vmax at 50% 38%);
+    clip-path: circle(132vmax at 50% 38%);
+  }
+
+  100% {
+    opacity: 0.74;
+    -webkit-clip-path: circle(160vmax at 50% 38%);
+    clip-path: circle(160vmax at 50% 38%);
+  }
+}
+
+@keyframes offer-field-core {
+  0%,
+  27% {
+    opacity: 0;
+  }
+
+  29% {
+    opacity: 1;
+  }
+
+  48% {
+    opacity: 0.84;
+  }
+
+  72% {
+    opacity: 0.18;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 .offer-stage {
   position: relative;
   z-index: 1;
@@ -1127,6 +1114,17 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   justify-content: center;
   gap: 0.85rem;
   padding: clamp(5.5rem, 10vh, 7.5rem) clamp(1.25rem, 4.2vw, 4.5rem) 6.4rem;
+}
+
+.offer-content {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  opacity: 0;
+  transform: translate3d(0, 1.1rem, 0);
 }
 
 .offer-action {
@@ -1150,8 +1148,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   line-height: 1;
   text-align: center;
   text-transform: uppercase;
-  opacity: 0;
-  transform: translate3d(0, 0, 0);
+  transform: translate3d(0, -1.25rem, 0);
 }
 
 .offer-terms {
@@ -1164,13 +1161,12 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   line-height: 1.2;
   text-align: center;
   text-transform: uppercase;
-  opacity: 0;
 }
 
 .offer-carousel {
   width: min(100%, 72rem);
-  opacity: 0;
-  transform: translate3d(0, 1.1rem, 0);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .offer-carousel-controls {
@@ -1200,6 +1196,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
 }
 
 .offer-track {
+  min-width: 0;
   display: flex;
   gap: 0.85rem;
   overflow-x: auto;
@@ -1248,73 +1245,26 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   color: var(--gold);
 }
 
-html[data-offer-climax="settled"] .offer-action,
-html[data-offer-climax="settled"] .offer-terms,
-main:not(.force-motion) .offer-action,
-main:not(.force-motion) .offer-terms {
-  opacity: 1;
-}
-
-html[data-offer-climax="settled"] .offer-action,
-main:not(.force-motion) .offer-action {
-  transform: translate3d(0, -1.65rem, 0);
-}
-
-html[data-offer-climax="settled"] .offer-carousel,
-main:not(.force-motion) .offer-carousel {
+html[data-offer-climax="settled"] .offer-content,
+main:not(.force-motion) .offer-content {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
 
+html[data-offer-climax="settled"] main.force-motion .offer-content {
+  animation: offer-content-in 0.72s ease forwards;
+}
+
 html[data-offer-climax="settled"] main.force-motion .offer-action {
-  animation:
-    offer-arrive 0.7s ease forwards,
-    offer-action-breathe 2.8s 0.7s ease-in-out infinite;
+  animation: offer-action-breathe 2.8s 0.72s ease-in-out infinite;
 }
 
-html[data-offer-climax="settled"] main.force-motion .offer-carousel {
-  animation: offer-carousel-in 0.55s 0.28s ease forwards;
-}
-
-html[data-offer-climax="settled"] main.force-motion .offer-terms {
-  animation: offer-terms-in 0.45s 0.18s ease forwards;
-}
-
-html[data-offer-climax="playing"] .offer-field,
-html[data-offer-climax="playing"] .offer-action,
-html[data-offer-climax="playing"] .offer-terms,
-html[data-offer-climax="playing"] .offer-carousel {
+html[data-offer-climax="playing"] .offer-content {
   opacity: 0;
+  transform: translate3d(0, 1.1rem, 0);
 }
 
-@keyframes offer-arrive {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-  }
-
-  42% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translate3d(0, -1.65rem, 0);
-  }
-}
-
-@keyframes offer-terms-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes offer-carousel-in {
+@keyframes offer-content-in {
   from {
     opacity: 0;
     transform: translate3d(0, 1.1rem, 0);
@@ -1329,12 +1279,12 @@ html[data-offer-climax="playing"] .offer-carousel {
 @keyframes offer-action-breathe {
   0%,
   100% {
-    transform: translate3d(0, -1.65rem, 0) scale(1);
+    transform: translate3d(0, -1.25rem, 0) scale(1);
     box-shadow: 0 0.7rem 2rem rgba(0, 0, 0, 0.38);
   }
 
   50% {
-    transform: translate3d(0, -1.65rem, 0) scale(1.035);
+    transform: translate3d(0, -1.25rem, 0) scale(1.035);
     box-shadow: 0 0.95rem 2.4rem rgba(242, 173, 36, 0.28);
   }
 }
@@ -1368,13 +1318,21 @@ html[data-offer-climax="playing"] .offer-carousel {
     padding: 5.4rem 1.25rem 6.1rem;
   }
 
+  .offer-content {
+    align-items: stretch;
+  }
+
   .offer-action {
     width: 100%;
-    font-size: clamp(1.05rem, 6.4vw, 1.45rem);
+    padding-inline: 0.55rem;
+    font-size: clamp(1rem, 4.7vw, 1.15rem);
+    letter-spacing: -0.075em;
   }
 
   .offer-terms {
     font-size: 1rem;
+    letter-spacing: -0.055em;
+    white-space: nowrap;
   }
 
   .offer-card {
