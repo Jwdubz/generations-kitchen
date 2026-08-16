@@ -13,9 +13,10 @@ desktop arrow movement, mobile horizontal movement and vertical exit, plus
 `node --test tests/rendered-html.test.mjs`.
 Retirement: when the owner removes or replaces the first-order promotion or
 replaces this interaction with another verified offer-to-menu passage.
-The motion climax is a 4.8s held-breath: slam to true black in ~350-400ms,
-hold an empty black world, ignite a white point into a full-frame blowout,
-then grow Generations color at several speeds into the persistent field.
+The motion climax is a 4.8s held-breath: hide the finished offer until
+shutoff, slam to true black in ~350-400ms, hold an empty black world,
+ignite a white point into a full-frame blowout, then grow graphic
+Generations color from the shared origin into the same persistent field.
 Chrome and beat-navigation stay locked until `settled`. Keep CSS, canvas,
 and the settle timer on the same 4.8s clock.
 Desktop Previous/Next advances a selected DOM index independently of the
@@ -37,6 +38,9 @@ import {
 
 const desktopQuery = "(min-width: 761px)";
 const climaxDurationMs = 4800;
+const mobileOfferEnterRatio = 0.08;
+const mobileOfferLeaveRatio = 0.04;
+const whitePeakEnd = 0.43;
 const climaxLockKeys = new Set([
   "ArrowDown",
   "ArrowUp",
@@ -91,26 +95,39 @@ function rgba(color: DetonationColor, alpha: number) {
 }
 
 function buildDetonationGeometry(compact: boolean) {
+  const colors = [GOLD, RED, GREEN] as const;
   return {
-    plumes: [
-      { angle: -0.32, speed: 1.18, width: 0.2, color: GOLD, delay: 0 },
-      { angle: 0.58, speed: 0.9, width: 0.17, color: RED, delay: 0.05 },
-      { angle: 2.12, speed: 0.74, width: 0.19, color: GREEN, delay: 0.09 },
-      { angle: 3.38, speed: 1.04, width: 0.15, color: GOLD, delay: 0.03 },
-      { angle: 4.55, speed: 0.68, width: 0.22, color: RED, delay: 0.11 },
-      { angle: 5.48, speed: 0.84, width: 0.16, color: GREEN, delay: 0.07 },
+    wedges: [
+      { angle: -0.32, speed: 1.16, width: 0.072, color: GOLD, delay: 0 },
+      { angle: 0.72, speed: 0.92, width: 0.06, color: RED, delay: 0.04 },
+      { angle: 2.18, speed: 0.78, width: 0.068, color: GREEN, delay: 0.07 },
+      { angle: 3.46, speed: 1.08, width: 0.055, color: GOLD, delay: 0.02 },
+      { angle: 4.62, speed: 0.7, width: 0.064, color: RED, delay: 0.09 },
+      { angle: 5.52, speed: 0.86, width: 0.058, color: GREEN, delay: 0.05 },
     ],
-    embers: Array.from({ length: compact ? 8 : 14 }, (_, index) => ({
-      angle: (index * 2.399 + 0.31) % (Math.PI * 2),
-      dist: 0.1 + (index % 5) * 0.06,
-      size: 1.1 + (index % 3) * 0.55,
-      speed: 0.16 + (index % 4) * 0.045,
-      color: index % 3 === 0 ? GOLD : index % 3 === 1 ? RED : GREEN,
+    trails: Array.from({ length: compact ? 9 : 20 }, (_, index) => ({
+      angle: (index * 2.399 + 0.19) % (Math.PI * 2),
+      color: colors[index % 3],
+      delay: (index % 7) * 0.016,
+      life: 0.2 + (index % 5) * 0.055,
+      length: 0.2 + (index % 4) * 0.07,
+      width: compact ? 1.7 + (index % 3) * 0.35 : 2.4 + (index % 3) * 0.65,
+      speed: 0.58 + (index % 4) * 0.11,
+    })),
+    embers: Array.from({ length: compact ? 8 : 16 }, (_, index) => ({
+      angle: (index * 2.399 + 0.91) % (Math.PI * 2),
+      dist: 0.12 + (index % 5) * 0.05,
+      size: compact ? 1.6 + (index % 3) * 0.45 : 2.8 + (index % 3) * 0.7,
+      speed: 0.18 + (index % 4) * 0.05,
+      color: colors[index % 3],
     })),
     glints: [
-      { angle: 0.38, delay: 0.07, life: 0.16 },
-      { angle: 2.18, delay: 0.13, life: 0.13 },
-      { angle: 4.08, delay: 0.19, life: 0.15 },
+      { angle: 0.38, delay: 0.04, life: 0.15 },
+      { angle: 1.46, delay: 0.1, life: 0.12 },
+      { angle: 2.18, delay: 0.08, life: 0.14 },
+      { angle: 3.72, delay: 0.16, life: 0.11 },
+      { angle: 4.08, delay: 0.12, life: 0.13 },
+      { angle: 5.34, delay: 0.19, life: 0.12 },
     ],
   };
 }
@@ -166,20 +183,22 @@ export function OfferTransition() {
       const height = canvas.clientHeight;
       const elapsed = now - startedAt;
       const progress = clamp01(elapsed / climaxDurationMs);
-      const burst = (progress - 0.36) / 0.64;
       context.clearRect(0, 0, width, height);
-      if (burst < 0) {
-        frame = window.requestAnimationFrame(drawDetonation);
+      if (progress < whitePeakEnd) {
+        if (elapsed < climaxDurationMs) {
+          frame = window.requestAnimationFrame(drawDetonation);
+        }
         return;
       }
 
       const originX = width * 0.5;
       const originY = height * 0.38;
       const reach = Math.hypot(width, height);
+      const release = (progress - whitePeakEnd) / (1 - whitePeakEnd);
 
-      const core = clamp01((burst - 0.02) / 0.18);
-      const coreFade = 1 - clamp01((burst - 0.22) / 0.55);
-      const coreRadius = (1 - (1 - core) * (1 - core)) * reach * 0.42;
+      const core = clamp01(release / 0.2);
+      const coreFade = 1 - clamp01((release - 0.18) / 0.62);
+      const coreRadius = (1 - (1 - core) * (1 - core)) * reach * 0.28;
       if (coreRadius > 1 && coreFade > 0) {
         const bloom = context.createRadialGradient(
           originX,
@@ -189,72 +208,100 @@ export function OfferTransition() {
           originY,
           coreRadius,
         );
-        bloom.addColorStop(0, `rgba(255, 255, 255, ${0.95 * coreFade})`);
-        bloom.addColorStop(0.18, rgba(GOLD, 0.55 * coreFade));
-        bloom.addColorStop(0.55, rgba(RED, 0.16 * coreFade));
+        bloom.addColorStop(0, `rgba(255, 255, 255, ${0.9 * coreFade})`);
+        bloom.addColorStop(0.16, rgba(GOLD, 0.42 * coreFade));
+        bloom.addColorStop(0.42, rgba(RED, 0.1 * coreFade));
         bloom.addColorStop(1, "rgba(0, 0, 0, 0)");
         context.fillStyle = bloom;
         context.fillRect(0, 0, width, height);
       }
 
-      for (const plume of geometry.plumes) {
-        const local = clamp01((burst - plume.delay) / 0.5) * plume.speed;
+      for (const wedge of geometry.wedges) {
+        const local = clamp01((release - wedge.delay) / 0.42) * wedge.speed;
         if (local <= 0) continue;
-        const travel = (1 - (1 - Math.min(1, local)) ** 2) * reach * 0.48;
-        const cx = originX + Math.cos(plume.angle) * travel * 0.55;
-        const cy = originY + Math.sin(plume.angle) * travel * 0.55;
-        const radius = Math.max(18, travel * plume.width * 1.8);
-        const fade = 1 - clamp01((burst - 0.28 - plume.delay) / 0.62);
-        if (fade <= 0) continue;
-        const wash = context.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        wash.addColorStop(0, rgba(plume.color, 0.42 * fade));
-        wash.addColorStop(0.45, rgba(plume.color, 0.16 * fade));
+        const travel = (1 - (1 - Math.min(1, local)) ** 2) * reach * 0.62;
+        const fade = 1 - clamp01((release - 0.22 - wedge.delay) / 0.7);
+        if (fade <= 0 || travel < 8) continue;
+        const halfWidth = Math.max(9, travel * wedge.width);
+        context.save();
+        context.translate(originX, originY);
+        context.rotate(wedge.angle);
+        const wash = context.createLinearGradient(0, 0, travel, 0);
+        wash.addColorStop(0, rgba(wedge.color, 0.82 * fade));
+        wash.addColorStop(0.38, rgba(wedge.color, 0.34 * fade));
         wash.addColorStop(1, "rgba(0, 0, 0, 0)");
         context.fillStyle = wash;
         context.beginPath();
-        context.arc(cx, cy, radius, 0, Math.PI * 2);
+        context.moveTo(0, 0);
+        context.lineTo(travel, -halfWidth);
+        context.lineTo(travel * 1.04, 0);
+        context.lineTo(travel, halfWidth);
+        context.closePath();
         context.fill();
+        context.restore();
       }
 
       context.save();
       context.translate(originX, originY);
-      for (const wave of [0, 0.08]) {
-        const local = clamp01((burst - wave) / 0.34);
+      for (const wave of [0, 0.07]) {
+        const local = clamp01((release - wave) / 0.3);
         if (local <= 0 || local >= 1) continue;
         context.beginPath();
-        context.strokeStyle = rgba(GOLD, (1 - local) * 0.28);
-        context.lineWidth = Math.max(1.2, (1 - local) * 7);
-        context.arc(0, 0, local * reach * 0.62, 0, Math.PI * 2);
+        context.strokeStyle = rgba(GOLD, (1 - local) * 0.42);
+        context.lineWidth = Math.max(1.4, (1 - local) * 6);
+        context.arc(0, 0, local * reach * 0.7, 0, Math.PI * 2);
+        context.stroke();
+      }
+
+      context.lineCap = "round";
+      for (const trail of geometry.trails) {
+        const local = (release - trail.delay) / trail.life;
+        if (local <= 0 || local >= 1) continue;
+        const head = Math.min(1, local * trail.speed);
+        const tail = Math.max(0, head - trail.length);
+        const fade = Math.sin(local * Math.PI);
+        context.strokeStyle = rgba(trail.color, 0.78 * fade);
+        context.lineWidth = trail.width;
+        context.beginPath();
+        context.moveTo(
+          Math.cos(trail.angle) * tail * reach,
+          Math.sin(trail.angle) * tail * reach,
+        );
+        context.lineTo(
+          Math.cos(trail.angle) * head * reach,
+          Math.sin(trail.angle) * head * reach,
+        );
         context.stroke();
       }
 
       for (const glint of geometry.glints) {
-        const local = (burst - glint.delay) / glint.life;
+        const local = (release - glint.delay) / glint.life;
         if (local <= 0 || local >= 1) continue;
         const spark = Math.sin(local * Math.PI);
-        const arm = 7 + spark * 18;
+        const arm = 10 + spark * 26;
         context.save();
         context.rotate(glint.angle);
-        context.strokeStyle = `rgba(255, 255, 255, ${0.85 * spark})`;
-        context.lineWidth = 1.2;
+        context.strokeStyle = `rgba(255, 255, 255, ${0.88 * spark})`;
+        context.lineWidth = 1.6;
         context.beginPath();
         context.moveTo(-arm, 0);
         context.lineTo(arm, 0);
-        context.moveTo(0, -arm * 0.45);
-        context.lineTo(0, arm * 0.45);
+        context.moveTo(0, -arm * 0.42);
+        context.lineTo(0, arm * 0.42);
         context.stroke();
         context.restore();
       }
       context.restore();
 
       for (const ember of geometry.embers) {
-        const local = clamp01((burst - 0.08) / 0.9);
+        const local = clamp01((release - 0.04) / 0.86);
         if (local <= 0) continue;
         const drift = ember.dist + local * ember.speed;
         const x = originX + Math.cos(ember.angle) * drift * reach;
         const y = originY + Math.sin(ember.angle) * drift * reach;
-        const fade = 1 - clamp01((burst - 0.45) / 0.55);
-        context.fillStyle = rgba(ember.color, 0.55 * fade);
+        const fade = 1 - clamp01((release - 0.38) / 0.58);
+        if (fade <= 0) continue;
+        context.fillStyle = rgba(ember.color, 0.7 * fade);
         context.beginPath();
         context.arc(x, y, ember.size, 0, Math.PI * 2);
         context.fill();
@@ -320,27 +367,41 @@ export function OfferTransition() {
 
     const intersection = new IntersectionObserver(
       (entries) => {
-        const entry = entries[0];
+        const entry = entries[entries.length - 1];
         if (!entry) return;
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.28) {
-          enterOffer();
-        } else if (!entry.isIntersecting || entry.intersectionRatio < 0.12) {
-          if (!desktop.matches || html.dataset.activeScrollBeat !== "offer") {
+        if (desktop.matches) {
+          if (
+            (!entry.isIntersecting || entry.intersectionRatio < 0.12) &&
+            html.dataset.activeScrollBeat !== "offer"
+          ) {
             leaveOffer();
           }
+          return;
+        }
+        if (
+          entry.isIntersecting &&
+          entry.intersectionRatio >= mobileOfferEnterRatio
+        ) {
+          enterOffer();
+        } else if (
+          !entry.isIntersecting ||
+          entry.intersectionRatio < mobileOfferLeaveRatio
+        ) {
+          leaveOffer();
         }
       },
       {
         root: desktop.matches ? null : document.querySelector("main"),
-        threshold: [0.12, 0.28, 0.55],
+        threshold: [0.04, 0.08, 0.2, 0.4],
       },
     );
     intersection.observe(offer);
 
     const onResize = () => {
-      if (startedAt) sizeCanvas();
+      sizeCanvas();
     };
     window.addEventListener("resize", onResize);
+    sizeCanvas();
 
     if (prefersExplicitReducedMotion()) setClimax("settled");
     else setClimax("idle");
@@ -361,9 +422,6 @@ export function OfferTransition() {
     <div className="offer-transition" aria-hidden="true" style={{ pointerEvents: "none" }}>
       <div className="offer-shutter offer-shutter-top" />
       <div className="offer-shutter offer-shutter-bottom" />
-      <div className="offer-volume offer-volume-gold" />
-      <div className="offer-volume offer-volume-red" />
-      <div className="offer-volume offer-volume-green" />
       <canvas className="offer-detonation" ref={canvasRef} />
       <div className="offer-flash" />
     </div>

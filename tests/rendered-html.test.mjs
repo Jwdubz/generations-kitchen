@@ -527,23 +527,30 @@ test("exports the offer climax and first-party dish carousel", async () => {
     css,
     /html\[data-offer-climax="playing"\] \.offer-flash \{[\s\S]*?offer-flash-white 4\.8s linear forwards/,
   );
-  assert.match(
+  assert.doesNotMatch(
     css,
-    /html\[data-offer-climax="playing"\] \.offer-volume-gold \{[\s\S]*?offer-volume-gold 4\.8s linear forwards/,
-    "gold volume must run on the shared climax clock",
+    /offer-volume/,
+    "blurred RGB volume layers must not remain",
   );
-  assert.match(
-    css,
-    /html\[data-offer-climax="playing"\] \.offer-volume-red \{[\s\S]*?offer-volume-red 4\.8s linear forwards/,
-  );
-  assert.match(
-    css,
-    /html\[data-offer-climax="playing"\] \.offer-volume-green \{[\s\S]*?offer-volume-green 4\.8s linear forwards/,
+  assert.doesNotMatch(
+    climaxSource,
+    /offer-volume/,
+    "the transition stack must not mount volume layers",
   );
   assert.match(html, /class="offer-detonation"/);
   assert.match(climaxSource, /buildDetonationGeometry\(/);
+  assert.match(climaxSource, /trails:/);
+  assert.match(climaxSource, /wedges:/);
+  assert.match(climaxSource, /whitePeakEnd = 0\.43/);
+  assert.match(climaxSource, /progress < whitePeakEnd/);
   assert.match(climaxSource, /requestAnimationFrame\(drawDetonation\)/);
   assert.match(climaxSource, /cancelAnimationFrame/);
+  assert.match(climaxSource, /mobileOfferEnterRatio = 0\.08/);
+  assert.doesNotMatch(
+    climaxSource,
+    /intersectionRatio >= 0\.28/,
+    "the late mobile 0.28 entry threshold must not remain",
+  );
   assert.doesNotMatch(
     css,
     /offer-shutter-close 4\.4s|offer-flash-white 4\.4s|offer-ray-erupt 4\.4s|offer-field-core 4\.4s/,
@@ -571,10 +578,20 @@ test("exports the offer climax and first-party dish carousel", async () => {
     /@keyframes offer-shutter-close \{[\s\S]*?36% \{[\s\S]*?transform:\s*scaleY\(1\);[\s\S]*?opacity:\s*1;/,
     "true black must stay held through 36% of the 4.8s climax",
   );
+  assert.match(
+    css,
+    /@keyframes offer-shutter-close \{[\s\S]*?47% \{[\s\S]*?opacity:\s*0;/,
+    "shutters must finish fading while the flash is still near-white",
+  );
   assert.doesNotMatch(
     css,
     /@keyframes offer-shutter-close \{[^@]*27% \{/,
     "the obsolete 27% short black hold must not remain",
+  );
+  assert.doesNotMatch(
+    css,
+    /@keyframes offer-shutter-close \{[^@]*58%,\s*100% \{[\s\S]*?opacity:\s*1;/,
+    "a visible shutter edge must not remain after the white peak",
   );
   assert.match(
     css,
@@ -583,27 +600,65 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?38% \{[\s\S]*?opacity:\s*1;/,
+    /@keyframes offer-flash-white \{[\s\S]*?36\.8% \{[\s\S]*?radial-gradient\([\s\S]*?50%\s*38%/,
+    "a tiny ignition point may appear only immediately before the white strike",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-flash-white \{[\s\S]*?38% \{[\s\S]*?opacity:\s*1;[\s\S]*?background:\s*#fff;/,
     "ignition must open through a full-frame white blowout",
   );
   assert.match(
     css,
-    /@keyframes offer-flash-white \{[\s\S]*?43% \{[\s\S]*?opacity:\s*0\.97;/,
+    /@keyframes offer-flash-white \{[\s\S]*?43% \{[\s\S]*?opacity:\s*0\.97;[\s\S]*?background:\s*#fff;/,
     "the blowout must remain near-white long enough to be perceived",
   );
   assert.match(
     css,
-    /@keyframes offer-field-grow \{[\s\S]*?0%,\s*36% \{[\s\S]*?opacity:\s*0;/,
+    /@keyframes offer-flash-white \{[\s\S]*?47% \{[\s\S]*?radial-gradient\([\s\S]*?50%\s*38%/,
+    "flash decay must become radial around the shared origin",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-field-grow \{[\s\S]*?0%,\s*36% \{[\s\S]*?opacity:\s*0;[\s\S]*?clip-path:\s*circle\(0% at 50% 38%\)/,
     "the persistent field must stay dark until the rupture, then grow under the flash",
+  );
+  assert.match(
+    css,
+    /@keyframes offer-ray-afterlife \{[\s\S]*?transform:\s*scale\(0\.72\);[\s\S]*?clip-path:\s*circle\(0% at 50% 38%\)/,
+    "rays must be born from the shared origin instead of fading in at full length",
   );
   assert.match(
     css,
     /@keyframes offer-ray-afterlife \{[\s\S]*?100% \{[\s\S]*?opacity:\s*0\.74;/,
     "settled rays must arrive as afterlife, not as the explosion itself",
   );
+  assert.match(css, /\.offer-shutter \{[\s\S]*?z-index:\s*2;/);
+  assert.match(css, /\.offer-detonation \{[\s\S]*?z-index:\s*1;/);
+  assert.match(css, /\.offer-flash \{[\s\S]*?z-index:\s*3;/);
+  assert.doesNotMatch(
+    css,
+    /filter:\s*blur\(/,
+    "broad CSS blur volumes must stay absent from the climax",
+  );
   assert.match(
     css,
-    /\.offer-ray \{\s*background:\s*repeating-conic-gradient\([\s\S]*?9deg 13deg[\s\S]*?28deg 32deg[\s\S]*?47deg 51deg/,
+    /html\[data-offer-climax="idle"\] main\.force-motion \.offer-field,[\s\S]*?\.offer-ray \{[\s\S]*?opacity:\s*0;/,
+    "idle full-motion must not leak the settled field or rays",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="idle"\] main\.force-motion \.offer-content,[\s\S]*?html\[data-offer-climax="playing"\] \.offer-content \{[\s\S]*?opacity:\s*0;/,
+    "idle full-motion must not leak coupon or carousel",
+  );
+  assert.match(
+    css,
+    /\.offer-content \{[\s\S]*?opacity:\s*1;/,
+    "attribute-absent static markup must show the finished offer",
+  );
+  assert.match(
+    css,
+    /\.offer-ray \{[\s\S]*?background:\s*repeating-conic-gradient\([\s\S]*?9deg 13deg[\s\S]*?28deg 32deg[\s\S]*?47deg 51deg/,
     "initial and settled rays must be broad, softly edged red, gold, and green beams",
   );
   assert.doesNotMatch(
@@ -626,7 +681,7 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /html\[data-offer-climax="playing"\] \.site-header,[\s\S]*?\.floating-order \{[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/,
+    /html\[data-offer-climax="playing"\] main\.force-motion \.site-header,[\s\S]*?\.floating-order \{[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/,
     "logo, nav, and floating order must leave the empty black world",
   );
   assert.match(
@@ -755,6 +810,306 @@ test("exports the offer climax and first-party dish carousel", async () => {
     const info = await stat(url);
     assert.ok(info.size > 1_000, `${file} should be a real menu photograph`);
   }
+});
+
+function stripCssComments(css) {
+  return css.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+function readCssBlock(css, openIndex) {
+  let depth = 0;
+  for (let index = openIndex; index < css.length; index += 1) {
+    if (css[index] === "{") depth += 1;
+    else if (css[index] === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        return { block: css.slice(openIndex + 1, index), end: index + 1 };
+      }
+    }
+  }
+  return { block: "", end: css.length };
+}
+
+function parseCssRules(css) {
+  const source = stripCssComments(css);
+  const rules = [];
+  let index = 0;
+  while (index < source.length) {
+    const start = source.indexOf("{", index);
+    if (start === -1) break;
+    const prelude = source.slice(index, start).trim();
+    const { block, end } = readCssBlock(source, start);
+    if (prelude.startsWith("@keyframes")) {
+      rules.push({
+        type: "keyframes",
+        name: prelude.replace(/^@keyframes\s+/, "").trim(),
+        block,
+      });
+    } else if (!prelude.startsWith("@")) {
+      rules.push({ type: "style", prelude, block });
+    }
+    index = end;
+  }
+  return rules;
+}
+
+function parseDeclarations(block) {
+  const declarations = {};
+  for (const part of block.split(";")) {
+    const separator = part.indexOf(":");
+    if (separator === -1) continue;
+    const property = part.slice(0, separator).trim();
+    const value = part.slice(separator + 1).trim();
+    if (property) declarations[property] = value;
+  }
+  return declarations;
+}
+
+function parseKeyframes(block) {
+  const frames = [];
+  let index = 0;
+  while (index < block.length) {
+    const start = block.indexOf("{", index);
+    if (start === -1) break;
+    const keys = block
+      .slice(index, start)
+      .split(",")
+      .map((key) => key.trim())
+      .filter(Boolean);
+    const { block: body, end } = readCssBlock(block, start);
+    const declarations = parseDeclarations(body);
+    for (const key of keys) {
+      const percent =
+        key === "from" ? 0 : key === "to" || key === "100%" ? 100 : Number.parseFloat(key);
+      if (Number.isFinite(percent)) frames.push({ percent, declarations });
+    }
+    index = end;
+  }
+  return frames.sort((left, right) => left.percent - right.percent);
+}
+
+function specificity(selector) {
+  return [
+    (selector.match(/#/g) ?? []).length,
+    (selector.match(/\.|\[|:(?!:)/g) ?? []).length,
+    (selector.match(/(^|[\s>+~])[a-zA-Z]/g) ?? []).length,
+  ];
+}
+
+function compareSpecificity(left, right) {
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] - right[index];
+  }
+  return 0;
+}
+
+function selectorMatches(selector, env) {
+  const normalized = selector.replace(/\s+/g, " ").trim();
+  const classToken = `.${env.className}`;
+  if (!normalized.includes(classToken)) return false;
+  const last = normalized.split(" ").at(-1) ?? "";
+  if (!last.includes(classToken)) return false;
+  if (last.includes(`${classToken}:`) || last.includes(`${classToken}::`)) return false;
+
+  const climax = normalized.match(/data-offer-climax=["']?(\w+)/)?.[1];
+  if (normalized.includes("data-offer-climax") && climax !== env.climax) {
+    return false;
+  }
+  if (normalized.includes("main.force-motion") && !env.forceMotion) return false;
+  if (normalized.includes("main:not(.force-motion)") && env.forceMotion) {
+    return false;
+  }
+  return true;
+}
+
+const animationKeywords = new Set([
+  "none",
+  "linear",
+  "ease",
+  "ease-in",
+  "ease-out",
+  "ease-in-out",
+  "forwards",
+  "backwards",
+  "both",
+  "infinite",
+  "alternate",
+  "normal",
+  "reverse",
+  "paused",
+  "running",
+]);
+
+function animationName(value) {
+  return (
+    value
+      .split(/[\s,]+/)
+      .filter(Boolean)
+      .find(
+        (token) =>
+          !animationKeywords.has(token) &&
+          !/^[\d.]/.test(token) &&
+          !token.includes("(") &&
+          /^[a-zA-Z_-]/.test(token),
+      ) ?? null
+  );
+}
+
+function computedLayerOpacity(css, env) {
+  const rules = parseCssRules(css);
+  const keyframes = new Map(
+    rules
+      .filter((rule) => rule.type === "keyframes")
+      .map((rule) => [rule.name, parseKeyframes(rule.block)]),
+  );
+
+  let winner = {
+    order: -1,
+    specificity: [0, 0, 0],
+    opacity: env.className === "offer-ray" ? "0.74" : "1",
+    animation: null,
+    fill: "",
+  };
+
+  rules.forEach((rule, order) => {
+    if (rule.type !== "style") return;
+    for (const selector of rule.prelude.split(",")) {
+      if (!selectorMatches(selector, env)) continue;
+      const declarations = parseDeclarations(rule.block);
+      const spec = specificity(selector);
+      if (
+        compareSpecificity(spec, winner.specificity) < 0 ||
+        (compareSpecificity(spec, winner.specificity) === 0 && order < winner.order)
+      ) {
+        continue;
+      }
+      winner = {
+        order,
+        specificity: spec,
+        opacity: declarations.opacity ?? winner.opacity,
+        animation: declarations.animation
+          ? animationName(declarations.animation)
+          : winner.animation,
+        fill: declarations.animation ?? winner.fill,
+      };
+    }
+  });
+
+  if (winner.animation && keyframes.has(winner.animation)) {
+    const frames = keyframes.get(winner.animation);
+    const useEnd =
+      env.phase === "end" && /\b(?:forwards|both)\b/.test(winner.fill);
+    const frame = useEnd
+      ? [...frames].reverse().find((item) => item.declarations.opacity)
+      : frames.find((item) => item.declarations.opacity);
+    if (frame?.declarations.opacity) return frame.declarations.opacity;
+  }
+
+  return winner.opacity;
+}
+
+function parseOpacity(value) {
+  return Number.parseFloat(value);
+}
+
+async function readBuiltStylesheet() {
+  const html = await readFile(
+    new URL("../dist/client/index.html", import.meta.url),
+    "utf8",
+  );
+  const href = html.match(/href="(\/assets\/index-[^"]+\.css)"/)?.[1];
+  if (!href) return null;
+  return readFile(new URL(`../dist/client${href}`, import.meta.url), "utf8");
+}
+
+function assertOfferVisibilityTable(css, label) {
+  const cases = [
+    ["absent", true, "start", { field: 1, ray: 0.74, content: 1, header: 1 }],
+    ["idle", true, "start", { field: 0, ray: 0, content: 0, header: 1 }],
+    ["playing", true, "start", { field: 0, ray: 0, content: 0, header: 0 }],
+    ["settled", true, "end", { field: 1, ray: 0.74, content: 1, header: 1 }],
+    ["absent", false, "start", { field: 1, ray: 0.74, content: 1, header: 1 }],
+    ["idle", false, "start", { field: 1, ray: 0.74, content: 1, header: 1 }],
+    ["playing", false, "start", { field: 1, ray: 0.74, content: 1, header: 1 }],
+    ["settled", false, "end", { field: 1, ray: 0.74, content: 1, header: 1 }],
+  ];
+
+  for (const [climax, forceMotion, phase, expected] of cases) {
+    const env = { climax: climax === "absent" ? null : climax, forceMotion, phase };
+    const actual = {
+      field: parseOpacity(
+        computedLayerOpacity(css, { ...env, className: "offer-field" }),
+      ),
+      ray: parseOpacity(
+        computedLayerOpacity(css, { ...env, className: "offer-ray" }),
+      ),
+      content: parseOpacity(
+        computedLayerOpacity(css, { ...env, className: "offer-content" }),
+      ),
+      header: parseOpacity(
+        computedLayerOpacity(css, { ...env, className: "site-header" }),
+      ),
+    };
+    assert.deepEqual(
+      actual,
+      expected,
+      `${label} ${climax}/${forceMotion ? "force-motion" : "reduced"} must keep ${JSON.stringify(expected)}`,
+    );
+  }
+}
+
+// Focused tripwire: offer climax visibility, stack, and phase order.
+// Canonical path: tests/rendered-html.test.mjs.
+// Future consumer: maintainers changing the poke-to-offer handoff.
+// Activation: execute `node --test tests/rendered-html.test.mjs`.
+// Behavioral check: idle/pre-entry cannot leak the finished world; attribute-
+// absent markup stays readable; reduced motion stays settled; the shutter owns
+// the black hold; blur volumes stay gone; black -> white -> release -> field
+// -> content remains the clock. Retire when the offer climax is replaced.
+test("keeps the offer climax from leaking, stacking, or blurring", async () => {
+  const css = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  const climaxSource = await readFile(
+    new URL("../app/offer-climax.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assertOfferVisibilityTable(css, "source");
+  const built = await readBuiltStylesheet();
+  if (
+    built &&
+    (built.includes("data-offer-climax=idle") ||
+      built.includes('data-offer-climax="idle"'))
+  ) {
+    assertOfferVisibilityTable(built, "built");
+    assert.match(built, /z-index:2/);
+    assert.match(built, /z-index:3/);
+    assert.doesNotMatch(built, /filter:blur\(/);
+    assert.doesNotMatch(built, /offer-volume/);
+  }
+
+  assert.match(
+    climaxSource,
+    /offer-shutter-top[\s\S]*offer-shutter-bottom[\s\S]*offer-detonation[\s\S]*offer-flash/,
+    "detonation must sit under the flash and not under the shutters",
+  );
+  assert.match(climaxSource, /if \(prefersExplicitReducedMotion\(\)\) setClimax\("settled"\)/);
+  assert.match(
+    climaxSource,
+    /if \(prefersExplicitReducedMotion\(\)\) \{\s*detachLock\(\);\s*stopDetonation\(\);\s*setClimax\("settled"\);/,
+  );
+  assert.match(climaxSource, /climaxDurationMs = 4800/);
+  assert.match(
+    css,
+    /@keyframes offer-field-grow \{[\s\S]*?72%,\s*100% \{[\s\S]*?opacity:\s*1;/,
+    "the field must finish before content becomes readable",
+  );
+  assert.match(
+    css,
+    /html\[data-offer-climax="settled"\] main\.force-motion \.offer-content \{[\s\S]*?offer-content-in 0\.72s ease forwards/,
+  );
 });
 
 // Focused tripwire: one-card offer-carousel navigation.

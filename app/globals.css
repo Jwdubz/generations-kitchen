@@ -861,6 +861,7 @@ h1 strong {
   position: fixed;
   inset: 0;
   z-index: 30;
+  isolation: isolate;
   overflow: hidden;
   pointer-events: none;
   visibility: hidden;
@@ -877,6 +878,7 @@ main:not(.force-motion) .offer-transition {
 .offer-shutter {
   position: absolute;
   left: 0;
+  z-index: 2;
   width: 100%;
   height: 50%;
   background: #000;
@@ -893,53 +895,21 @@ main:not(.force-motion) .offer-transition {
   transform-origin: bottom center;
 }
 
-.offer-flash {
-  position: absolute;
-  inset: 0;
-  background: #fff;
-  opacity: 0;
-}
-
-.offer-volume,
 .offer-detonation {
   position: absolute;
   inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
-.offer-volume {
-  inset: -22%;
+.offer-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #fff;
   opacity: 0;
-  filter: blur(4.5rem);
-}
-
-.offer-volume-gold {
-  background: radial-gradient(
-    circle at 50% 38%,
-    rgba(242, 173, 36, 0.82) 0 14%,
-    transparent 44%
-  );
-}
-
-.offer-volume-red {
-  background: radial-gradient(
-    circle at 34% 48%,
-    rgba(179, 24, 31, 0.7) 0 16%,
-    transparent 48%
-  );
-}
-
-.offer-volume-green {
-  background: radial-gradient(
-    circle at 66% 44%,
-    rgba(11, 107, 58, 0.64) 0 16%,
-    transparent 48%
-  );
-}
-
-.offer-detonation {
-  width: 100%;
-  height: 100%;
 }
 
 html[data-offer-climax="playing"] .offer-shutter {
@@ -950,20 +920,8 @@ html[data-offer-climax="playing"] .offer-flash {
   animation: offer-flash-white 4.8s linear forwards;
 }
 
-html[data-offer-climax="playing"] .offer-volume-gold {
-  animation: offer-volume-gold 4.8s linear forwards;
-}
-
-html[data-offer-climax="playing"] .offer-volume-red {
-  animation: offer-volume-red 4.8s linear forwards;
-}
-
-html[data-offer-climax="playing"] .offer-volume-green {
-  animation: offer-volume-green 4.8s linear forwards;
-}
-
-html[data-offer-climax="playing"] .site-header,
-html[data-offer-climax="playing"] .floating-order {
+html[data-offer-climax="playing"] main.force-motion .site-header,
+html[data-offer-climax="playing"] main.force-motion .floating-order {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -992,10 +950,15 @@ html[data-offer-climax="playing"] .floating-order {
     opacity: 1;
   }
 
-  58%,
+  47% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+
+  48%,
   100% {
     transform: scaleY(0);
-    opacity: 1;
+    opacity: 0;
   }
 }
 
@@ -1003,93 +966,57 @@ html[data-offer-climax="playing"] .floating-order {
   0%,
   36% {
     opacity: 0;
+    background: #fff;
+  }
+
+  36.8% {
+    opacity: 1;
+    background: radial-gradient(circle at 50% 38%, #fff 0 0.14rem, transparent 0.7rem);
   }
 
   38% {
     opacity: 1;
+    background: #fff;
   }
 
   43% {
     opacity: 0.97;
+    background: #fff;
   }
 
-  50% {
-    opacity: 0.55;
-  }
-
-  68% {
-    opacity: 0.12;
-  }
-
-  82%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes offer-volume-gold {
-  0%,
-  36% {
-    opacity: 0;
-    transform: scale(0.42);
-  }
-
-  42% {
-    opacity: 0.92;
-    transform: scale(0.86);
+  47% {
+    opacity: 1;
+    background: radial-gradient(
+      circle at 50% 38%,
+      #fff 0 18%,
+      rgba(255, 255, 255, 0.9) 36%,
+      transparent 74%
+    );
   }
 
   58% {
-    opacity: 0.55;
-    transform: scale(1.12);
-  }
-
-  88%,
-  100% {
-    opacity: 0;
-    transform: scale(1.28);
-  }
-}
-
-@keyframes offer-volume-red {
-  0%,
-  38% {
-    opacity: 0;
-    transform: scale(0.36) translate3d(-4%, 3%, 0);
-  }
-
-  48% {
-    opacity: 0.78;
-    transform: scale(0.94) translate3d(-2%, 1%, 0);
+    opacity: 1;
+    background: radial-gradient(
+      circle at 50% 38%,
+      #fff 0 7%,
+      rgba(255, 255, 255, 0.38) 24%,
+      transparent 56%
+    );
   }
 
   72% {
-    opacity: 0.28;
-    transform: scale(1.18) translate3d(0, 0, 0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(1.32);
-  }
-}
-
-@keyframes offer-volume-green {
-  0%,
-  40% {
-    opacity: 0;
-    transform: scale(0.34) translate3d(5%, 2%, 0);
-  }
-
-  54% {
-    opacity: 0.7;
-    transform: scale(1) translate3d(1%, 0, 0);
+    opacity: 1;
+    background: radial-gradient(
+      circle at 50% 38%,
+      rgba(255, 255, 255, 0.22) 0 4%,
+      transparent 28%
+    );
   }
 
   86%,
   100% {
     opacity: 0;
-    transform: scale(1.26);
+    background: radial-gradient(circle at 50% 38%, transparent 0 100%);
   }
 }
 
@@ -1131,6 +1058,7 @@ html[data-offer-climax="playing"] .floating-order {
 }
 
 .offer-ray {
+  transform-origin: 50% 38%;
   background: repeating-conic-gradient(
     from 90deg at 50% 38%,
     transparent 0 4deg,
@@ -1150,14 +1078,23 @@ html[data-offer-climax="playing"] .floating-order {
   opacity: 0.74;
 }
 
+html[data-offer-climax="idle"] main.force-motion .offer-field,
+html[data-offer-climax="idle"] main.force-motion .offer-ray {
+  opacity: 0;
+}
+
 html[data-offer-climax="playing"] main.force-motion .offer-field {
   opacity: 0;
-  transform: scale(0.92);
+  transform: scale(0.72);
   transform-origin: 50% 38%;
+  clip-path: circle(0% at 50% 38%);
   animation: offer-field-grow 4.8s linear forwards;
 }
 
 html[data-offer-climax="playing"] main.force-motion .offer-ray {
+  opacity: 0;
+  transform: scale(0.72);
+  clip-path: circle(0% at 50% 38%);
   animation: offer-ray-afterlife 4.8s linear forwards;
 }
 
@@ -1167,7 +1104,25 @@ html[data-offer-climax="playing"] main.force-motion .offer-field::after {
 }
 
 html[data-offer-climax="settled"] main.force-motion .offer-field {
+  opacity: 1;
+  transform-origin: 50% 38%;
+  clip-path: circle(140% at 50% 38%);
   animation: offer-field-breathe 7.5s ease-in-out infinite;
+}
+
+html[data-offer-climax="settled"] main.force-motion .offer-ray {
+  opacity: 0.74;
+  transform: scale(1);
+  clip-path: circle(130% at 50% 38%);
+}
+
+main:not(.force-motion) .offer-field,
+main:not(.force-motion) .offer-ray {
+  opacity: 1;
+}
+
+main:not(.force-motion) .offer-ray {
+  opacity: 0.74;
 }
 
 @keyframes offer-field-breathe {
@@ -1185,38 +1140,55 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   0%,
   36% {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.72);
+    clip-path: circle(0% at 50% 38%);
   }
 
-  42% {
-    opacity: 0.22;
-    transform: scale(0.96);
+  43% {
+    opacity: 0.2;
+    transform: scale(0.88);
+    clip-path: circle(16% at 50% 38%);
   }
 
   58% {
     opacity: 0.86;
-    transform: scale(1);
+    transform: scale(0.98);
+    clip-path: circle(72% at 50% 38%);
   }
 
-  75%,
+  72%,
   100% {
     opacity: 1;
     transform: scale(1);
+    clip-path: circle(140% at 50% 38%);
   }
 }
 
 @keyframes offer-ray-afterlife {
   0%,
-  52% {
+  48% {
     opacity: 0;
+    transform: scale(0.72);
+    clip-path: circle(0% at 50% 38%);
   }
 
-  70% {
-    opacity: 0.4;
+  58% {
+    opacity: 0.28;
+    transform: scale(0.88);
+    clip-path: circle(28% at 50% 38%);
   }
 
+  72% {
+    opacity: 0.52;
+    transform: scale(0.96);
+    clip-path: circle(70% at 50% 38%);
+  }
+
+  88%,
   100% {
     opacity: 0.74;
+    transform: scale(1);
+    clip-path: circle(130% at 50% 38%);
   }
 }
 
@@ -1263,8 +1235,8 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   flex-direction: column;
   align-items: center;
   gap: 0.85rem;
-  opacity: 0;
-  transform: translate3d(0, 1.1rem, 0);
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .offer-action {
@@ -1386,6 +1358,12 @@ html[data-offer-climax="settled"] main.force-motion .offer-field {
   color: var(--gold);
 }
 
+html[data-offer-climax="idle"] main.force-motion .offer-content,
+html[data-offer-climax="playing"] .offer-content {
+  opacity: 0;
+  transform: translate3d(0, 1.1rem, 0);
+}
+
 html[data-offer-climax="settled"] .offer-content,
 main:not(.force-motion) .offer-content {
   opacity: 1;
@@ -1404,11 +1382,6 @@ html[data-offer-climax="settled"] main.force-motion .offer-content {
 
 html[data-offer-climax="settled"] main.force-motion .offer-action {
   animation: offer-action-breathe 2.8s 0.72s ease-in-out infinite;
-}
-
-html[data-offer-climax="playing"] .offer-content {
-  opacity: 0;
-  transform: translate3d(0, 1.1rem, 0);
 }
 
 @keyframes offer-chrome-in {
