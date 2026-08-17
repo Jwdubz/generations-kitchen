@@ -5,7 +5,9 @@ Future consumer: OfferTransition and the focused Node climax tests.
 Activation: imported by app/offer-climax.tsx and tests/rendered-html.test.mjs.
 Behavioral check: every public visual scalar is a continuous sample of one
 normalized progress value; phase boundaries keep value and first difference
-continuous; terminal sample equals the static settled CSS state.
+continuous; exposure radius is monotonic and never retracts; field/ray
+geometry is settled before exposure opacity materially clears; terminal
+sample equals the static settled CSS state.
 Retirement: when the offer climax is removed or its one-clock contract is
 intentionally replaced.
 */
@@ -27,6 +29,8 @@ export const SETTLED_RAY_OPACITY = 0.74;
 export const SETTLED_FIELD_CLIP = 140;
 export const SETTLED_RAY_CLIP = 130;
 export const CONTENT_Y_START = 1.1;
+export const TERMINAL_EXPOSURE_RADIUS = 1;
+export const EXPOSURE_OVERSCAN = 2.6;
 
 const shutterEndMs = PHASE_MS.shutter;
 const blackHoldEndMs = shutterEndMs + PHASE_MS.blackHold;
@@ -103,7 +107,7 @@ export const SETTLED_SAMPLE = Object.freeze({
   black: 0,
   ignition: 0,
   white: 0,
-  whiteRadius: 0,
+  whiteRadius: TERMINAL_EXPOSURE_RADIUS,
   field: 1,
   fieldClip: SETTLED_FIELD_CLIP,
   fieldScale: 1,
@@ -184,28 +188,6 @@ export function ramp(progress, start, end) {
 }
 
 /**
- * Smooth pulse that is 0 at both ends with zero slope.
- * @param {number} progress
- * @param {number} start
- * @param {number} end
- * @returns {number}
- */
-export function pulse(progress, start, end) {
-  const u = clamp01(unlerp(progress, start, end));
-  if (u <= 0 || u >= 1) return 0;
-  const wave = Math.sin(Math.PI * u);
-  return wave * wave;
-}
-
-/**
- * @param {number} progress
- * @returns {number}
- */
-export function releaseProgress(progress) {
-  return clamp01(unlerp(clamp01(progress), PHASES.releaseStart, PHASES.fieldOwn));
-}
-
-/**
  * @param {number} progress
  * @returns {OfferClimaxSample}
  */
@@ -233,9 +215,9 @@ export function sampleOfferClimax(progress) {
     PHASES.releaseStart,
     PHASES.fieldOwn,
   );
-  const field = ramp(t, PHASES.releaseStart, PHASES.fieldOwn);
+  const whiteRadius = ramp(t, PHASES.blackHoldEnd, PHASES.whitePeak);
+  const field = ramp(t, PHASES.whitePeak, PHASES.releaseStart);
   const content = ramp(t, PHASES.fieldOwn, PHASES.end);
-  const transient = pulse(t, PHASES.releaseStart, PHASES.fieldOwn);
   const shutterTerm = t < PHASES.shutterCloseEnd ? shutter : 0;
 
   return {
@@ -244,19 +226,29 @@ export function sampleOfferClimax(progress) {
     black,
     ignition: white,
     white,
-    whiteRadius: white,
+    whiteRadius,
     field,
     fieldClip: field * SETTLED_FIELD_CLIP,
     fieldScale: 1,
     rays: field * SETTLED_RAY_OPACITY,
     rayClip: field * SETTLED_RAY_CLIP,
     rayScale: 1,
-    transient,
+    transient: 0,
     content,
     chrome: content,
     contentY: CONTENT_Y_START * (1 - content),
-    compositor: Math.max(shutterTerm, black, white, transient),
+    compositor: Math.max(shutterTerm, black, white),
   };
+}
+
+/**
+ * Terminal radius 1 is the beyond-corners coverage hold. Opacity may fall
+ * after this; radius may not.
+ * @param {number} whiteRadius
+ * @returns {boolean}
+ */
+export function exposureCoversFrame(whiteRadius) {
+  return whiteRadius >= TERMINAL_EXPOSURE_RADIUS - 1e-12;
 }
 
 /**

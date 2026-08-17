@@ -15,14 +15,19 @@ import {
 import {
   CLIMAX_DURATION_MS,
   CONTENT_Y_START,
+  EXPOSURE_OVERSCAN,
   PHASE_BOUNDARIES,
   PHASE_MS,
   PHASES,
   SAMPLE_KEYS,
   SAMPLE_RANGES,
+  SETTLED_FIELD_CLIP,
+  SETTLED_RAY_CLIP,
   SETTLED_RAY_OPACITY,
   SETTLED_SAMPLE,
   START_SAMPLE,
+  TERMINAL_EXPOSURE_RADIUS,
+  exposureCoversFrame,
   sampleOfferClimax,
 } from "../app/offer-climax-timeline.mjs";
 
@@ -429,9 +434,10 @@ test("keeps the visitor calls to action on the display face", async () => {
 // colored spokes, offer leak during the transition, visible chrome during
 // black, beat-skipping while playing, or loss of the twelve menu images/links.
 // The visitor contract is one master clock: slam to empty black, hold, a
-// continuous white ignition/blowout, then Generations color growing into the
-// persistent field. Coupon, carousel, and chrome fade from that same clock
-// and already match `settled` before the attribute changes.
+// soft gold-white seed that only expands, destination field/rays staged
+// under full exposure, then opacity-only reveal. Coupon, carousel, and
+// chrome fade from that same clock and already match `settled` before the
+// attribute changes.
 // Retirement: only when the offer beat is intentionally removed or replaced
 // and the corresponding production consumer contract changes.
 test("exports the offer climax and first-party dish carousel", async () => {
@@ -551,9 +557,24 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "the transition stack must not mount volume layers",
   );
   assert.match(html, /class="offer-detonation"/);
-  assert.match(climaxSource, /buildDetonationGeometry\(/);
-  assert.match(climaxSource, /trails:/);
-  assert.match(climaxSource, /wedges:/);
+  assert.doesNotMatch(climaxSource, /buildDetonationGeometry\(/);
+  assert.doesNotMatch(
+    climaxSource,
+    /wedges:|trails:|embers:|glints:/,
+    "canvas must not keep a second star vocabulary of wedges, trails, rings, or embers",
+  );
+  assert.doesNotMatch(
+    climaxSource,
+    /strokeStyle|lineTo\(|context\.arc\(/,
+    "transient ring, trail, and glint strokes must not remain",
+  );
+  assert.doesNotMatch(
+    climaxSource,
+    /addColorStop\(0\.82/,
+    "the hard-rim white disc plateau must not remain",
+  );
+  assert.match(climaxSource, /EXPOSURE_OVERSCAN/);
+  assert.match(climaxSource, /createRadialGradient/);
   assert.doesNotMatch(
     climaxSource,
     /whitePeakEnd/,
@@ -640,6 +661,11 @@ test("exports the offer climax and first-party dish carousel", async () => {
     "the old one-degree colored spokes must not return",
   );
   assert.match(css, /\.offer-field::after \{[\s\S]*?radial-gradient\(/);
+  assert.match(
+    css,
+    /\.offer-field::after \{[\s\S]*?opacity:\s*0;/,
+    "terminal origin flare must match the settled CSS opacity",
+  );
   assert.match(css, /\.offer-field \{[\s\S]*?opacity:\s*1;/);
   assert.match(
     css,
@@ -1033,8 +1059,9 @@ function assertOfferVisibilityTable(css, label) {
 // Activation: execute `node --test tests/rendered-html.test.mjs`.
 // Behavioral check: idle/pre-entry cannot leak the finished world; attribute-
 // absent markup stays readable; reduced motion stays settled; one RAF clock
-// owns in-flight pixels; blur volumes stay gone; black -> white -> release ->
-// field -> content remains the clock. Retire when the offer climax is replaced.
+// owns in-flight pixels; blur volumes stay gone; black -> seed -> beyond-
+// frame exposure -> opacity reveal of the already-settled field -> content
+// remains the clock. Retire when the offer climax is replaced.
 test("keeps the offer climax from leaking, stacking, or blurring", async () => {
   const css = await readFile(
     new URL("../app/globals.css", import.meta.url),
@@ -1073,7 +1100,7 @@ test("keeps the offer climax from leaking, stacking, or blurring", async () => {
   assert.match(
     climaxSource,
     /className="offer-detonation"/,
-    "one full-viewport canvas must own shutter, black, white, and transient energy",
+    "one full-viewport canvas must own shutter, black, and the soft exposure",
   );
   assert.doesNotMatch(climaxSource, /offer-shutter|offer-flash/);
   assert.match(climaxSource, /if \(prefersExplicitReducedMotion\(\)\) setClimax\("settled"\)/);
@@ -1108,8 +1135,10 @@ test("keeps the offer climax from leaking, stacking, or blurring", async () => {
 // Future consumer: maintainers changing the poke-to-offer motion.
 // Activation: execute `node --test tests/rendered-html.test.mjs`.
 // Behavioral check: the pure sampler clamps, stays in range, stays C0/C1 at
-// every declared phase boundary, and ends exactly on the static settled CSS
-// state. Retire when the one-clock climax is intentionally replaced.
+// every declared phase boundary, keeps exposure radius monotonic, stages
+// field/ray geometry before exposure opacity clears, and ends exactly on
+// the static settled CSS state. Retire when the one-clock climax is
+// intentionally replaced.
 test("samples the offer climax from one continuous master clock", () => {
   assert.ok(CLIMAX_DURATION_MS >= 5400 && CLIMAX_DURATION_MS <= 5800);
   assert.ok(PHASE_MS.shutter >= 350 && PHASE_MS.shutter <= 400);
@@ -1197,22 +1226,103 @@ test("samples the offer climax from one continuous master clock", () => {
   );
   assert.equal(sampleOfferClimax(PHASES.blackHoldEnd).white, 0);
   assert.equal(sampleOfferClimax(PHASES.blackHoldEnd).ignition, 0);
+  assert.equal(sampleOfferClimax(PHASES.blackHoldEnd).whiteRadius, 0);
   assert.ok(sampleOfferClimax(PHASES.blackHoldEnd + 0.02).white > 0);
+  assert.ok(sampleOfferClimax(PHASES.blackHoldEnd + 0.02).whiteRadius > 0);
+  assert.ok(sampleOfferClimax(PHASES.blackHoldEnd + 0.02).whiteRadius < 1);
+  assert.equal(sampleOfferClimax(PHASES.blackHoldEnd + 0.02).field, 0);
   assert.ok(sampleOfferClimax(PHASES.whitePeak).white > 0.999);
+  assert.equal(
+    sampleOfferClimax(PHASES.whitePeak).whiteRadius,
+    TERMINAL_EXPOSURE_RADIUS,
+  );
+  assert.equal(sampleOfferClimax(PHASES.whitePeak).field, 0);
+  assert.equal(sampleOfferClimax(PHASES.whitePeak).fieldClip, 0);
+  assert.ok(EXPOSURE_OVERSCAN * TERMINAL_EXPOSURE_RADIUS > 1);
 
-  assert.equal(sampleOfferClimax(PHASES.releaseStart).field, 0);
-  assert.equal(sampleOfferClimax(PHASES.releaseStart).rays, 0);
-  assert.equal(sampleOfferClimax(PHASES.releaseStart - 1e-5).field, 0);
+  assert.equal(sampleOfferClimax(PHASES.releaseStart).white, 1);
+  assert.equal(
+    sampleOfferClimax(PHASES.releaseStart).whiteRadius,
+    TERMINAL_EXPOSURE_RADIUS,
+  );
+  assert.equal(sampleOfferClimax(PHASES.releaseStart).field, 1);
+  assert.equal(sampleOfferClimax(PHASES.releaseStart).rays, SETTLED_RAY_OPACITY);
+  assert.equal(
+    sampleOfferClimax(PHASES.releaseStart).fieldClip,
+    SETTLED_FIELD_CLIP,
+  );
+  assert.equal(sampleOfferClimax(PHASES.releaseStart).rayClip, SETTLED_RAY_CLIP);
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).field, 1);
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).rays, SETTLED_RAY_OPACITY);
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).fieldClip, SETTLED_SAMPLE.fieldClip);
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).rayClip, SETTLED_SAMPLE.rayClip);
+  assert.equal(sampleOfferClimax(PHASES.fieldOwn).white, 0);
+  assert.equal(
+    sampleOfferClimax(PHASES.fieldOwn).whiteRadius,
+    TERMINAL_EXPOSURE_RADIUS,
+  );
+
+  const midRelease = sampleOfferClimax(
+    (PHASES.releaseStart + PHASES.fieldOwn) / 2,
+  );
+  assert.ok(midRelease.white < 0.6);
+  assert.equal(midRelease.whiteRadius, TERMINAL_EXPOSURE_RADIUS);
+  assert.equal(midRelease.field, 1);
+  assert.equal(midRelease.fieldClip, SETTLED_FIELD_CLIP);
+  assert.equal(midRelease.rayClip, SETTLED_RAY_CLIP);
+  assert.equal(midRelease.transient, 0);
 
   assert.equal(sampleOfferClimax(PHASES.releaseStart).transient, 0);
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).transient, 0);
-  assert.ok(
-    sampleOfferClimax((PHASES.releaseStart + PHASES.fieldOwn) / 2).transient > 0.5,
-  );
+
+  let previousRadius = 0;
+  let covered = false;
+  const steps = 400;
+  for (let index = 0; index <= steps; index += 1) {
+    const progress = index / steps;
+    const sample = sampleOfferClimax(progress);
+    if (progress >= PHASES.blackHoldEnd) {
+      assert.ok(
+        sample.whiteRadius + 1e-12 >= previousRadius,
+        `exposure radius must be monotonic at ${progress}: ${previousRadius} -> ${sample.whiteRadius}`,
+      );
+      previousRadius = sample.whiteRadius;
+    }
+    if (exposureCoversFrame(sample.whiteRadius)) {
+      covered = true;
+    }
+    if (covered) {
+      assert.ok(
+        exposureCoversFrame(sample.whiteRadius),
+        `full-frame coverage must not be lost at ${progress}`,
+      );
+    }
+    if (progress >= PHASES.releaseStart) {
+      assert.equal(sample.fieldClip, SETTLED_FIELD_CLIP);
+      assert.equal(sample.rayClip, SETTLED_RAY_CLIP);
+      assert.equal(sample.field, 1);
+      assert.equal(sample.rays, SETTLED_RAY_OPACITY);
+      assert.equal(sample.whiteRadius, TERMINAL_EXPOSURE_RADIUS);
+    }
+    if (exposureCoversFrame(sample.whiteRadius) && sample.white < 0.35) {
+      assert.equal(sample.fieldClip, SETTLED_FIELD_CLIP);
+      assert.equal(sample.rayClip, SETTLED_RAY_CLIP);
+      assert.equal(sample.field, 1);
+      assert.equal(sample.rays, SETTLED_RAY_OPACITY);
+    }
+  }
+  assert.ok(covered, "exposure must reach full-frame coverage");
+
+  const hide = sampleOfferClimax(PHASES.fieldOwn);
+  assert.equal(hide.compositor, 0);
+  assert.equal(hide.field, SETTLED_SAMPLE.field);
+  assert.equal(hide.fieldClip, SETTLED_SAMPLE.fieldClip);
+  assert.equal(hide.fieldScale, SETTLED_SAMPLE.fieldScale);
+  assert.equal(hide.rays, SETTLED_SAMPLE.rays);
+  assert.equal(hide.rayClip, SETTLED_SAMPLE.rayClip);
+  assert.equal(hide.rayScale, SETTLED_SAMPLE.rayScale);
+  assert.equal(hide.white, SETTLED_SAMPLE.white);
+  assert.equal(hide.whiteRadius, SETTLED_SAMPLE.whiteRadius);
 
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).content, 0);
   assert.equal(sampleOfferClimax(PHASES.fieldOwn).chrome, 0);
@@ -1221,6 +1331,7 @@ test("samples the offer climax from one continuous master clock", () => {
   assert.equal(sampleOfferClimax(1).chrome, 1);
   assert.equal(sampleOfferClimax(1).contentY, 0);
   assert.equal(sampleOfferClimax(1).compositor, 0);
+  assert.equal(sampleOfferClimax(1).whiteRadius, TERMINAL_EXPOSURE_RADIUS);
   assert.deepEqual(sampleOfferClimax(1), { ...SETTLED_SAMPLE });
 });
 
