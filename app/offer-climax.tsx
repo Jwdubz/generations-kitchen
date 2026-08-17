@@ -13,12 +13,12 @@ desktop arrow movement, mobile horizontal movement and vertical exit, plus
 `node --test tests/rendered-html.test.mjs`.
 Retirement: when the owner removes or replaces the first-order promotion or
 replaces this interaction with another verified offer-to-menu passage.
-The motion climax is a 4.8s held-breath: hide the finished offer until
+The motion climax is one master clock: hide the finished offer until
 shutoff, slam to true black in ~350-400ms, hold an empty black world,
 ignite a white point into a full-frame blowout, then grow graphic
 Generations color from the shared origin into the same persistent field.
-Chrome and beat-navigation stay locked until `settled`. Keep CSS, canvas,
-and the settle timer on the same 4.8s clock.
+One RAF loop samples app/offer-climax-timeline.mjs and owns every
+in-flight pixel. Chrome and beat-navigation stay locked until `settled`.
 Desktop Previous/Next advances a selected DOM index independently of the
 clamped physical scrollLeft, aims at that adjacent card's measured offset,
 and ignores further button input until that card rests. One horizontal
@@ -35,12 +35,33 @@ import {
   resyncOfferCarouselFromUserScroll,
   stepOfferCarousel,
 } from "./offer-carousel-nav.mjs";
+import {
+  CLIMAX_DURATION_MS,
+  ORIGIN,
+  PHASES,
+  SETTLED_SAMPLE,
+  pulse,
+  releaseProgress,
+  sampleOfferClimax,
+} from "./offer-climax-timeline.mjs";
 
 const desktopQuery = "(min-width: 761px)";
-const climaxDurationMs = 4800;
 const mobileOfferEnterRatio = 0.08;
 const mobileOfferLeaveRatio = 0.04;
-const whitePeakEnd = 0.43;
+
+type ClimaxSample = ReturnType<typeof sampleOfferClimax>;
+
+const climaxVarNames = [
+  "--offer-field-opacity",
+  "--offer-field-clip",
+  "--offer-field-scale",
+  "--offer-ray-opacity",
+  "--offer-ray-clip",
+  "--offer-ray-scale",
+  "--offer-content-opacity",
+  "--offer-content-y",
+  "--offer-chrome-opacity",
+] as const;
 const climaxLockKeys = new Set([
   "ArrowDown",
   "ArrowUp",
@@ -94,6 +115,24 @@ function rgba(color: DetonationColor, alpha: number) {
   return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${clamp01(alpha)})`;
 }
 
+function applyClimaxSample(html: HTMLElement, sample: ClimaxSample) {
+  html.style.setProperty("--offer-field-opacity", String(sample.field));
+  html.style.setProperty("--offer-field-clip", `${sample.fieldClip}%`);
+  html.style.setProperty("--offer-field-scale", String(sample.fieldScale));
+  html.style.setProperty("--offer-ray-opacity", String(sample.rays));
+  html.style.setProperty("--offer-ray-clip", `${sample.rayClip}%`);
+  html.style.setProperty("--offer-ray-scale", String(sample.rayScale));
+  html.style.setProperty("--offer-content-opacity", String(sample.content));
+  html.style.setProperty("--offer-content-y", `${sample.contentY}rem`);
+  html.style.setProperty("--offer-chrome-opacity", String(sample.chrome));
+}
+
+function clearClimaxVars(html: HTMLElement) {
+  for (const name of climaxVarNames) {
+    html.style.removeProperty(name);
+  }
+}
+
 function buildDetonationGeometry(compact: boolean) {
   const colors = [GOLD, RED, GREEN] as const;
   return {
@@ -145,7 +184,6 @@ export function OfferTransition() {
     const context = canvas.getContext("2d", { alpha: true });
     let inOffer = false;
     let locked = false;
-    let settleTimer = 0;
     let frame = 0;
     let startedAt = 0;
     let geometry = buildDetonationGeometry(false);
@@ -160,11 +198,13 @@ export function OfferTransition() {
       locked = false;
     }
 
-    function stopDetonation() {
+    function stopClimaxClock() {
       window.cancelAnimationFrame(frame);
       frame = 0;
       startedAt = 0;
       context?.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.style.visibility = "hidden";
+      clearClimaxVars(html);
     }
 
     function sizeCanvas() {
@@ -177,29 +217,73 @@ export function OfferTransition() {
       geometry = buildDetonationGeometry(width < 700);
     }
 
-    function drawDetonation(now: number) {
-      if (!context || !startedAt) return;
+    function compositorOwnsSettledField(sample: ClimaxSample) {
+      return (
+        sample.compositor <= 0 &&
+        sample.field >= SETTLED_SAMPLE.field &&
+        sample.rays >= SETTLED_SAMPLE.rays &&
+        sample.white <= 0 &&
+        sample.black <= 0 &&
+        sample.transient <= 0
+      );
+    }
+
+    function hideCompositor() {
+      canvas.style.visibility = "hidden";
+      context?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function paintClimax(sample: ClimaxSample) {
+      if (!context) return;
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
-      const elapsed = now - startedAt;
-      const progress = clamp01(elapsed / climaxDurationMs);
       context.clearRect(0, 0, width, height);
-      if (progress < whitePeakEnd) {
-        if (elapsed < climaxDurationMs) {
-          frame = window.requestAnimationFrame(drawDetonation);
-        }
-        return;
+
+      const originX = width * ORIGIN.x;
+      const originY = height * ORIGIN.y;
+      const maxRadius = Math.hypot(
+        Math.max(originX, width - originX),
+        Math.max(originY, height - originY),
+      );
+      const reach = Math.hypot(width, height);
+
+      if (sample.progress <= PHASES.blackHoldEnd && sample.shutter > 0) {
+        const bar = (height / 2) * sample.shutter;
+        context.fillStyle = "#000";
+        context.fillRect(0, 0, width, bar);
+        context.fillRect(0, height - bar, width, bar);
       }
 
-      const originX = width * 0.5;
-      const originY = height * 0.38;
-      const reach = Math.hypot(width, height);
-      const release = (progress - whitePeakEnd) / (1 - whitePeakEnd);
+      if (sample.black > 0) {
+        context.fillStyle = `rgba(0, 0, 0, ${sample.black})`;
+        context.fillRect(0, 0, width, height);
+      }
 
-      const core = clamp01(release / 0.2);
-      const coreFade = 1 - clamp01((release - 0.18) / 0.62);
-      const coreRadius = (1 - (1 - core) * (1 - core)) * reach * 0.28;
-      if (coreRadius > 1 && coreFade > 0) {
+      if (sample.white > 0 && sample.whiteRadius > 0) {
+        const radius = Math.max(sample.whiteRadius * maxRadius * 1.45, 0.5);
+        const glow = context.createRadialGradient(
+          originX,
+          originY,
+          0,
+          originX,
+          originY,
+          radius,
+        );
+        glow.addColorStop(0, `rgba(255, 255, 255, ${sample.white})`);
+        glow.addColorStop(0.82, `rgba(255, 255, 255, ${sample.white})`);
+        glow.addColorStop(1, "rgba(255, 255, 255, 0)");
+        context.fillStyle = glow;
+        context.fillRect(0, 0, width, height);
+      }
+
+      const burst = sample.transient;
+      if (burst <= 0) return;
+
+      const release = releaseProgress(sample.progress);
+      const coreRise = clamp01(release / 0.2);
+      const coreFade = (1 - clamp01((release - 0.18) / 0.62)) * burst;
+      const coreRadius = (1 - (1 - coreRise) * (1 - coreRise)) * reach * 0.28;
+      if (coreRadius > 0 && coreFade > 0) {
         const bloom = context.createRadialGradient(
           originX,
           originY,
@@ -220,9 +304,10 @@ export function OfferTransition() {
         const local = clamp01((release - wedge.delay) / 0.42) * wedge.speed;
         if (local <= 0) continue;
         const travel = (1 - (1 - Math.min(1, local)) ** 2) * reach * 0.62;
-        const fade = 1 - clamp01((release - 0.22 - wedge.delay) / 0.7);
-        if (fade <= 0 || travel < 8) continue;
-        const halfWidth = Math.max(9, travel * wedge.width);
+        const fade =
+          (1 - clamp01((release - 0.22 - wedge.delay) / 0.7)) * burst;
+        if (fade <= 0 || travel <= 0) continue;
+        const halfWidth = Math.max(travel * wedge.width, travel * 0.02);
         context.save();
         context.translate(originX, originY);
         context.rotate(wedge.angle);
@@ -244,23 +329,24 @@ export function OfferTransition() {
       context.save();
       context.translate(originX, originY);
       for (const wave of [0, 0.07]) {
-        const local = clamp01((release - wave) / 0.3);
-        if (local <= 0 || local >= 1) continue;
+        const local = pulse(release, wave, wave + 0.3);
+        if (local <= 0) continue;
+        const unit = clamp01((release - wave) / 0.3);
         context.beginPath();
-        context.strokeStyle = rgba(GOLD, (1 - local) * 0.42);
-        context.lineWidth = Math.max(1.4, (1 - local) * 6);
-        context.arc(0, 0, local * reach * 0.7, 0, Math.PI * 2);
+        context.strokeStyle = rgba(GOLD, local * 0.42 * burst);
+        context.lineWidth = Math.max(0.01, (1 - unit) * 6);
+        context.arc(0, 0, unit * reach * 0.7, 0, Math.PI * 2);
         context.stroke();
       }
 
       context.lineCap = "round";
       for (const trail of geometry.trails) {
-        const local = (release - trail.delay) / trail.life;
-        if (local <= 0 || local >= 1) continue;
-        const head = Math.min(1, local * trail.speed);
+        const local = pulse(release, trail.delay, trail.delay + trail.life);
+        if (local <= 0) continue;
+        const unit = clamp01((release - trail.delay) / trail.life);
+        const head = Math.min(1, unit * trail.speed);
         const tail = Math.max(0, head - trail.length);
-        const fade = Math.sin(local * Math.PI);
-        context.strokeStyle = rgba(trail.color, 0.78 * fade);
+        context.strokeStyle = rgba(trail.color, 0.78 * local * burst);
         context.lineWidth = trail.width;
         context.beginPath();
         context.moveTo(
@@ -275,13 +361,12 @@ export function OfferTransition() {
       }
 
       for (const glint of geometry.glints) {
-        const local = (release - glint.delay) / glint.life;
-        if (local <= 0 || local >= 1) continue;
-        const spark = Math.sin(local * Math.PI);
-        const arm = 10 + spark * 26;
+        const local = pulse(release, glint.delay, glint.delay + glint.life);
+        if (local <= 0) continue;
+        const arm = 10 + local * 26;
         context.save();
         context.rotate(glint.angle);
-        context.strokeStyle = `rgba(255, 255, 255, ${0.88 * spark})`;
+        context.strokeStyle = `rgba(255, 255, 255, ${0.88 * local * burst})`;
         context.lineWidth = 1.6;
         context.beginPath();
         context.moveTo(-arm, 0);
@@ -294,29 +379,55 @@ export function OfferTransition() {
       context.restore();
 
       for (const ember of geometry.embers) {
-        const local = clamp01((release - 0.04) / 0.86);
+        const local = pulse(release, 0.04, 0.9);
         if (local <= 0) continue;
-        const drift = ember.dist + local * ember.speed;
+        const unit = clamp01((release - 0.04) / 0.86);
+        const drift = ember.dist + unit * ember.speed;
         const x = originX + Math.cos(ember.angle) * drift * reach;
         const y = originY + Math.sin(ember.angle) * drift * reach;
-        const fade = 1 - clamp01((release - 0.38) / 0.58);
-        if (fade <= 0) continue;
-        context.fillStyle = rgba(ember.color, 0.7 * fade);
+        context.fillStyle = rgba(ember.color, 0.7 * local * burst);
         context.beginPath();
         context.arc(x, y, ember.size, 0, Math.PI * 2);
         context.fill();
       }
-
-      if (elapsed < climaxDurationMs) {
-        frame = window.requestAnimationFrame(drawDetonation);
-      }
     }
 
-    function startDetonation() {
-      stopDetonation();
+    function finishSettled() {
+      if (!inOffer) return;
+      applyClimaxSample(html, SETTLED_SAMPLE);
+      paintClimax(SETTLED_SAMPLE);
+      hideCompositor();
+      detachLock();
+      setClimax("settled");
+      clearClimaxVars(html);
+      frame = 0;
+      startedAt = 0;
+    }
+
+    function tickClimax(now: number) {
+      if (!startedAt) return;
+      const progress = clamp01((now - startedAt) / CLIMAX_DURATION_MS);
+      const sample = sampleOfferClimax(progress);
+      applyClimaxSample(html, sample);
+      paintClimax(sample);
+      if (compositorOwnsSettledField(sample)) hideCompositor();
+      else canvas.style.visibility = "visible";
+
+      if (progress >= 1) {
+        finishSettled();
+        return;
+      }
+      frame = window.requestAnimationFrame(tickClimax);
+    }
+
+    function startClimax() {
+      window.cancelAnimationFrame(frame);
+      frame = 0;
       sizeCanvas();
+      canvas.style.visibility = "visible";
       startedAt = performance.now();
-      frame = window.requestAnimationFrame(drawDetonation);
+      applyClimaxSample(html, sampleOfferClimax(0));
+      frame = window.requestAnimationFrame(tickClimax);
     }
 
     function enterOffer() {
@@ -325,7 +436,7 @@ export function OfferTransition() {
 
       if (prefersExplicitReducedMotion()) {
         detachLock();
-        stopDetonation();
+        stopClimaxClock();
         setClimax("settled");
         return;
       }
@@ -335,22 +446,14 @@ export function OfferTransition() {
         attachOfferClimaxInputLock();
         locked = true;
       }
-      startDetonation();
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => {
-        if (!inOffer) return;
-        detachLock();
-        stopDetonation();
-        setClimax("settled");
-      }, climaxDurationMs);
+      startClimax();
     }
 
     function leaveOffer() {
       if (!inOffer) return;
       inOffer = false;
-      window.clearTimeout(settleTimer);
       detachLock();
-      stopDetonation();
+      stopClimaxClock();
       setClimax("idle");
     }
 
@@ -408,10 +511,9 @@ export function OfferTransition() {
     syncFromDesktopBeat();
 
     return () => {
-      window.clearTimeout(settleTimer);
       window.removeEventListener("resize", onResize);
       detachLock();
-      stopDetonation();
+      stopClimaxClock();
       attributeObserver.disconnect();
       intersection.disconnect();
       delete html.dataset.offerClimax;
@@ -420,10 +522,7 @@ export function OfferTransition() {
 
   return (
     <div className="offer-transition" aria-hidden="true" style={{ pointerEvents: "none" }}>
-      <div className="offer-shutter offer-shutter-top" />
-      <div className="offer-shutter offer-shutter-bottom" />
       <canvas className="offer-detonation" ref={canvasRef} />
-      <div className="offer-flash" />
     </div>
   );
 }
