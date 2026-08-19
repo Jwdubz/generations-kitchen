@@ -1140,9 +1140,14 @@ test("keeps the offer climax from leaking, stacking, or blurring", async () => {
 // the static settled CSS state. Retire when the one-clock climax is
 // intentionally replaced.
 test("samples the offer climax from one continuous master clock", () => {
-  assert.ok(CLIMAX_DURATION_MS >= 5400 && CLIMAX_DURATION_MS <= 5800);
+  assert.ok(CLIMAX_DURATION_MS >= 4780 && CLIMAX_DURATION_MS <= 4900);
   assert.ok(PHASE_MS.shutter >= 350 && PHASE_MS.shutter <= 400);
-  assert.ok(PHASE_MS.blackHold >= 1400 && PHASE_MS.blackHold <= 1600);
+  assert.ok(PHASE_MS.blackHold >= 720 && PHASE_MS.blackHold <= 800);
+  assert.equal(
+    PHASE_MS.blackHold,
+    760,
+    "black hold must be exactly half of the prior 1520ms plateau",
+  );
   assert.equal(
     Object.values(PHASE_MS).reduce((sum, value) => sum + value, 0),
     CLIMAX_DURATION_MS,
