@@ -111,15 +111,15 @@ function FoodPassage({
           loop
           playsInline
           preload="none"
-          poster={`/media/${mediaName}-desktop.jpg?v=nativecrop1`}
+          poster={`/media/${mediaName}-desktop.jpg?v=zoomout1`}
         >
           <source
             media="(max-width: 760px)"
-            src={`/media/${mediaName}-mobile.mp4?v=nativecrop1`}
+            src={`/media/${mediaName}-mobile.mp4?v=zoomout1`}
             type="video/mp4"
           />
           <source
-            src={`/media/${mediaName}-desktop.mp4?v=nativecrop1`}
+            src={`/media/${mediaName}-desktop.mp4?v=zoomout1`}
             type="video/mp4"
           />
         </video>
@@ -127,9 +127,9 @@ function FoodPassage({
         <picture className="passage-poster">
           <source
             media="(max-width: 760px)"
-            srcSet={`/media/${mediaName}-mobile.jpg?v=nativecrop1`}
+            srcSet={`/media/${mediaName}-mobile.jpg?v=zoomout1`}
           />
-          <img src={`/media/${mediaName}-desktop.jpg?v=nativecrop1`} alt={alt} />
+          <img src={`/media/${mediaName}-desktop.jpg?v=zoomout1`} alt={alt} />
         </picture>
       </div>
 

@@ -6,8 +6,8 @@ the featured food footage.
 Activation: execute `pwsh -File scripts/build-menu-media.ps1` from the project
 root, optionally overriding SourcePath and OutputDirectory.
 Behavioral check: `npm test` pins the approved people-frame edit boundaries and
-ffprobes the shipped desktop/mobile consumers for native 1728x972 desktop and
-native 506x900 mobile (no baked upscale), and complete clip durations; the
+ffprobes the shipped desktop/mobile consumers for native 1920x1080 desktop and
+native 608x1080 mobile (no baked upscale), and complete clip durations; the
 script was also executed against the current source to produce the visually
 reviewed assets.
 Retirement: remove when the site stops consuming responsive raster menu video
@@ -25,13 +25,13 @@ $OutputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
 
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 
-# Desktop keeps the approved 1728x972 punch-in at native source pixels — do
-# not scale it back to 1920x1080. Mobile keeps the approved 506x900 portrait
-# window at native source pixels — do not scale it to 1080x1920. CRF 21 is
-# the evidence-backed encode against this ~3.2 Mbps source. Do not add
-# sharpening or invent detail.
-$desktopFilter = "crop=1728:972:96:0,setsar=1"
-$mobileFilter = "crop=506:900:707:0,setsar=1"
+# Desktop ships the full native 1920x1080 source frame — do not punch in and
+# do not scale. Mobile ships the largest even 9:16 window that fits inside
+# that same 1080p frame (608x1080, centered) at native pixels — do not scale
+# it to 1080x1920. CRF 21 is the evidence-backed encode against this ~3.2
+# Mbps source. Do not add sharpening or invent detail.
+$desktopFilter = "crop=1920:1080:0:0,setsar=1"
+$mobileFilter = "crop=608:1080:656:0,setsar=1"
 
 function Encode-Clip {
   param(
