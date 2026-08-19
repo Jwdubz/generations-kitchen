@@ -111,7 +111,7 @@ test("exports the complete Generations Kitchen passage", async () => {
 
 // Focused cache-bust tripwire at tests/rendered-html.test.mjs for the next
 // media-URL editor. Activation: execute `npm test`. Its page-source consumer
-// requires zoomout1 on every rebuilt menu video/poster and nativecrop1 on
+// requires noticker1 on every rebuilt menu video/poster and nativecrop1 on
 // the rebuilt mobile opening, while unchanged opening desktop, poster, and
 // fallback stills stay on brandfree3. Retire when a later media rebuild
 // needs a new cache key.
@@ -123,24 +123,24 @@ test("busts cached enlarged menu and mobile-opening media", async () => {
 
   assert.match(
     pageSource,
-    /\$\{mediaName\}-desktop\.jpg\?v=zoomout1/,
+    /\$\{mediaName\}-desktop\.jpg\?v=noticker1/,
   );
   assert.match(
     pageSource,
-    /\$\{mediaName\}-mobile\.mp4\?v=zoomout1/,
+    /\$\{mediaName\}-mobile\.mp4\?v=noticker1/,
   );
   assert.match(
     pageSource,
-    /\$\{mediaName\}-desktop\.mp4\?v=zoomout1/,
+    /\$\{mediaName\}-desktop\.mp4\?v=noticker1/,
   );
   assert.match(
     pageSource,
-    /\$\{mediaName\}-mobile\.jpg\?v=zoomout1/,
+    /\$\{mediaName\}-mobile\.jpg\?v=noticker1/,
   );
   assert.doesNotMatch(
     pageSource,
-    /\$\{mediaName\}-desktop\.mp4\?v=nativecrop1/,
-    "rebuilt menu assets must not keep the punched-in native-crop cache key",
+    /\$\{mediaName\}-desktop\.mp4\?v=zoomout1/,
+    "rebuilt menu assets must not keep the full-frame ticker cache key",
   );
   assert.match(
     pageSource,
@@ -1663,7 +1663,7 @@ test("preserves the approved people-free menu edit boundaries", async () => {
 
 // Focused encode-quality tripwire at tests/rendered-html.test.mjs for the next
 // menu-media encoder. Activation: execute `npm test`. Its script consumer
-// requires native 1920x1080 desktop and 608x1080 mobile crops with no baked
+// requires native 1920x968 desktop and 544x968 mobile crops with no baked
 // scale-up, browser-safe H.264/yuv420p/faststart, and CRF 21. Retire only if
 // a higher-quality source is adopted or the owner accepts a new encode contract.
 test("keeps the menu encoder on the source-preserving CRF 21 contract", async () => {
@@ -1672,17 +1672,17 @@ test("keeps the menu encoder on the source-preserving CRF 21 contract", async ()
     "utf8",
   );
 
-  assert.match(script, /crop=1920:1080:0:0,setsar=1/);
-  assert.match(script, /crop=608:1080:656:0,setsar=1/);
+  assert.match(script, /crop=1920:968:0:0,setsar=1/);
+  assert.match(script, /crop=544:968:688:0,setsar=1/);
   assert.doesNotMatch(
     script,
     /scale=1920:1080/,
-    "desktop menu output must stay at the native 1920x1080 frame",
+    "desktop menu output must stay at the native 1920x968 ticker-free frame",
   );
   assert.doesNotMatch(
     script,
     /scale=1080:1920/,
-    "mobile menu output must stay at the native 608x1080 crop",
+    "mobile menu output must stay at the native 544x968 crop",
   );
   assert.match(script, /-c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p/);
   assert.match(script, /-movflags \+faststart/);
@@ -1794,7 +1794,7 @@ test("keeps the opening desktop 1080-class and the mobile opening at native crop
 
 // Focused menu-media tripwire at tests/rendered-html.test.mjs for the next site
 // editor changing featured food footage. Activation: execute `npm test`. Its
-// real ffprobe consumer requires desktop 1920x1080 and mobile 608x1080 native
+// real ffprobe consumer requires desktop 1920x968 and mobile 544x968 native
 // crops, and enough duration to read as a complete food beat. Retire only if
 // the menu passage stops using responsive raster video or the owner approves
 // a different resolution/duration contract.
@@ -1807,8 +1807,8 @@ test("keeps every menu encode responsive, native-crop, and long enough to read a
 
   for (const [name, minimumDuration] of names) {
     for (const [variant, width, height] of [
-      ["desktop", 1920, 1080],
-      ["mobile", 608, 1080],
+      ["desktop", 1920, 968],
+      ["mobile", 544, 968],
     ]) {
       const path = `public/media/${name}-${variant}.mp4`;
       const filePath = fileURLToPath(new URL(path, projectRoot));
