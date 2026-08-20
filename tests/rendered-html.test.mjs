@@ -419,6 +419,11 @@ test("keeps the visitor calls to action on the display face", async () => {
   const pokeOrderBlock = blockFor(".dish-poke .dish-cta a {");
   assert.match(pokeOrderBlock, /position:\s*absolute/);
   assert.match(pokeOrderBlock, /right:\s*0\.85rem/);
+  assert.match(
+    css,
+    /@media \(max-width: 760px\) \{[\s\S]*?\.dish-poke \.dish-cta a \{[\s\S]*?display:\s*none/,
+    "the poke Order Now text should leave the mobile page to the order button",
+  );
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);

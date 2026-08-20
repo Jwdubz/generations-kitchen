@@ -733,9 +733,7 @@ h1 strong {
   }
 
   .dish-poke .dish-cta a {
-    right: 0.95rem;
-    margin-top: 0.35rem;
-    font-size: clamp(1rem, 4.6vw, 1.3rem);
+    display: none;
   }
 
   .dish-poke h2 {
