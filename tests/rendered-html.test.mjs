@@ -360,7 +360,7 @@ test("defaults to video-led motion unless the visitor asks for reduced motion", 
 // CTA composition, heading color split, or order language.
 test("keeps the visitor calls to action on the display face", async () => {
   const html = await (await render()).text();
-  assert.match(html, /<h3>HUNGRY YET\?<\/h3>/);
+  assert.match(html, /<h3>\s*HUNGRY\s*<br\s*\/?>\s*YET\?\s*<\/h3>/);
   assert.match(html, /ORDER NOW/);
   assert.match(
     html,
@@ -403,6 +403,7 @@ test("keeps the visitor calls to action on the display face", async () => {
 
   assert.doesNotMatch(ctaBlock, /\bbackground(?:-color)?\s*:/);
   assert.match(hungryBlock, /color:\s*var\(--gold\)/);
+  assert.match(hungryBlock, /text-align:\s*left/);
   assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
@@ -416,7 +417,7 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(pokeCtaBlock, /text-align:\s*right/);
   const pokeOrderBlock = blockFor(".dish-poke .dish-cta a {");
   assert.match(pokeOrderBlock, /position:\s*absolute/);
-  assert.match(pokeOrderBlock, /right:\s*0\.85rem/);
+  assert.match(pokeOrderBlock, /right:\s*1\.45rem/);
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
@@ -546,7 +547,7 @@ test("exports the offer climax and first-party dish carousel", async () => {
   const pokeStart = html.indexOf('id="poke-bowl"');
   const offerStart = html.indexOf('id="offer"');
   const visitStart = html.indexOf('id="visit"');
-  const hungry = html.indexOf("HUNGRY YET?");
+  const hungry = html.search(/HUNGRY[\s\S]*?YET\?/);
   assert.ok(
     pokeStart >= 0 &&
       hungry > pokeStart &&

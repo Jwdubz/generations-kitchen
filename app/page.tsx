@@ -292,7 +292,11 @@ export default async function Home({ searchParams }: HomeProps) {
         }
       >
         <div className="dish-cta">
-          <h3>HUNGRY YET?</h3>
+          <h3>
+            HUNGRY
+            <br />
+            YET?
+          </h3>
           <a href={orderUrl} target="_blank" rel="noreferrer">
             ORDER NOW
           </a>

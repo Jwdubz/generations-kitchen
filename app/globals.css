@@ -490,12 +490,13 @@ h1 strong {
   color: var(--gold);
   font-size: clamp(4.7rem, 10.2vw, 10rem);
   line-height: 0.77;
+  text-align: left;
 }
 
 .dish-poke .dish-cta a {
   position: absolute;
   top: 100%;
-  right: 0.85rem;
+  right: 1.45rem;
   margin-top: 0.4rem;
   font-size: clamp(1.25rem, 2vw, 1.85rem);
 }
@@ -730,7 +731,7 @@ h1 strong {
   }
 
   .dish-poke .dish-cta a {
-    right: 0.95rem;
+    right: 1.65rem;
     margin-top: 0.35rem;
     font-size: clamp(1rem, 4.6vw, 1.3rem);
   }
