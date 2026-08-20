@@ -393,6 +393,8 @@ test("keeps the visitor calls to action on the display face", async () => {
   const headerOrderBlock = blockFor(".order-link {");
   const locoHeadingBlock = blockFor(".dish-loco h2 {");
   const pokeHeadingBlock = blockFor(".dish-poke h2 {");
+  const pokeContentBlock = blockFor(".dish-poke .passage-content {");
+  const pokeCtaBlock = blockFor(".dish-poke .dish-cta {");
   const floatingOrderBlock = blockFor(".floating-order {");
   const headerBlock = blockFor(".site-header {");
   const openingNextBlocks = [...css.matchAll(/\.opening-next\s*\{([^}]*)\}/g)]
@@ -409,6 +411,9 @@ test("keeps the visitor calls to action on the display face", async () => {
     /\.dish-poke \.passage-content \{[^}]*flex-direction:\s*column/,
     "Hungry Yet should sit beside Poke Bowl, not stack under it",
   );
+  assert.match(pokeContentBlock, /justify-content:\s*space-between/);
+  assert.match(pokeContentBlock, /padding-right:\s*0/);
+  assert.match(pokeCtaBlock, /text-align:\s*right/);
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
