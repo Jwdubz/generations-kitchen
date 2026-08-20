@@ -7,7 +7,7 @@ Activation: execute `pwsh -File scripts/build-menu-media.ps1` from the project
 root, optionally overriding SourcePath and OutputDirectory.
 Behavioral check: `npm test` pins the approved people-frame edit boundaries and
 ffprobes the shipped desktop/mobile consumers for native 1920x968 desktop and
-native 544x968 mobile (no baked upscale), and complete clip durations; the
+the same 1920x968 mobile frame (no baked upscale), and complete clip durations; the
 script was also executed against the current source to produce the visually
 reviewed assets.
 Retirement: remove when the site stops consuming responsive raster menu video
@@ -25,13 +25,13 @@ $OutputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
 
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 
-# Desktop keeps the full native 1920 width and crops only the bottom 112px
-# UFC ticker (gold rule at y=970). Mobile keeps the largest even 9:16 window
-# inside that same ticker-free 1920x968 frame (544x968, centered) at native
-# pixels — do not scale to 1080x1920. CRF 21 is the evidence-backed encode
-# against this ~3.2 Mbps source. Do not add sharpening or invent detail.
+# Desktop and mobile both keep the full native 1920 width and crop only the
+# bottom 112px UFC ticker (gold rule at y=970). Mobile shows that same
+# ticker-free 1920x968 frame; do not punch it back into a 9:16 window or
+# scale to 1080x1920. CRF 21 is the evidence-backed encode against this
+# ~3.2 Mbps source. Do not add sharpening or invent detail.
 $desktopFilter = "crop=1920:968:0:0,setsar=1"
-$mobileFilter = "crop=544:968:688:0,setsar=1"
+$mobileFilter = "crop=1920:968:0:0,setsar=1"
 
 function Encode-Clip {
   param(

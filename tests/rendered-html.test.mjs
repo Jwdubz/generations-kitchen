@@ -111,7 +111,7 @@ test("exports the complete Generations Kitchen passage", async () => {
 
 // Focused cache-bust tripwire at tests/rendered-html.test.mjs for the next
 // media-URL editor. Activation: execute `npm test`. Its page-source consumer
-// requires noticker1 on every rebuilt menu video/poster and nativecrop1 on
+// requires foodwide1 on every rebuilt menu video/poster and nativecrop1 on
 // the rebuilt mobile opening, while unchanged opening desktop, poster, and
 // fallback stills stay on brandfree3. Retire when a later media rebuild
 // needs a new cache key.
@@ -123,24 +123,24 @@ test("busts cached enlarged menu and mobile-opening media", async () => {
 
   assert.match(
     pageSource,
-    /\$\{mediaName\}-desktop\.jpg\?v=noticker1/,
+    /\$\{mediaName\}-desktop\.jpg\?v=foodwide1/,
   );
   assert.match(
     pageSource,
-    /\$\{mediaName\}-mobile\.mp4\?v=noticker1/,
+    /\$\{mediaName\}-mobile\.mp4\?v=foodwide1/,
   );
   assert.match(
     pageSource,
-    /\$\{mediaName\}-desktop\.mp4\?v=noticker1/,
+    /\$\{mediaName\}-desktop\.mp4\?v=foodwide1/,
   );
   assert.match(
     pageSource,
-    /\$\{mediaName\}-mobile\.jpg\?v=noticker1/,
+    /\$\{mediaName\}-mobile\.jpg\?v=foodwide1/,
   );
   assert.doesNotMatch(
     pageSource,
-    /\$\{mediaName\}-desktop\.mp4\?v=zoomout1/,
-    "rebuilt menu assets must not keep the full-frame ticker cache key",
+    /\$\{mediaName\}-mobile\.mp4\?v=noticker1/,
+    "rebuilt menu assets must not keep the punched-in mobile cache key",
   );
   assert.match(
     pageSource,
@@ -195,6 +195,11 @@ test("leaves the opening and food media visually unfiltered", async () => {
     .map((match) => match[2])
     .join("\n");
   assert.doesNotMatch(videoBlocks, /\b(?:filter|backdrop-filter)\s*:/);
+  assert.match(
+    css,
+    /@media \(max-width:\s*760px\) \{[\s\S]*?\.food-passage \.passage-video,[\s\S]*?object-fit:\s*contain;/,
+    "mobile food beats must show the same zoomed-out frame instead of a 9:16 punch-in",
+  );
 
   const headerStart = css.indexOf(".site-header {");
   assert.ok(headerStart >= 0, "the fixed header should have a style block");
@@ -1145,13 +1150,13 @@ test("keeps the offer climax from leaking, stacking, or blurring", async () => {
 // the static settled CSS state. Retire when the one-clock climax is
 // intentionally replaced.
 test("samples the offer climax from one continuous master clock", () => {
-  assert.ok(CLIMAX_DURATION_MS >= 4400 && CLIMAX_DURATION_MS <= 4520);
+  assert.ok(CLIMAX_DURATION_MS >= 4210 && CLIMAX_DURATION_MS <= 4330);
   assert.ok(PHASE_MS.shutter >= 350 && PHASE_MS.shutter <= 400);
-  assert.ok(PHASE_MS.blackHold >= 360 && PHASE_MS.blackHold <= 400);
+  assert.ok(PHASE_MS.blackHold >= 180 && PHASE_MS.blackHold <= 200);
   assert.equal(
     PHASE_MS.blackHold,
-    380,
-    "black hold must be exactly half of the prior 760ms plateau",
+    190,
+    "black hold must be exactly half of the prior 380ms plateau",
   );
   assert.equal(
     Object.values(PHASE_MS).reduce((sum, value) => sum + value, 0),
@@ -1673,7 +1678,11 @@ test("keeps the menu encoder on the source-preserving CRF 21 contract", async ()
   );
 
   assert.match(script, /crop=1920:968:0:0,setsar=1/);
-  assert.match(script, /crop=544:968:688:0,setsar=1/);
+  assert.doesNotMatch(
+    script,
+    /crop=544:968:688:0/,
+    "mobile menu output must keep the same 1920x968 frame as desktop",
+  );
   assert.doesNotMatch(
     script,
     /scale=1920:1080/,
@@ -1682,7 +1691,7 @@ test("keeps the menu encoder on the source-preserving CRF 21 contract", async ()
   assert.doesNotMatch(
     script,
     /scale=1080:1920/,
-    "mobile menu output must stay at the native 544x968 crop",
+    "mobile menu output must stay at the native 1920x968 frame",
   );
   assert.match(script, /-c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p/);
   assert.match(script, /-movflags \+faststart/);
@@ -1794,8 +1803,8 @@ test("keeps the opening desktop 1080-class and the mobile opening at native crop
 
 // Focused menu-media tripwire at tests/rendered-html.test.mjs for the next site
 // editor changing featured food footage. Activation: execute `npm test`. Its
-// real ffprobe consumer requires desktop 1920x968 and mobile 544x968 native
-// crops, and enough duration to read as a complete food beat. Retire only if
+// real ffprobe consumer requires desktop 1920x968 and the same 1920x968
+// mobile frame, and enough duration to read as a complete food beat. Retire only if
 // the menu passage stops using responsive raster video or the owner approves
 // a different resolution/duration contract.
 test("keeps every menu encode responsive, native-crop, and long enough to read as a beat", async () => {
@@ -1808,7 +1817,7 @@ test("keeps every menu encode responsive, native-crop, and long enough to read a
   for (const [name, minimumDuration] of names) {
     for (const [variant, width, height] of [
       ["desktop", 1920, 968],
-      ["mobile", 544, 968],
+      ["mobile", 1920, 968],
     ]) {
       const path = `public/media/${name}-${variant}.mp4`;
       const filePath = fileURLToPath(new URL(path, projectRoot));

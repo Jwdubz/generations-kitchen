@@ -644,6 +644,12 @@ h1 strong {
     padding: 2.4rem 1.25rem 5.4rem;
   }
 
+  .food-passage .passage-video,
+  .food-passage .passage-poster img {
+    object-fit: contain;
+    background: var(--ink);
+  }
+
   .floating-order {
     bottom: max(0.85rem, env(safe-area-inset-bottom));
     padding: 0.82rem 1.2rem 0.78rem;

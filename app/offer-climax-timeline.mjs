@@ -12,11 +12,11 @@ Retirement: when the offer climax is removed or its one-clock contract is
 intentionally replaced.
 */
 
-export const CLIMAX_DURATION_MS = 4460;
+export const CLIMAX_DURATION_MS = 4270;
 
 export const PHASE_MS = Object.freeze({
   shutter: 380,
-  blackHold: 380,
+  blackHold: 190,
   ignition: 600,
   whiteHold: 200,
   release: 1600,
