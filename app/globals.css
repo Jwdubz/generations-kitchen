@@ -22,6 +22,7 @@ rendered treatment over the footage.
   --cream: #f4e9cf;
   --red: #b3181f;
   --green: #0b6b3a;
+  --leaf: #47e37d;
   --gold: #f2ad24;
   --white: #fffaf0;
   --beat-viewport-height: 100vh;
@@ -539,12 +540,14 @@ h1 strong {
   align-self: end;
   max-width: 33rem;
   padding-bottom: 0.4rem;
-  text-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.42);
+  text-shadow:
+    0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
+    0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
 }
 
 .visit-actions p {
   margin: 0;
-  color: var(--green);
+  color: var(--leaf);
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   font-weight: 800;
   line-height: 1.42;
@@ -559,7 +562,7 @@ h1 strong {
   flex-wrap: wrap;
   gap: 1rem 2rem;
   margin-top: 1.6rem;
-  color: var(--green);
+  color: var(--leaf);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
   font-size: 1rem;
   font-weight: 950;
