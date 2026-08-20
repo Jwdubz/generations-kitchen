@@ -404,6 +404,7 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.doesNotMatch(ctaBlock, /\bbackground(?:-color)?\s*:/);
   assert.match(hungryBlock, /color:\s*var\(--gold\)/);
   assert.match(hungryBlock, /text-align:\s*left/);
+  assert.match(hungryBlock, /margin-right:\s*1\.45rem/);
   assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
@@ -417,7 +418,7 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(pokeCtaBlock, /text-align:\s*right/);
   const pokeOrderBlock = blockFor(".dish-poke .dish-cta a {");
   assert.match(pokeOrderBlock, /position:\s*absolute/);
-  assert.match(pokeOrderBlock, /right:\s*1\.45rem/);
+  assert.match(pokeOrderBlock, /right:\s*0\.85rem/);
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
