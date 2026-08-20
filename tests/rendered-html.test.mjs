@@ -111,8 +111,8 @@ test("exports the complete Generations Kitchen passage", async () => {
 
 // Focused cache-bust tripwire at tests/rendered-html.test.mjs for the next
 // media-URL editor. Activation: execute `npm test`. Its page-source consumer
-// requires foodwide1 on every rebuilt menu video/poster and nativecrop1 on
-// the rebuilt mobile opening, while unchanged opening desktop, poster, and
+// requires foodwide1 on every rebuilt menu video/poster and openingwide1 on
+// the full-frame mobile opening, while unchanged opening desktop, poster, and
 // fallback stills stay on brandfree3. Retire when a later media rebuild
 // needs a new cache key.
 test("busts cached enlarged menu and mobile-opening media", async () => {
@@ -144,7 +144,15 @@ test("busts cached enlarged menu and mobile-opening media", async () => {
   );
   assert.match(
     pageSource,
-    /max-holloway-opening-mobile\.mp4\?v=nativecrop1/,
+    /max-holloway-opening-mobile\.mp4\?v=openingwide1/,
+  );
+  const openingCss = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    openingCss,
+    /@media \(max-width: 760px\) \{[\s\S]*?\.opening-video \{[\s\S]*?object-fit:\s*contain/,
   );
   assert.match(
     pageSource,
@@ -166,7 +174,7 @@ test("busts cached enlarged menu and mobile-opening media", async () => {
   assert.doesNotMatch(
     pageSource,
     /max-holloway-opening-mobile\.mp4\?v=brandfree3/,
-    "the rebuilt mobile opening must not keep the pre-native-crop cache key",
+    "the rebuilt mobile opening must not keep the pre-wide-frame cache key",
   );
 });
 
@@ -396,6 +404,11 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
+  assert.doesNotMatch(
+    css,
+    /\.dish-poke \.passage-content \{[^}]*flex-direction:\s*column/,
+    "Hungry Yet should sit beside Poke Bowl, not stack under it",
+  );
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
@@ -1744,14 +1757,14 @@ test("ships every responsive motion source, poster, place image, and brand mark"
 });
 
 // Focused tripwire at tests/rendered-html.test.mjs for future opening-media
-// editors. Activation: execute `npm test`. Desktop stays 1920x1080. Mobile
-// must be the native 506x900 portrait crop from the UFC 1080p source, not a
-// baked 1080x1920 upscale, and must keep the 23.5-24.0s approved entrance.
-// Retire only if the opening carrier or source-native crop changes.
-test("keeps the opening desktop 1080-class and the mobile opening at native crop", async () => {
+// editors. Activation: execute `npm test`. Desktop and mobile both stay
+// 1920x1080 so the first beat can show the highest-fidelity opening on
+// phones. Keep the 23.5-24.0s approved entrance. Retire only if the opening
+// carrier changes.
+test("keeps the opening desktop and mobile at the same 1080-class frame", async () => {
   const expected = [
     ["public/media/max-holloway-opening-desktop.mp4", 1920, 1080],
-    ["public/media/max-holloway-opening-mobile.mp4", 506, 900],
+    ["public/media/max-holloway-opening-mobile.mp4", 1920, 1080],
   ];
 
   for (const [path, width, height] of expected) {
@@ -1793,7 +1806,13 @@ test("keeps the opening desktop 1080-class and the mobile opening at native crop
   assert.match(openingScript, /trim=start=241\.00:end=242\.600/);
   assert.match(openingScript, /trim=start=275\.00:end=276\.833/);
   assert.match(openingScript, /trim=start=284\.40:end=286\.700/);
-  assert.match(openingScript, /crop=506:900:/);
+  assert.match(openingScript, /max-holloway-opening-desktop\.mp4/);
+  assert.match(openingScript, /Copy-Item -LiteralPath \$desktop -Destination \$target/);
+  assert.doesNotMatch(
+    openingScript,
+    /crop=506:900:/,
+    "mobile opening should ship the full desktop frame, not a portrait crop",
+  );
   assert.doesNotMatch(
     openingScript,
     /scale=1080:1920/,

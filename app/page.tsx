@@ -198,12 +198,14 @@ export default async function Home({ searchParams }: HomeProps) {
           {/*
             Maintained asset:
             public/media/max-holloway-opening-{desktop,mobile}.mp4.
-            Future consumer: the site's cold-load visitor. Activation:
-            auto-load through these responsive video sources. Behavioral check:
-            npm test ffprobes both encodes and browser review exercises the
-            entrance, handoff, loop, and reduced-motion path. Owner has
-            confirmed permission to publish this opening footage. Retire when
-            this restaurant-visit carrier is replaced.
+            Mobile ships the same 1920x1080 desktop cut so phones get the
+            highest-fidelity first beat. Future consumer: the site's
+            cold-load visitor. Activation: auto-load through these
+            responsive video sources. Behavioral check: npm test ffprobes
+            both encodes and browser review exercises the entrance, handoff,
+            loop, and reduced-motion path. Owner has confirmed permission to
+            publish this opening footage. Retire when this restaurant-visit
+            carrier is replaced.
           */}
           <video
             className="opening-video"
@@ -217,7 +219,7 @@ export default async function Home({ searchParams }: HomeProps) {
           >
             <source
               media="(max-width: 760px)"
-              src="/media/max-holloway-opening-mobile.mp4?v=nativecrop1"
+              src="/media/max-holloway-opening-mobile.mp4?v=openingwide1"
               type="video/mp4"
             />
             <source
