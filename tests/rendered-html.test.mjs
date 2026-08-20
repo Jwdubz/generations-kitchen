@@ -414,6 +414,9 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(pokeContentBlock, /justify-content:\s*space-between/);
   assert.match(pokeContentBlock, /padding-right:\s*0/);
   assert.match(pokeCtaBlock, /text-align:\s*right/);
+  const pokeOrderBlock = blockFor(".dish-poke .dish-cta a {");
+  assert.match(pokeOrderBlock, /position:\s*absolute/);
+  assert.match(pokeOrderBlock, /right:\s*0\.85rem/);
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
