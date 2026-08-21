@@ -243,11 +243,6 @@ export default async function Home({ searchParams }: HomeProps) {
             </span>
           </h1>
         </div>
-
-        <a className="opening-next" href="#hurricane">
-          <span>Meet the plate</span>
-          <span aria-hidden="true">↓</span>
-        </a>
       </section>
 
       <FoodPassage

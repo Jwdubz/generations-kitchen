@@ -334,35 +334,6 @@ h1 strong {
   font: inherit;
 }
 
-.opening-next {
-  position: absolute;
-  z-index: 3;
-  right: clamp(1.25rem, 4.2vw, 4.5rem);
-  bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding: 0 0 0.28rem;
-  color: var(--cream);
-  font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(1.15rem, 1.6vw, 1.45rem);
-  font-weight: 950;
-  letter-spacing: -0.045em;
-  line-height: 0.95;
-  text-shadow: 0 0.15rem 0.8rem rgba(0, 0, 0, 0.5);
-  text-transform: uppercase;
-}
-
-.opening-next span:last-child {
-  color: var(--green);
-  font-size: 1.2rem;
-}
-
-.opening-next:hover,
-.opening-next:focus-visible {
-  color: var(--gold);
-}
-
 .food-passage {
   background: var(--ink);
 }
@@ -650,12 +621,6 @@ h1 strong {
   h1 {
     font-size: clamp(3.2rem, 16vw, 5.7rem);
     line-height: 0.81;
-  }
-
-  .opening-next {
-    left: 1.25rem;
-    right: auto;
-    bottom: 5.2rem;
   }
 
   .passage-content,

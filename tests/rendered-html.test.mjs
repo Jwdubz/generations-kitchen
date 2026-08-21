@@ -397,9 +397,6 @@ test("keeps the visitor calls to action on the display face", async () => {
   const pokeCtaBlock = blockFor(".dish-poke .dish-cta {");
   const floatingOrderBlock = blockFor(".floating-order {");
   const headerBlock = blockFor(".site-header {");
-  const openingNextBlocks = [...css.matchAll(/\.opening-next\s*\{([^}]*)\}/g)]
-    .map((match) => match[1])
-    .join("\n");
 
   assert.doesNotMatch(ctaBlock, /\bbackground(?:-color)?\s*:/);
   assert.match(hungryBlock, /color:\s*var\(--gold\)/);
@@ -443,10 +440,8 @@ test("keeps the visitor calls to action on the display face", async () => {
     css,
     /\.floating-order\s*>\s*span\s*\{[^}]*color:\s*var\(--green\)/s,
   );
-  assert.match(
-    css,
-    /\.opening-next\s+span:last-child\s*\{[^}]*color:\s*var\(--green\)/s,
-  );
+  assert.doesNotMatch(html, /Meet the plate/);
+  assert.doesNotMatch(css, /\.opening-next\b/);
   assert.ok(
     html.indexOf('class="floating-order"') <
       html.indexOf('class="smooth-scroll-wrapper"'),
@@ -454,8 +449,6 @@ test("keeps the visitor calls to action on the display face", async () => {
   );
   assert.match(headerBlock, /position:\s*fixed/);
   assert.match(headerBlock, /z-index:\s*20/);
-  assert.match(openingNextBlocks, /font-family:\s*"Arial Black"/);
-  assert.doesNotMatch(openingNextBlocks, /\bbackground(?:-color)?\s*:/);
   assert.match(
     css,
     /\.reduced-motion-sequence img \{\s*opacity: 1;\s*animation: none;/,
