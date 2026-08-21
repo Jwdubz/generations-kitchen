@@ -430,6 +430,10 @@ test("keeps the visitor calls to action on the display face", async () => {
     css,
     /\.visit-address \{[\s\S]*?text-shadow:[\s\S]*?0 0\.06rem 0\.16rem rgba\(0, 0, 0, 0\.86\)/,
   );
+  assert.match(
+    css,
+    /\.visit-address,[\s\S]*?\.visit-links a:visited \{[\s\S]*?color:\s*var\(--leaf\)/,
+  );
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
   assert.doesNotMatch(

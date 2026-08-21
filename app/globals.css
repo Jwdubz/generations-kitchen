@@ -550,8 +550,16 @@ h1 strong {
   margin: 0;
 }
 
-.visit-address {
+.visit-address,
+.visit-address:link,
+.visit-address:visited,
+.visit-links a,
+.visit-links a:link,
+.visit-links a:visited {
   color: var(--leaf);
+}
+
+.visit-address {
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   font-weight: 800;
   line-height: 1.42;
@@ -574,7 +582,6 @@ h1 strong {
   flex-wrap: wrap;
   gap: 1rem 2rem;
   margin-top: 1.6rem;
-  color: var(--leaf);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
   font-size: 1rem;
   font-weight: 950;
