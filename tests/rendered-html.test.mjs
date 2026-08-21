@@ -800,10 +800,20 @@ test("exports the offer climax and first-party dish carousel", async () => {
   );
   assert.match(
     css,
-    /\.offer-card \{[\s\S]*?scroll-snap-stop:\s*always;/,
-    "each card must be a hard snap stop so momentum cannot skip dishes",
+    /\.offer-card \{[\s\S]*?scroll-snap-align:\s*center;[\s\S]*?scroll-snap-stop:\s*always;/,
+    "each card must snap to the track center and stop there",
+  );
+  assert.match(
+    css,
+    /\.offer-track::before,[\s\S]*?\.offer-track::after \{[\s\S]*?flex:\s*0 0 calc\(\(100% - var\(--offer-card-width\)\) \/ 2\)/,
+    "side spacers must let the first and last cards rest at center",
   );
   assert.match(css, /\.offer-card span \{[\s\S]*?text-align:\s*center;/);
+  assert.match(
+    climaxSource,
+    /cardCenter - trackCenter/,
+    "arrow and wheel steps must aim at the card center, not its left edge",
+  );
   assert.match(
     climaxSource,
     /stepOfferCarousel\(/,

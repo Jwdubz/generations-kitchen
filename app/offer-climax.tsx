@@ -21,7 +21,7 @@ clear exposure by opacity only. Radius never retracts. One RAF loop
 samples app/offer-climax-timeline.mjs and owns every in-flight pixel.
 Chrome and beat-navigation stay locked until `settled`.
 Desktop Previous/Next advances a selected DOM index independently of the
-clamped physical scrollLeft, aims at that adjacent card's measured offset,
+clamped physical scrollLeft, aims at that adjacent card's centered offset,
 and ignores further button input until that card rests. One horizontal
 wheel/trackpad gesture over the track requests that same adjacent step and
 stays locked until the gesture goes idle. Vertical wheel intent is not
@@ -370,10 +370,13 @@ export function OfferTransition() {
 }
 
 function measureOfferCardOffsets(track: HTMLElement) {
-  const trackLeft = track.getBoundingClientRect().left;
-  return [...track.querySelectorAll<HTMLElement>(".offer-card")].map(
-    (card) => track.scrollLeft + card.getBoundingClientRect().left - trackLeft,
-  );
+  const trackRect = track.getBoundingClientRect();
+  const trackCenter = trackRect.left + trackRect.width / 2;
+  return [...track.querySelectorAll<HTMLElement>(".offer-card")].map((card) => {
+    const cardRect = card.getBoundingClientRect();
+    const cardCenter = cardRect.left + cardRect.width / 2;
+    return track.scrollLeft + (cardCenter - trackCenter);
+  });
 }
 
 export function OfferMenuTrack({ children }: { children: React.ReactNode }) {

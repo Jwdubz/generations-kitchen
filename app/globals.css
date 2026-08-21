@@ -1101,6 +1101,7 @@ main:not(.force-motion) .offer-ray {
 }
 
 .offer-carousel {
+  --offer-card-width: min(16.5rem, 72vw);
   width: min(100%, 72rem);
   min-width: 0;
   max-width: 100%;
@@ -1135,17 +1136,21 @@ main:not(.force-motion) .offer-ray {
 .offer-track {
   min-width: 0;
   display: flex;
-  gap: 0.85rem;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.15rem 0.1rem 0.4rem;
+  padding: 0.15rem 0 0.4rem;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 0.1rem;
   touch-action: pan-x pan-y;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
+}
+
+.offer-track::before,
+.offer-track::after {
+  content: "";
+  flex: 0 0 calc((100% - var(--offer-card-width)) / 2);
 }
 
 .offer-track::-webkit-scrollbar {
@@ -1154,10 +1159,14 @@ main:not(.force-motion) .offer-ray {
 
 .offer-card {
   flex: 0 0 auto;
-  width: min(16.5rem, 72vw);
-  scroll-snap-align: start;
+  width: var(--offer-card-width);
+  scroll-snap-align: center;
   scroll-snap-stop: always;
   color: var(--cream);
+}
+
+.offer-card + .offer-card {
+  margin-left: 0.85rem;
 }
 
 .offer-card img {
@@ -1228,8 +1237,8 @@ html[data-offer-climax="settled"] main.force-motion .offer-action {
     display: flex;
   }
 
-  .offer-card {
-    width: 15.5rem;
+  .offer-carousel {
+    --offer-card-width: 15.5rem;
   }
 }
 
@@ -1257,7 +1266,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-action {
     white-space: nowrap;
   }
 
-  .offer-card {
-    width: calc(100% - 3.4rem);
+  .offer-carousel {
+    --offer-card-width: calc(100% - 3.4rem);
   }
 }
