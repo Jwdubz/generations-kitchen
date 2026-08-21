@@ -91,6 +91,10 @@ test("exports the complete Generations Kitchen passage", async () => {
   assert.doesNotMatch(html, /hurricane-fries-(?:desktop|mobile)\.mp4/);
 
   assert.match(html, /6280 S Valley View Blvd/);
+  assert.match(
+    html,
+    /class="visit-address"[^>]*href="https:\/\/www\.google\.com\/maps\/search\/\?api=1/,
+  );
   assert.match(html, /Directions/);
   assert.match(html, /generationskitchenlv/);
   assert.match(html, /https:\/\/generations\.jarrettwroten\.com\/og\.png/);
@@ -422,6 +426,10 @@ test("keeps the visitor calls to action on the display face", async () => {
     /\.visit-passage h2 \{[\s\S]*?text-shadow:[\s\S]*?0 0\.06rem 0\.16rem rgba\(0, 0, 0, 0\.86\)/,
   );
   assert.doesNotMatch(css, /\.visit-passage h2 \{[\s\S]*?-webkit-text-stroke/);
+  assert.match(
+    css,
+    /\.visit-address \{[\s\S]*?text-shadow:[\s\S]*?0 0\.06rem 0\.16rem rgba\(0, 0, 0, 0\.86\)/,
+  );
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
   assert.doesNotMatch(

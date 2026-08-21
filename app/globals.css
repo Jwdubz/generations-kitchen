@@ -548,10 +548,21 @@ h1 strong {
 
 .visit-actions p {
   margin: 0;
+}
+
+.visit-address {
   color: var(--leaf);
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   font-weight: 800;
   line-height: 1.42;
+  text-shadow:
+    0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
+    0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
+}
+
+.visit-address:hover,
+.visit-address:focus-visible {
+  color: var(--white);
 }
 
 .visit-order {
@@ -727,7 +738,7 @@ h1 strong {
     padding-bottom: 0;
   }
 
-  .visit-actions p {
+  .visit-address {
     font-size: 1rem;
   }
 

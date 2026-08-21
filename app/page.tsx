@@ -375,9 +375,16 @@ export default async function Home({ searchParams }: HomeProps) {
 
           <div className="visit-actions">
             <p>
-              6280 S Valley View Blvd
-              <br />
-              Building A, Suite 100 · Las Vegas
+              <a
+                className="visit-address"
+                href={directionsUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                6280 S Valley View Blvd
+                <br />
+                Building A, Suite 100 · Las Vegas
+              </a>
             </p>
 
             <a
