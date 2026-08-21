@@ -525,6 +525,11 @@ h1 strong {
   max-width: 7ch;
 }
 
+.visit-passage h2 strong {
+  color: var(--gold);
+  font: inherit;
+}
+
 .visit-actions {
   align-self: end;
   max-width: 33rem;

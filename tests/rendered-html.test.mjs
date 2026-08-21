@@ -60,6 +60,11 @@ test("exports the complete Generations Kitchen passage", async () => {
   const html = await response.text();
   assert.match(html, /Generations Kitchen \| Hawai‘i Kine Grindz in Las Vegas/);
   assert.match(html, /The Ninth Island/);
+  assert.doesNotMatch(html, /here\./);
+  assert.doesNotMatch(html, /Chicken\./);
+  assert.doesNotMatch(html, /Moco\./);
+  assert.doesNotMatch(html, /Bowl\./);
+  assert.match(html, /<strong>hungry<\/strong>\./);
   assert.match(html, /max-holloway-opening-desktop\.mp4/);
   assert.match(html, /max-holloway-opening-mobile\.mp4/);
   assert.match(html, /class="opening-copy"><h1 id="opening-title"/);
@@ -403,6 +408,10 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(hungryBlock, /text-align:\s*left/);
   assert.match(hungryBlock, /margin-right:\s*1\.45rem/);
   assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
+  assert.match(
+    css,
+    /\.visit-passage h2 strong \{[\s\S]*?color:\s*var\(--gold\)/,
+  );
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
   assert.doesNotMatch(

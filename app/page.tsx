@@ -239,7 +239,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <h1 id="opening-title">
             <span>The Ninth Island</span>
             <span>
-              eats <strong>here.</strong>
+              eats <strong>here</strong>
             </span>
           </h1>
         </div>
@@ -254,7 +254,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <>
             Hurricane
             <br />
-            Chicken.
+            Chicken
           </>
         }
       />
@@ -268,7 +268,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <>
             Loco
             <br />
-            Moco.
+            Moco
           </>
         }
       />
@@ -282,7 +282,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <>
             Poke
             <br />
-            Bowl.
+            Bowl
           </>
         }
       >
@@ -370,7 +370,7 @@ export default async function Home({ searchParams }: HomeProps) {
           <h2 id="visit-title">
             Pull up
             <br />
-            hungry.
+            <strong>hungry</strong>.
           </h2>
 
           <div className="visit-actions">
