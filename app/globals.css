@@ -671,9 +671,7 @@ h1 strong {
 
   .opening-video {
     object-fit: contain;
-    object-position: center bottom;
-    height: auto;
-    bottom: calc(6.7rem + 1.75 * clamp(3.2rem, 16vw, 5.7rem));
+    object-position: center;
     background: #080504;
   }
 
