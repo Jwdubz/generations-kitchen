@@ -1175,6 +1175,7 @@ main:not(.force-motion) .offer-ray {
   font-weight: 950;
   letter-spacing: -0.04em;
   line-height: 1.15;
+  text-align: center;
   text-transform: uppercase;
 }
 

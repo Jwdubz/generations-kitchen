@@ -803,6 +803,7 @@ test("exports the offer climax and first-party dish carousel", async () => {
     /\.offer-card \{[\s\S]*?scroll-snap-stop:\s*always;/,
     "each card must be a hard snap stop so momentum cannot skip dishes",
   );
+  assert.match(css, /\.offer-card span \{[\s\S]*?text-align:\s*center;/);
   assert.match(
     climaxSource,
     /stepOfferCarousel\(/,
