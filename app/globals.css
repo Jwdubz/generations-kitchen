@@ -523,17 +523,9 @@ h1 strong {
 
 .visit-passage h2 {
   max-width: 7ch;
-  -webkit-text-stroke: 0.045em #000;
-  paint-order: stroke fill;
   text-shadow:
-    -0.03em -0.03em 0 #000,
-    0.03em -0.03em 0 #000,
-    -0.03em 0.03em 0 #000,
-    0.03em 0.03em 0 #000,
-    -0.045em 0 0 #000,
-    0.045em 0 0 #000,
-    0 -0.045em 0 #000,
-    0 0.045em 0 #000;
+    0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
+    0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
 }
 
 .visit-passage h2 span {

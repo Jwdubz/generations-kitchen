@@ -419,9 +419,9 @@ test("keeps the visitor calls to action on the display face", async () => {
   );
   assert.match(
     css,
-    /\.visit-passage h2 \{[\s\S]*?-webkit-text-stroke:\s*0\.045em #000/,
+    /\.visit-passage h2 \{[\s\S]*?text-shadow:[\s\S]*?0 0\.06rem 0\.16rem rgba\(0, 0, 0, 0\.86\)/,
   );
-  assert.match(css, /\.visit-passage h2 \{[\s\S]*?paint-order:\s*stroke fill/);
+  assert.doesNotMatch(css, /\.visit-passage h2 \{[\s\S]*?-webkit-text-stroke/);
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
   assert.doesNotMatch(
