@@ -152,7 +152,7 @@ test("busts cached enlarged menu and mobile-opening media", async () => {
   );
   assert.match(
     openingCss,
-    /@media \(max-width: 760px\) \{[\s\S]*?\.opening-video \{[\s\S]*?object-fit:\s*contain[\s\S]*?object-position:\s*center calc\(50% - 75px\)/,
+    /@media \(max-width: 760px\) \{[\s\S]*?\.opening-video \{[\s\S]*?height:\s*calc\(100vw \* 968 \/ 1920\)[\s\S]*?object-fit:\s*cover/,
   );
   assert.match(
     pageSource,

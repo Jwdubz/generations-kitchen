@@ -670,8 +670,13 @@ h1 strong {
   }
 
   .opening-video {
-    object-fit: contain;
-    object-position: center calc(50% - 75px);
+    inset: auto;
+    left: 0;
+    width: 100%;
+    height: calc(100vw * 968 / 1920);
+    top: calc(50% - (100vw * 968 / 1920) / 2 - 75px);
+    object-fit: cover;
+    object-position: center;
     background: #080504;
   }
 
