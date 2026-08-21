@@ -499,25 +499,26 @@ h1 strong {
 }
 
 .visit-frame-one {
-  object-position: center 44%;
+  object-position: 48% center;
 }
 
 .visit-frame-two {
-  object-position: center 42%;
+  object-position: 44% center;
   animation-delay: 6s;
 }
 
 .visit-frame-three {
-  object-position: center 55%;
+  object-position: 37% center;
   animation-delay: 12s;
 }
 
 .visit-content {
   min-height: var(--beat-viewport-height);
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(19rem, 0.6fr);
-  align-items: end;
-  gap: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1.35rem;
   padding: clamp(3rem, 7vw, 6.5rem) clamp(1.25rem, 4.2vw, 4.5rem);
 }
 
@@ -538,9 +539,9 @@ h1 strong {
 }
 
 .visit-actions {
-  align-self: end;
+  align-self: flex-start;
   max-width: 33rem;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0;
   text-shadow:
     0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
     0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
@@ -688,11 +689,8 @@ h1 strong {
   }
 
   .visit-content {
-    display: flex;
-    flex-direction: column;
     align-items: stretch;
-    justify-content: flex-end;
-    gap: 1.35rem;
+    padding: 2.4rem 1.25rem 5.4rem;
   }
 
   .food-passage h2,
@@ -741,10 +739,6 @@ h1 strong {
     color: var(--white);
   }
 
-  .visit-actions {
-    padding-bottom: 0;
-  }
-
   .visit-address {
     font-size: 1rem;
   }
@@ -756,18 +750,6 @@ h1 strong {
 
   .visit-links {
     font-size: 1rem;
-  }
-
-  .visit-frame-one {
-    object-position: 48% center;
-  }
-
-  .visit-frame-two {
-    object-position: 44% center;
-  }
-
-  .visit-frame-three {
-    object-position: 37% center;
   }
 }
 
@@ -1233,6 +1215,16 @@ html[data-offer-climax="settled"] main.force-motion .offer-action {
 }
 
 @media (min-width: 761px) {
+  .opening-video,
+  .food-passage .passage-video,
+  .food-passage .passage-poster img {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
   .offer-carousel-controls {
     display: flex;
   }

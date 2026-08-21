@@ -218,6 +218,17 @@ test("leaves the opening and food media visually unfiltered", async () => {
     /@media \(max-width:\s*760px\) \{[\s\S]*?\.food-passage \.passage-video,[\s\S]*?object-fit:\s*contain;/,
     "mobile food beats must show the same zoomed-out frame instead of a 9:16 punch-in",
   );
+  assert.match(
+    css,
+    /@media \(min-width: 761px\) \{[\s\S]*?\.opening-video,[\s\S]*?\.food-passage \.passage-video,[\s\S]*?height:\s*100%;[\s\S]*?object-fit:\s*cover/,
+    "desktop opening and food videos must stay full-bleed",
+  );
+  assert.match(
+    css,
+    /\.visit-content \{[\s\S]*?flex-direction:\s*column/,
+    "the last-beat lockup must stack on desktop the same way it does on mobile",
+  );
+  assert.doesNotMatch(css, /grid-template-columns:/);
 
   const headerStart = css.indexOf(".site-header {");
   assert.ok(headerStart >= 0, "the fixed header should have a style block");
