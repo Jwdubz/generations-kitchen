@@ -368,9 +368,9 @@ export default async function Home({ searchParams }: HomeProps) {
 
         <div className="visit-content">
           <h2 id="visit-title">
-            Pull up
+            <span>Pull up</span>
             <br />
-            <strong>hungry</strong>.
+            <strong>hungry.</strong>
           </h2>
 
           <div className="visit-actions">

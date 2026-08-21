@@ -64,7 +64,8 @@ test("exports the complete Generations Kitchen passage", async () => {
   assert.doesNotMatch(html, /Chicken\./);
   assert.doesNotMatch(html, /Moco\./);
   assert.doesNotMatch(html, /Bowl\./);
-  assert.match(html, /<strong>hungry<\/strong>\./);
+  assert.match(html, /<span>Pull up<\/span>/);
+  assert.match(html, /<strong>hungry\.<\/strong>/);
   assert.match(html, /max-holloway-opening-desktop\.mp4/);
   assert.match(html, /max-holloway-opening-mobile\.mp4/);
   assert.match(html, /class="opening-copy"><h1 id="opening-title"/);
@@ -410,8 +411,17 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
   assert.match(
     css,
+    /\.visit-passage h2 span \{[\s\S]*?color:\s*var\(--leaf\)/,
+  );
+  assert.match(
+    css,
     /\.visit-passage h2 strong \{[\s\S]*?color:\s*var\(--gold\)/,
   );
+  assert.match(
+    css,
+    /\.visit-passage h2 \{[\s\S]*?-webkit-text-stroke:\s*0\.045em #000/,
+  );
+  assert.match(css, /\.visit-passage h2 \{[\s\S]*?paint-order:\s*stroke fill/);
   assert.match(pokeHeadingBlock, /color:\s*var\(--white\)/);
   assert.doesNotMatch(pokeHeadingBlock, /var\(--gold\)/);
   assert.doesNotMatch(
