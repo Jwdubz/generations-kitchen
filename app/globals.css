@@ -671,7 +671,7 @@ h1 strong {
 
   .opening-video {
     object-fit: contain;
-    object-position: center calc(50% - 50px);
+    object-position: center calc(50% - 60px);
     background: #080504;
   }
 
