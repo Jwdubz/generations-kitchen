@@ -192,7 +192,12 @@ html.smooth-scroll-active .smooth-scroll-wrapper {
 .brand img {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.36));
+  filter:
+    drop-shadow(0.65px 0 0 rgba(0, 0, 0, 1))
+    drop-shadow(-0.65px 0 0 rgba(0, 0, 0, 1))
+    drop-shadow(0 0.65px 0 rgba(0, 0, 0, 1))
+    drop-shadow(0 -0.65px 0 rgba(0, 0, 0, 1))
+    drop-shadow(0 0.35rem 1rem rgba(0, 0, 0, 0.36));
 }
 
 nav {
@@ -208,6 +213,9 @@ nav a {
 }
 
 nav a:not(.order-link) {
+  color: var(--gold);
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 1);
+  paint-order: stroke fill;
   border-bottom: 0.15rem solid transparent;
 }
 
@@ -397,7 +405,6 @@ h1 strong {
   line-height: 0.8;
 }
 
-.dish-cta a,
 .visit-order {
   display: inline-flex;
   align-items: center;
@@ -415,8 +422,6 @@ h1 strong {
   border-bottom: 0.16rem solid var(--gold);
 }
 
-.dish-cta a:hover,
-.dish-cta a:focus-visible,
 .visit-order:hover,
 .visit-order:focus-visible {
   color: var(--white);
@@ -447,7 +452,6 @@ h1 strong {
 }
 
 .dish-poke .dish-cta {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -463,14 +467,6 @@ h1 strong {
   line-height: 0.77;
   text-align: left;
   margin-right: 1.45rem;
-}
-
-.dish-poke .dish-cta a {
-  position: absolute;
-  top: 100%;
-  right: 0.85rem;
-  margin-top: 0.4rem;
-  font-size: clamp(1.25rem, 2vw, 1.85rem);
 }
 
 .visit-passage {
@@ -516,17 +512,32 @@ h1 strong {
   min-height: var(--beat-viewport-height);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-end;
   gap: 1.35rem;
   padding: clamp(3rem, 7vw, 6.5rem) clamp(1.25rem, 4.2vw, 4.5rem);
+  text-align: center;
 }
 
 .visit-passage h2 {
   max-width: 7ch;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12em;
   text-shadow:
     0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
     0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
+}
+
+.visit-passage h2 br {
+  display: none;
+}
+
+.visit-passage h2 span,
+.visit-passage h2 strong {
+  display: block;
 }
 
 .visit-passage h2 span {
@@ -539,9 +550,10 @@ h1 strong {
 }
 
 .visit-actions {
-  align-self: flex-start;
+  align-self: center;
   max-width: 33rem;
   padding-bottom: 0;
+  text-align: center;
   text-shadow:
     0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
     0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
@@ -581,6 +593,7 @@ h1 strong {
 .visit-links {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem 2rem;
   margin-top: 1.6rem;
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
@@ -689,7 +702,10 @@ h1 strong {
   }
 
   .visit-content {
-    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     padding: 2.4rem 1.25rem 5.4rem;
   }
 
@@ -705,11 +721,6 @@ h1 strong {
 
   .dish-cta h3 {
     font-size: clamp(3.1rem, 13.3vw, 4rem);
-  }
-
-  .dish-cta a {
-    margin-top: 1rem;
-    font-size: clamp(1.55rem, 7.2vw, 2.25rem);
   }
 
   .dish-loco .passage-content {
@@ -729,10 +740,6 @@ h1 strong {
     font-size: clamp(3.25rem, 14vw, 4.7rem);
     line-height: 0.79;
     margin-right: 1.65rem;
-  }
-
-  .dish-poke .dish-cta a {
-    display: none;
   }
 
   .dish-poke h2 {

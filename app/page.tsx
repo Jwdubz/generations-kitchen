@@ -292,9 +292,6 @@ export default async function Home({ searchParams }: HomeProps) {
             <br />
             YET?
           </h3>
-          <a href={orderUrl} target="_blank" rel="noreferrer">
-            ORDER NOW
-          </a>
         </div>
       </FoodPassage>
 

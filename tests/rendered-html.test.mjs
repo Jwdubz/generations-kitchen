@@ -226,9 +226,18 @@ test("leaves the opening and food media visually unfiltered", async () => {
   assert.match(
     css,
     /\.visit-content \{[\s\S]*?flex-direction:\s*column/,
-    "the last-beat lockup must stack on desktop the same way it does on mobile",
+    "the last-beat lockup must stay a stacked flex column",
   );
-  assert.doesNotMatch(css, /grid-template-columns:/);
+  assert.doesNotMatch(
+    css,
+    /\.visit-content\s*\{[^}]*display:\s*grid/,
+    "no Visit grid display may remain",
+  );
+  assert.doesNotMatch(
+    css,
+    /grid-template-columns:/,
+    "no Visit grid-template-columns may remain",
+  );
 
   const headerStart = css.indexOf(".site-header {");
   assert.ok(headerStart >= 0, "the fixed header should have a style block");
@@ -372,32 +381,63 @@ test("defaults to video-led motion unless the visitor asks for reduced motion", 
 
 // Focused CTA-surface tripwire at tests/rendered-html.test.mjs for future page
 // editors. Activation: execute `npm test`. Its server-rendered HTML and
-// production CSS consumers require the fixed ORDER NOW header with a
+// production CSS consumers require the fixed Order Now header with a
 // decorative green up-right arrow, gold Loco heading, white Poke heading,
-// the Hungry Yet / Order Now lockup on Poke Bowl staying gold, the shared
-// display face, the pill-shaped header action, and one fixed bottom-center
-// order action outside the moving passage, with directional arrows held to
-// the same approved deep green. Retire if the owner approves a different
-// CTA composition, heading color split, or order language.
+// gold Hungry Yet on Poke Bowl with no Poke dish-cta anchor, gold header
+// Menu/Instagram at rest with a half-pixel black stroke, the logo's
+// ambient shadow plus a 0.65px black alpha-edge, the shared display face,
+// the pill-shaped header action, one fixed bottom-center order action
+// outside the moving passage, and the centered Visit lockup that stacks
+// title, address, Order Now, Directions, and Instagram as one middle
+// column without a panel. Directional arrows stay the approved
+// deep green.
+// Retire if the owner approves a different CTA composition, heading color
+// split, visit lockup, or order language.
 test("keeps the visitor calls to action on the display face", async () => {
   const html = await (await render()).text();
   assert.match(html, /<h3>\s*HUNGRY\s*<br\s*\/?>\s*YET\?\s*<\/h3>/);
-  assert.match(html, /ORDER NOW/);
+  assert.match(
+    html,
+    /<a href="https:\/\/generationskitchenvegas\.com\/menu" target="_blank" rel="noreferrer">\s*Menu\s*<\/a>/,
+  );
+  assert.match(
+    html,
+    /<a href="https:\/\/www\.instagram\.com\/generationskitchenlv\/" target="_blank" rel="noreferrer">\s*Instagram\s*<\/a>/,
+  );
   assert.match(
     html,
     /class="order-link"[^>]*>\s*Order Now\s*<span aria-hidden="true">↗<\/span>/,
   );
-  assert.match(html, /class="floating-order"/);
+  assert.match(
+    html,
+    /class="floating-order"[^>]*>\s*Order Now\s*<span aria-hidden="true">↗<\/span>/,
+  );
+  assert.match(
+    html,
+    /class="visit-order"[^>]*>\s*Order now\s*<span aria-hidden="true">↗<\/span>/,
+  );
+  assert.match(
+    html,
+    /class="offer-action"[^>]*>\s*\$10 OFF YOUR FIRST ORDER\s*<\/a>/,
+  );
   assert.doesNotMatch(html, /Order online/i);
   assert.doesNotMatch(html, /dish-detail|Marinated boneless chicken|Get the plate/);
 
   const pokeStart = html.indexOf('id="poke-bowl"');
   const offerStart = html.indexOf('id="offer"');
   const dishCta = html.indexOf('class="dish-cta"');
+  const hungry = html.search(/<h3>\s*HUNGRY\s*<br\s*\/?>\s*YET\?\s*<\/h3>/);
   assert.ok(
-    pokeStart >= 0 && dishCta > pokeStart && dishCta < offerStart,
-    "the Hungry Yet / Order Now lockup should live on Poke Bowl",
+    pokeStart >= 0 &&
+      dishCta > pokeStart &&
+      dishCta < offerStart &&
+      hungry > pokeStart &&
+      hungry < offerStart,
+    "HUNGRY YET? should remain on Poke Bowl before the offer beat",
   );
+  const pokeHtml = html.slice(pokeStart, offerStart);
+  assert.doesNotMatch(pokeHtml, /ORDER NOW/);
+  assert.doesNotMatch(pokeHtml, /<a\b/);
 
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const blockFor = (selector) => {
@@ -407,11 +447,61 @@ test("keeps the visitor calls to action on the display face", async () => {
     const closeBrace = css.indexOf("}", openBrace);
     return css.slice(openBrace + 1, closeBrace);
   };
+  const mediaBlocks = (query) => {
+    const source = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    const blocks = [];
+    const needle = `@media ${query}`;
+    let from = 0;
+    while (from < source.length) {
+      const start = source.indexOf(needle, from);
+      if (start === -1) break;
+      const openBrace = source.indexOf("{", start);
+      let depth = 0;
+      let end = openBrace;
+      for (; end < source.length; end += 1) {
+        if (source[end] === "{") depth += 1;
+        else if (source[end] === "}") {
+          depth -= 1;
+          if (depth === 0) {
+            blocks.push(source.slice(openBrace + 1, end));
+            end += 1;
+            break;
+          }
+        }
+      }
+      from = end;
+    }
+    return blocks;
+  };
+  const nestedBlocksFor = (chunk, selector) => {
+    const blocks = [];
+    let from = 0;
+    while (from < chunk.length) {
+      const selectorIndex = chunk.indexOf(selector, from);
+      if (selectorIndex === -1) break;
+      const openBrace = chunk.indexOf("{", selectorIndex);
+      let depth = 0;
+      for (let index = openBrace; index < chunk.length; index += 1) {
+        if (chunk[index] === "{") depth += 1;
+        else if (chunk[index] === "}") {
+          depth -= 1;
+          if (depth === 0) {
+            blocks.push(chunk.slice(openBrace + 1, index));
+            from = index + 1;
+            break;
+          }
+        }
+      }
+    }
+    return blocks;
+  };
 
   const ctaBlock = blockFor(".dish-cta {");
   const hungryBlock = blockFor(".dish-poke .dish-cta h3 {");
-  const orderBlock = blockFor(".dish-cta a,\n.visit-order {");
+  const orderBlock = blockFor(".visit-order {");
   const headerOrderBlock = blockFor(".order-link {");
+  const navLinkBlock = blockFor("nav a:not(.order-link) {");
+  const brandImgBlock = blockFor(".brand img {");
   const locoHeadingBlock = blockFor(".dish-loco h2 {");
   const pokeHeadingBlock = blockFor(".dish-poke h2 {");
   const pokeContentBlock = blockFor(".dish-poke .passage-content {");
@@ -423,6 +513,33 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(hungryBlock, /color:\s*var\(--gold\)/);
   assert.match(hungryBlock, /text-align:\s*left/);
   assert.match(hungryBlock, /margin-right:\s*1\.45rem/);
+  assert.match(navLinkBlock, /color:\s*var\(--gold\)/);
+  assert.match(navLinkBlock, /-webkit-text-stroke:\s*0\.5px\s+rgba\(0, 0, 0, 1\)/);
+  assert.match(navLinkBlock, /paint-order:\s*stroke fill/);
+  assert.match(navLinkBlock, /border-bottom:\s*0\.15rem solid transparent/);
+  assert.match(
+    brandImgBlock,
+    /drop-shadow\(0 0\.35rem 1rem rgba\(0, 0, 0, 0\.36\)\)/,
+  );
+  assert.match(brandImgBlock, /drop-shadow\(0\.65px 0 0 rgba\(0, 0, 0, 1\)\)/);
+  assert.match(brandImgBlock, /drop-shadow\(-0\.65px 0 0 rgba\(0, 0, 0, 1\)\)/);
+  assert.match(brandImgBlock, /drop-shadow\(0 0\.65px 0 rgba\(0, 0, 0, 1\)\)/);
+  assert.match(brandImgBlock, /drop-shadow\(0 -0\.65px 0 rgba\(0, 0, 0, 1\)\)/);
+  assert.doesNotMatch(brandImgBlock, /\b(?:background|box-shadow|outline|border)\s*:/);
+  const cssWithoutHeaderNavStroke = css.replace(
+    /nav a:not\(\.order-link\) \{[^}]*\}/,
+    "",
+  );
+  assert.doesNotMatch(
+    cssWithoutHeaderNavStroke,
+    /-webkit-text-stroke|paint-order:/,
+    "the micro black stroke must stay on header Menu/Instagram only",
+  );
+  assert.doesNotMatch(headerOrderBlock, /-webkit-text-stroke|paint-order:/);
+  assert.doesNotMatch(orderBlock, /-webkit-text-stroke|paint-order:/);
+  assert.doesNotMatch(floatingOrderBlock, /-webkit-text-stroke|paint-order:/);
+  assert.doesNotMatch(ctaBlock, /-webkit-text-stroke|paint-order:/);
+  assert.doesNotMatch(hungryBlock, /-webkit-text-stroke|paint-order:/);
   assert.match(locoHeadingBlock, /color:\s*var\(--gold\)/);
   assert.match(
     css,
@@ -431,6 +548,10 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(
     css,
     /\.visit-passage h2 strong \{[\s\S]*?color:\s*var\(--gold\)/,
+  );
+  assert.match(
+    css,
+    /\.visit-passage h2 strong \{[\s\S]*?font:\s*inherit/,
   );
   assert.match(
     css,
@@ -455,14 +576,8 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(pokeContentBlock, /justify-content:\s*space-between/);
   assert.match(pokeContentBlock, /padding-right:\s*0/);
   assert.match(pokeCtaBlock, /text-align:\s*right/);
-  const pokeOrderBlock = blockFor(".dish-poke .dish-cta a {");
-  assert.match(pokeOrderBlock, /position:\s*absolute/);
-  assert.match(pokeOrderBlock, /right:\s*0\.85rem/);
-  assert.match(
-    css,
-    /@media \(max-width: 760px\) \{[\s\S]*?\.dish-poke \.dish-cta a \{[\s\S]*?display:\s*none/,
-    "the poke Order Now text should leave the mobile page to the order button",
-  );
+  assert.doesNotMatch(css, /\.dish-cta a/);
+  assert.doesNotMatch(css, /\.dish-poke \.dish-cta a/);
   assert.match(css, /h1,\s*h2,\s*\.dish-cta h3 \{[\s\S]*?font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /font-family:\s*"Arial Black"/);
   assert.match(orderBlock, /color:\s*var\(--gold\)/);
@@ -494,6 +609,113 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(
     css,
     /\.reduced-motion-sequence img \{\s*opacity: 1;\s*animation: none;/,
+  );
+
+  assert.match(html, /class="visit-address"/);
+  assert.match(html, /6280 S Valley View Blvd/);
+  assert.match(html, /class="visit-order"[^>]*>\s*Order now/);
+  assert.match(html, /class="visit-links"[\s\S]*?Directions[\s\S]*?Instagram/);
+  assert.match(html, /class="floating-order"/);
+
+  const visitContentBase = blockFor(".visit-content {");
+  assert.match(visitContentBase, /display:\s*flex/);
+  assert.match(visitContentBase, /flex-direction:\s*column/);
+  assert.match(visitContentBase, /justify-content:\s*flex-end/);
+  assert.match(visitContentBase, /align-items:\s*center/);
+  assert.match(visitContentBase, /text-align:\s*center/);
+  assert.match(visitContentBase, /gap:\s*1\.35rem/);
+  assert.doesNotMatch(
+    css,
+    /\.visit-content\s*\{[^}]*display:\s*grid/,
+    "no Visit grid display may remain",
+  );
+  assert.doesNotMatch(
+    css,
+    /grid-template-columns:/,
+    "no Visit grid-template-columns may remain",
+  );
+  assert.ok(
+    !mediaBlocks("(min-width: 761px)").some((block) =>
+      /\.visit-content\s*\{/.test(block),
+    ),
+    "no desktop Visit grid may remain under min-width 761px",
+  );
+
+  const visitTitleBlock = blockFor(".visit-passage h2 {\n  max-width: 7ch;");
+  assert.match(visitTitleBlock, /max-width:\s*7ch/);
+  assert.match(visitTitleBlock, /text-align:\s*center/);
+  assert.match(visitTitleBlock, /display:\s*flex/);
+  assert.match(visitTitleBlock, /flex-direction:\s*column/);
+  assert.match(visitTitleBlock, /align-items:\s*center/);
+  assert.match(visitTitleBlock, /gap:\s*0\.12em/);
+  const visitTitleBreakBlock = blockFor(".visit-passage h2 br {");
+  assert.match(visitTitleBreakBlock, /display:\s*none/);
+  assert.match(
+    css,
+    /\.visit-passage h2 span,\s*\.visit-passage h2 strong \{\s*display:\s*block;/,
+  );
+  assert.doesNotMatch(
+    css,
+    /(?:^|})\s*(?:h1|h2|\.food-passage h2|\.dish-\S+ h2|\.dish-cta h3) br\s*\{/,
+    "only the Visit title line break may be hidden",
+  );
+  assert.doesNotMatch(
+    css,
+    /(?:^|})\s*(?:h1|h2|\.food-passage h2|\.dish-\S+ h2|\.dish-cta h3)\s*\{[^}]*gap:\s*0\.12em/,
+    "no global heading or dish title may receive the Visit title gap",
+  );
+  assert.doesNotMatch(
+    css,
+    /\.food-passage h2,\s*\.visit-passage h2 \{[^}]*gap:\s*0\.12em/,
+    "the shared food/visit title rule must not receive the Visit title gap",
+  );
+  assert.doesNotMatch(locoHeadingBlock, /gap:\s*0\.12em/);
+  assert.doesNotMatch(pokeHeadingBlock, /gap:\s*0\.12em/);
+  assert.doesNotMatch(hungryBlock, /display:\s*none/);
+  assert.doesNotMatch(hungryBlock, /gap:\s*0\.12em/);
+  const visitActionsBase = blockFor(".visit-actions {");
+  assert.match(visitActionsBase, /align-self:\s*center/);
+  assert.match(visitActionsBase, /max-width:\s*33rem/);
+  assert.match(visitActionsBase, /text-align:\s*center/);
+  assert.doesNotMatch(
+    visitActionsBase,
+    /\b(?:background|background-color|background-image|box-shadow|border)\s*:/,
+    "visit-actions must stay unpaneled on the photograph",
+  );
+  const visitLinksBlock = blockFor(".visit-links {");
+  assert.match(visitLinksBlock, /justify-content:\s*center/);
+  assert.match(visitLinksBlock, /gap:\s*1rem 2rem/);
+
+  const mobileVisitBlocks = mediaBlocks("(max-width: 760px)");
+  assert.ok(
+    mobileVisitBlocks.some((block) =>
+      nestedBlocksFor(block, ".visit-content {").some(
+        (visitMobile) =>
+          /display:\s*flex/.test(visitMobile) &&
+          /flex-direction:\s*column/.test(visitMobile) &&
+          /align-items:\s*center/.test(visitMobile) &&
+          /text-align:\s*center/.test(visitMobile),
+      ),
+    ),
+    "the max-width 760px Visit rule must remain a centered flex column",
+  );
+  assert.ok(
+    mobileVisitBlocks.every((block) =>
+      nestedBlocksFor(block, ".visit-content {").every(
+        (visitMobile) =>
+          !/align-items:\s*stretch/.test(visitMobile) &&
+          !/align-items:\s*flex-start/.test(visitMobile) &&
+          !/text-align:\s*left/.test(visitMobile) &&
+          !/display:\s*grid/.test(visitMobile),
+      ),
+    ),
+    "the max-width 760px Visit rule must not restore stretch or left alignment",
+  );
+  assert.ok(
+    !mediaBlocks("(max-width: 760px)").some((block) =>
+      /grid-template-columns:/.test(block),
+    ),
+    "mobile rules must not define Visit grid tracks",
   );
 });
 
