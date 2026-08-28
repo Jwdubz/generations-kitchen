@@ -707,8 +707,8 @@ h1 strong {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 1.35rem;
-    padding: 2.4rem 1.25rem 5.4rem;
+    gap: clamp(2.65rem, 8svh, 4.25rem);
+    padding: 2.1rem 1.25rem clamp(6.8rem, 14svh, 8rem);
   }
 
   .food-passage h2,
@@ -718,7 +718,7 @@ h1 strong {
   }
 
   .visit-passage h2 {
-    gap: 0.12em;
+    gap: clamp(0.22em, 4.4svh, 0.38em);
   }
 
   .dish-cta {
@@ -753,16 +753,16 @@ h1 strong {
   }
 
   .visit-address {
-    font-size: 1rem;
+    font-size: clamp(1.08rem, 4.7vw, 1.32rem);
   }
 
   .visit-order {
-    margin-top: 1.15rem;
+    margin-top: clamp(2.35rem, 7svh, 3.65rem);
     font-size: clamp(2.1rem, 10.5vw, 3.5rem);
   }
 
   .visit-links {
-    margin-top: 1.6rem;
+    margin-top: clamp(2.15rem, 6.5svh, 3.25rem);
     font-size: 1rem;
   }
 }

@@ -732,10 +732,15 @@ test("keeps the visitor calls to action on the display face", async () => {
           /flex-direction:\s*column/.test(visitMobile) &&
           /align-items:\s*center/.test(visitMobile) &&
           /text-align:\s*center/.test(visitMobile) &&
-          /gap:\s*1\.35rem/.test(visitMobile),
+          /gap:\s*clamp\(2\.65rem,\s*8svh,\s*4\.25rem\)/.test(
+            visitMobile,
+          ) &&
+          /padding:\s*2\.1rem 1\.25rem clamp\(6\.8rem,\s*14svh,\s*8rem\)/.test(
+            visitMobile,
+          ),
       ),
     ),
-    "the max-width 760px Visit rule must remain a centered flex column",
+    "the max-width 760px Visit rule must mirror the desktop centered spacing rhythm",
   );
   assert.ok(
     mobileVisitBlocks.every((block) =>
@@ -752,18 +757,22 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.ok(
     mobileVisitBlocks.some((block) =>
       nestedBlocksFor(block, ".visit-passage h2 {").some((visitTitleMobile) =>
-        /gap:\s*0\.12em/.test(visitTitleMobile),
+        /gap:\s*clamp\(0\.22em,\s*4\.4svh,\s*0\.38em\)/.test(
+          visitTitleMobile,
+        ),
       ),
     ),
-    "the mobile Visit title must retain its compact line rhythm",
+    "the mobile Visit title must carry the spaced desktop line rhythm",
   );
   assert.ok(
     mobileVisitBlocks.some((block) =>
       nestedBlocksFor(block, ".visit-links {").some((visitLinksMobile) =>
-        /margin-top:\s*1\.6rem/.test(visitLinksMobile),
+        /margin-top:\s*clamp\(2\.15rem,\s*6\.5svh,\s*3\.25rem\)/.test(
+          visitLinksMobile,
+        ),
       ),
     ),
-    "the mobile Visit links must retain their established spacing",
+    "the mobile Visit links must stay separated from the primary order action",
   );
   assert.ok(
     !mediaBlocks("(max-width: 760px)").some((block) =>
