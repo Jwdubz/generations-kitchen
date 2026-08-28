@@ -31,6 +31,8 @@ width-plus-gap jumps.
 
 import { useEffect, useRef } from "react";
 import {
+  offerCarouselGlideDurationMs,
+  offerCarouselSmoothstep,
   offerWheelGestureDecision,
   offerWheelGestureIdleMs,
   resyncOfferCarouselFromUserScroll,
@@ -389,6 +391,8 @@ export function OfferMenuTrack({ children }: { children: React.ReactNode }) {
   const settleTimerRef = useRef(0);
   const wheelIdleTimerRef = useRef(0);
   const frameRef = useRef(0);
+  const desktopGlideRef = useRef(false);
+  const snapStyleRef = useRef<string | null>(null);
   const stepAdjacentCardRef = useRef<(direction: -1 | 1) => void>(() => {});
 
   useEffect(() => {
@@ -398,12 +402,21 @@ export function OfferMenuTrack({ children }: { children: React.ReactNode }) {
     function clearMotionTimers() {
       window.clearTimeout(settleTimerRef.current);
       window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    }
+
+    function restoreTrackSnap() {
+      if (snapStyleRef.current === null) return;
+      track.style.scrollSnapType = snapStyleRef.current;
+      snapStyleRef.current = null;
+      desktopGlideRef.current = false;
     }
 
     function finishProgrammatic() {
+      clearMotionTimers();
       programmaticRef.current = false;
       pendingIndexRef.current = null;
-      clearMotionTimers();
+      restoreTrackSnap();
     }
 
     function resyncFromUserScroll() {
@@ -421,6 +434,7 @@ export function OfferMenuTrack({ children }: { children: React.ReactNode }) {
     }
 
     function onScrollEnd() {
+      if (desktopGlideRef.current) return;
       if (programmaticRef.current) {
         finishProgrammatic();
         return;
@@ -432,12 +446,64 @@ export function OfferMenuTrack({ children }: { children: React.ReactNode }) {
       if (!programmaticRef.current) userScrollingRef.current = true;
       window.clearTimeout(settleTimerRef.current);
       settleTimerRef.current = window.setTimeout(() => {
+        if (desktopGlideRef.current) return;
         if (programmaticRef.current) {
           finishProgrammatic();
           return;
         }
         resyncFromUserScroll();
       }, 120);
+    }
+
+    function startDesktopGlide(targetLeft: number) {
+      const startLeft = track.scrollLeft;
+      const distance = targetLeft - startLeft;
+      const startedAt = performance.now();
+
+      snapStyleRef.current = track.style.scrollSnapType;
+      track.style.scrollSnapType = "none";
+      desktopGlideRef.current = true;
+
+      const tick = (now: number) => {
+        if (!desktopGlideRef.current || !programmaticRef.current) return;
+
+        const progress = Math.min(
+          1,
+          (now - startedAt) / offerCarouselGlideDurationMs,
+        );
+        const eased = offerCarouselSmoothstep(progress);
+        track.scrollLeft = startLeft + distance * eased;
+
+        if (progress < 1) {
+          frameRef.current = window.requestAnimationFrame(tick);
+          return;
+        }
+
+        track.scrollLeft = targetLeft;
+        finishProgrammatic();
+      };
+
+      frameRef.current = window.requestAnimationFrame(tick);
+    }
+
+    function cancelDesktopGlideForUser() {
+      if (!desktopGlideRef.current) return;
+      finishProgrammatic();
+      resyncFromUserScroll();
+    }
+
+    function centerPendingCardAfterResize() {
+      if (!desktopGlideRef.current) return;
+      const targetIndex = pendingIndexRef.current ?? selectedIndexRef.current;
+      finishProgrammatic();
+      const offsets = measureOfferCardOffsets(track);
+      const maxScrollLeft = Math.max(0, track.scrollWidth - track.clientWidth);
+      const targetLeft = Math.max(
+        0,
+        Math.min(maxScrollLeft, offsets[targetIndex] ?? track.scrollLeft),
+      );
+      selectedIndexRef.current = targetIndex;
+      track.scrollTo({ left: targetLeft, behavior: "auto" });
     }
 
     function stepAdjacentCard(direction: -1 | 1) {
@@ -464,6 +530,14 @@ export function OfferMenuTrack({ children }: { children: React.ReactNode }) {
 
       pendingIndexRef.current = next.pendingIndex;
       programmaticRef.current = true;
+      if (
+        window.matchMedia(desktopQuery).matches &&
+        !prefersExplicitReducedMotion()
+      ) {
+        startDesktopGlide(next.scrollLeft);
+        return;
+      }
+
       track.scrollTo({
         left: next.scrollLeft,
         behavior: prefersExplicitReducedMotion() ? "auto" : "smooth",
@@ -507,10 +581,16 @@ export function OfferMenuTrack({ children }: { children: React.ReactNode }) {
     track.addEventListener("scrollend", onScrollEnd);
     track.addEventListener("scroll", onScroll, { passive: true });
     track.addEventListener("wheel", onWheel, { passive: false });
+    track.addEventListener("pointerdown", cancelDesktopGlideForUser, {
+      passive: true,
+    });
+    window.addEventListener("resize", centerPendingCardAfterResize);
     return () => {
       track.removeEventListener("scrollend", onScrollEnd);
       track.removeEventListener("scroll", onScroll);
       track.removeEventListener("wheel", onWheel);
+      track.removeEventListener("pointerdown", cancelDesktopGlideForUser);
+      window.removeEventListener("resize", centerPendingCardAfterResize);
       userScrollingRef.current = false;
       wheelGestureRef.current = false;
       window.clearTimeout(wheelIdleTimerRef.current);

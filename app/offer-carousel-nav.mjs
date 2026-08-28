@@ -4,13 +4,28 @@ Canonical path: app/offer-carousel-nav.mjs.
 Future consumer: OfferMenuTrack and the focused Node navigation test.
 Activation: auto-load from app/offer-climax.tsx; execute via
 `node --test tests/rendered-html.test.mjs`.
-Behavioral check: the test walks 0..11 and 11..0 on realistic geometry whose
+Behavioral check: the test pins the approved 900 ms smoothstep, walks 0..11
+and 11..0 on realistic geometry whose
 maxScrollLeft is below the last raw offsets, clamps only the physical target,
 ignores a second step while pending, and treats one horizontal wheel gesture
 as a single adjacent step.
 Retirement: when the offer carousel is removed or its one-card contract is
 intentionally replaced.
 */
+
+export const offerCarouselGlideDurationMs = 900;
+
+/**
+ * Approved C1 carousel glide used by the final desktop demo and live site.
+ * @param {number} progress
+ * @returns {number}
+ */
+export function offerCarouselSmoothstep(progress) {
+  const p = Number.isFinite(progress)
+    ? Math.max(0, Math.min(1, progress))
+    : 0;
+  return p * p * (3 - 2 * p);
+}
 
 /**
  * @param {number} scrollLeft

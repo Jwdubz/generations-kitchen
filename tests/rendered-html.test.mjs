@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 import {
   adjacentOfferCardTarget,
   nearestOfferCardIndex,
+  offerCarouselGlideDurationMs,
+  offerCarouselSmoothstep,
   offerWheelGestureDecision,
   offerWheelGestureIdleMs,
   resyncOfferCarouselFromUserScroll,
@@ -1153,6 +1155,22 @@ test("exports the offer climax and first-party dish carousel", async () => {
     /function onWheel\([\s\S]*?stopPropagation/,
     "settled carousel vertical wheel intent must keep bubbling so the visitor can leave the beat",
   );
+  assert.match(climaxSource, /startDesktopGlide\(next\.scrollLeft\)/);
+  assert.match(climaxSource, /offerCarouselGlideDurationMs/);
+  assert.match(climaxSource, /offerCarouselSmoothstep\(progress\)/);
+  assert.match(climaxSource, /track\.style\.scrollSnapType = "none"/);
+  assert.match(climaxSource, /restoreTrackSnap\(\)/);
+  assert.match(climaxSource, /if \(desktopGlideRef\.current\) return;/);
+  assert.match(
+    climaxSource,
+    /window\.matchMedia\(desktopQuery\)\.matches[\s\S]*?!prefersExplicitReducedMotion\(\)/,
+    "the approved glide must be desktop-only and preserve explicit reduced motion",
+  );
+  assert.match(
+    climaxSource,
+    /behavior:\s*prefersExplicitReducedMotion\(\) \? "auto" : "smooth"/,
+    "mobile and explicit reduced-motion fallback behavior must remain available",
+  );
   assert.match(climaxSource, /data-active-scroll-beat/);
   assert.match(climaxSource, /IntersectionObserver/);
   assert.match(climaxSource, /motion"\) === "reduced"/);
@@ -1986,6 +2004,26 @@ test("advances the offer carousel one measured card at a time", () => {
     ),
     { selectedIndex: 8, pendingIndex: null },
   );
+});
+
+test("matches the approved 900ms desktop carousel glide", () => {
+  assert.equal(offerCarouselGlideDurationMs, 900);
+  assert.equal(offerCarouselSmoothstep(Number.NaN), 0);
+  assert.equal(offerCarouselSmoothstep(-1), 0);
+  assert.equal(offerCarouselSmoothstep(0), 0);
+  assert.equal(offerCarouselSmoothstep(0.25), 0.15625);
+  assert.equal(offerCarouselSmoothstep(0.5), 0.5);
+  assert.equal(offerCarouselSmoothstep(0.75), 0.84375);
+  assert.equal(offerCarouselSmoothstep(1), 1);
+  assert.equal(offerCarouselSmoothstep(2), 1);
+
+  const samples = Array.from({ length: 101 }, (_, index) =>
+    offerCarouselSmoothstep(index / 100),
+  );
+  for (let index = 1; index < samples.length; index += 1) {
+    assert.ok(samples[index] >= samples[index - 1]);
+  }
+  assert.equal(1 - offerCarouselSmoothstep(0.25), offerCarouselSmoothstep(0.75));
 });
 
 // Focused tripwire: one-card horizontal wheel/trackpad gestures.
