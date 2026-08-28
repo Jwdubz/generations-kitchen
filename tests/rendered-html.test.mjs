@@ -593,6 +593,16 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(floatingOrderBlock, /position:\s*fixed/);
   assert.match(floatingOrderBlock, /left:\s*50%/);
   assert.match(floatingOrderBlock, /border-radius:\s*999px/);
+  assert.match(floatingOrderBlock, /padding:\s*1\.05rem 1\.7rem 1rem/);
+  assert.match(
+    floatingOrderBlock,
+    /font-size:\s*clamp\(1\.05rem, 1\.4vw, 1\.25rem\)/,
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 760px\)[\s\S]*?\.floating-order \{[\s\S]*?padding:\s*0\.82rem 1\.2rem 0\.78rem;[\s\S]*?font-size:\s*1rem;/,
+    "mobile keeps the compact floating-order treatment",
+  );
   assert.match(
     css,
     /\.floating-order\s*>\s*span\s*\{[^}]*color:\s*var\(--green\)/s,
@@ -623,7 +633,14 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(visitContentBase, /justify-content:\s*flex-end/);
   assert.match(visitContentBase, /align-items:\s*center/);
   assert.match(visitContentBase, /text-align:\s*center/);
-  assert.match(visitContentBase, /gap:\s*1\.35rem/);
+  assert.match(
+    visitContentBase,
+    /gap:\s*clamp\(2\.5rem,\s*11\.111vh,\s*7\.5rem\)/,
+  );
+  assert.match(
+    visitContentBase,
+    /padding-bottom:\s*clamp\(6\.5rem,\s*16\.963vh,\s*11\.45rem\)/,
+  );
   assert.doesNotMatch(
     css,
     /\.visit-content\s*\{[^}]*display:\s*grid/,
@@ -634,10 +651,9 @@ test("keeps the visitor calls to action on the display face", async () => {
     /grid-template-columns:/,
     "no Visit grid-template-columns may remain",
   );
+  const desktopVisitBlocks = mediaBlocks("(min-width: 761px)");
   assert.ok(
-    !mediaBlocks("(min-width: 761px)").some((block) =>
-      /\.visit-content\s*\{/.test(block),
-    ),
+    !desktopVisitBlocks.some((block) => /\.visit-content\s*\{/.test(block)),
     "no desktop Visit grid may remain under min-width 761px",
   );
 
@@ -647,12 +663,20 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(visitTitleBlock, /display:\s*flex/);
   assert.match(visitTitleBlock, /flex-direction:\s*column/);
   assert.match(visitTitleBlock, /align-items:\s*center/);
-  assert.match(visitTitleBlock, /gap:\s*0\.12em/);
+  assert.match(
+    visitTitleBlock,
+    /gap:\s*clamp\(0\.18em,\s*8vh,\s*0\.54em\)/,
+  );
   const visitTitleBreakBlock = blockFor(".visit-passage h2 br {");
   assert.match(visitTitleBreakBlock, /display:\s*none/);
   assert.match(
     css,
     /\.visit-passage h2 span,\s*\.visit-passage h2 strong \{\s*display:\s*block;/,
+  );
+  assert.doesNotMatch(
+    css,
+    /\.visit-passage h2 (?:span|strong)\s*\{[^}]*transform:/,
+    "the Visit title rows must share the composition rhythm instead of independent offsets",
   );
   assert.doesNotMatch(
     css,
@@ -683,8 +707,21 @@ test("keeps the visitor calls to action on the display face", async () => {
     "visit-actions must stay unpaneled on the photograph",
   );
   const visitLinksBlock = blockFor(".visit-links {");
+  const visitAddressBlock = blockFor(".visit-address {");
   assert.match(visitLinksBlock, /justify-content:\s*center/);
   assert.match(visitLinksBlock, /gap:\s*1rem 2rem/);
+  assert.match(
+    visitAddressBlock,
+    /font-size:\s*clamp\(1\.1rem,\s*1\.7vw,\s*1\.5rem\)/,
+  );
+  assert.match(
+    orderBlock,
+    /margin-top:\s*clamp\(1\.5rem,\s*6\.667vh,\s*4\.5rem\)/,
+  );
+  assert.match(
+    visitLinksBlock,
+    /margin-top:\s*clamp\(1\.5rem,\s*6\.667vh,\s*4\.5rem\)/,
+  );
 
   const mobileVisitBlocks = mediaBlocks("(max-width: 760px)");
   assert.ok(
@@ -694,7 +731,8 @@ test("keeps the visitor calls to action on the display face", async () => {
           /display:\s*flex/.test(visitMobile) &&
           /flex-direction:\s*column/.test(visitMobile) &&
           /align-items:\s*center/.test(visitMobile) &&
-          /text-align:\s*center/.test(visitMobile),
+          /text-align:\s*center/.test(visitMobile) &&
+          /gap:\s*1\.35rem/.test(visitMobile),
       ),
     ),
     "the max-width 760px Visit rule must remain a centered flex column",
@@ -710,6 +748,22 @@ test("keeps the visitor calls to action on the display face", async () => {
       ),
     ),
     "the max-width 760px Visit rule must not restore stretch or left alignment",
+  );
+  assert.ok(
+    mobileVisitBlocks.some((block) =>
+      nestedBlocksFor(block, ".visit-passage h2 {").some((visitTitleMobile) =>
+        /gap:\s*0\.12em/.test(visitTitleMobile),
+      ),
+    ),
+    "the mobile Visit title must retain its compact line rhythm",
+  );
+  assert.ok(
+    mobileVisitBlocks.some((block) =>
+      nestedBlocksFor(block, ".visit-links {").some((visitLinksMobile) =>
+        /margin-top:\s*1\.6rem/.test(visitLinksMobile),
+      ),
+    ),
+    "the mobile Visit links must retain their established spacing",
   );
   assert.ok(
     !mediaBlocks("(max-width: 760px)").some((block) =>
@@ -1108,6 +1162,128 @@ test("exports the offer climax and first-party dish carousel", async () => {
     await access(url);
     const info = await stat(url);
     assert.ok(info.size > 1_000, `${file} should be a real menu photograph`);
+  }
+});
+
+// Focused tripwire: offer-carousel DOM sequence in the generated export.
+// Canonical path: tests/rendered-html.test.mjs.
+// Future consumer: maintainers changing offerDishes in app/page.tsx.
+// Activation: execute `node --test tests/rendered-html.test.mjs` after
+// `vinext build`.
+// Behavioral check: inspects offer-track card render order in the exported
+// HTML, not a whole-page string search. The first five cards must be
+// Hurricane Chicken, Loco Moco, Spicy Poke Bowl, Teri Beef Fries,
+// Furikake Chicken; all twelve existing names, links, and images remain
+// present exactly once, with the remaining seven in their prior relative
+// order.
+// Retirement: when the owner intentionally changes the carousel sequence.
+test("renders the offer-carousel cards in the approved sequence", async () => {
+  const html = await (await render()).text();
+  const trackOpen = html.indexOf('<div class="offer-track">');
+  assert.ok(trackOpen >= 0, "the export must render the offer-track");
+  const trackClose = html.indexOf("</div>", trackOpen);
+  assert.ok(trackClose > trackOpen, "the offer-track must close");
+  const trackHtml = html.slice(trackOpen, trackClose);
+  const cards = [
+    ...trackHtml.matchAll(
+      /<a class="offer-card" href="([^"]+)"[^>]*>\s*<img src="([^"]+)" alt="([^"]+)"\s*\/?>\s*<span>([^<]*)<\/span>\s*<\/a>/g,
+    ),
+  ].map((match) => ({
+    href: match[1],
+    src: match[2],
+    alt: match[3],
+    name: match[4],
+  }));
+
+  const expected = [
+    {
+      name: "Hurricane Chicken",
+      src: "/media/menu/hurricane-chicken.webp",
+      href: "https://generationskitchenvegas.com/menu?item=hurricane-chicken-V3Ln",
+    },
+    {
+      name: "Loco Moco",
+      src: "/media/menu/loco-moco.webp",
+      href: "https://generationskitchenvegas.com/menu?item=loco-moco-mvzn",
+    },
+    {
+      name: "Spicy Poke Bowl",
+      src: "/media/menu/poke-bowl-spicy.webp",
+      href: "https://generationskitchenvegas.com/menu?item=poke-bowl-spicy-v2TB",
+    },
+    {
+      name: "Teri Beef Fries",
+      src: "/media/menu/teri-beef-fries.webp",
+      href: "https://generationskitchenvegas.com/menu?item=teri-beef-fries-sS8t",
+    },
+    {
+      name: "Furikake Chicken",
+      src: "/media/menu/furikake-chicken.webp",
+      href: "https://generationskitchenvegas.com/menu?item=furikake-chicken-BLaD",
+    },
+    {
+      name: "Garlic Chicken",
+      src: "/media/menu/garlic-chicken.webp",
+      href: "https://generationskitchenvegas.com/menu?item=garlic-chicken-9tBv",
+    },
+    {
+      name: "Hamburger Steak",
+      src: "/media/menu/hamburger-steak.webp",
+      href: "https://generationskitchenvegas.com/menu?item=hamburger-steak-7e8E",
+    },
+    {
+      name: "Teriyaki Beef",
+      src: "/media/menu/teriyaki-beef.webp",
+      href: "https://generationskitchenvegas.com/menu?item=teriyaki-beef-Nr2Q",
+    },
+    {
+      name: "Chicken Katsu",
+      src: "/media/menu/chicken-katsu.webp",
+      href: "https://generationskitchenvegas.com/menu?item=chicken-katsu-QqjI",
+    },
+    {
+      name: "Fried Chicken",
+      src: "/media/menu/fried-chicken.webp",
+      href: "https://generationskitchenvegas.com/menu?item=fried-chicken-u5Ss",
+    },
+    {
+      name: "Hawaiian Poke Bowl",
+      src: "/media/menu/poke-bowl-hawaiian.webp",
+      href: "https://generationskitchenvegas.com/menu?item=poke-bowl-hawaiian-xDrN",
+    },
+    {
+      name: "Spicy Poke Nachos",
+      src: "/media/menu/poke-nachos.webp",
+      href: "https://generationskitchenvegas.com/menu?item=poke-nachos-spicy-hGMI",
+    },
+  ];
+
+  assert.equal(
+    cards.length,
+    12,
+    "the offer-track must render all twelve existing cards in document order",
+  );
+  assert.deepEqual(
+    cards.slice(0, 5).map((card) => card.name),
+    [
+      "Hurricane Chicken",
+      "Loco Moco",
+      "Spicy Poke Bowl",
+      "Teri Beef Fries",
+      "Furikake Chicken",
+    ],
+    "the offer-track prefix must be the approved five-card sequence",
+  );
+  assert.deepEqual(
+    cards.map(({ href, src, name }) => ({ href, src, name })),
+    expected,
+    "every existing card name, link, and image must remain present exactly once in render order",
+  );
+  assert.equal(new Set(cards.map((card) => card.name)).size, 12);
+  assert.equal(new Set(cards.map((card) => card.href)).size, 12);
+  assert.equal(new Set(cards.map((card) => card.src)).size, 12);
+  for (const card of cards) {
+    assert.equal(card.alt, card.name);
   }
 });
 

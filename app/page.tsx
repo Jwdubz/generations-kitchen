@@ -12,14 +12,29 @@ const directionsUrl =
 
 const offerDishes = [
   {
-    name: "Furikake Chicken",
-    src: "/media/menu/furikake-chicken.webp",
-    href: "https://generationskitchenvegas.com/menu?item=furikake-chicken-BLaD",
-  },
-  {
     name: "Hurricane Chicken",
     src: "/media/menu/hurricane-chicken.webp",
     href: "https://generationskitchenvegas.com/menu?item=hurricane-chicken-V3Ln",
+  },
+  {
+    name: "Loco Moco",
+    src: "/media/menu/loco-moco.webp",
+    href: "https://generationskitchenvegas.com/menu?item=loco-moco-mvzn",
+  },
+  {
+    name: "Spicy Poke Bowl",
+    src: "/media/menu/poke-bowl-spicy.webp",
+    href: "https://generationskitchenvegas.com/menu?item=poke-bowl-spicy-v2TB",
+  },
+  {
+    name: "Teri Beef Fries",
+    src: "/media/menu/teri-beef-fries.webp",
+    href: "https://generationskitchenvegas.com/menu?item=teri-beef-fries-sS8t",
+  },
+  {
+    name: "Furikake Chicken",
+    src: "/media/menu/furikake-chicken.webp",
+    href: "https://generationskitchenvegas.com/menu?item=furikake-chicken-BLaD",
   },
   {
     name: "Garlic Chicken",
@@ -30,11 +45,6 @@ const offerDishes = [
     name: "Hamburger Steak",
     src: "/media/menu/hamburger-steak.webp",
     href: "https://generationskitchenvegas.com/menu?item=hamburger-steak-7e8E",
-  },
-  {
-    name: "Loco Moco",
-    src: "/media/menu/loco-moco.webp",
-    href: "https://generationskitchenvegas.com/menu?item=loco-moco-mvzn",
   },
   {
     name: "Teriyaki Beef",
@@ -50,16 +60,6 @@ const offerDishes = [
     name: "Fried Chicken",
     src: "/media/menu/fried-chicken.webp",
     href: "https://generationskitchenvegas.com/menu?item=fried-chicken-u5Ss",
-  },
-  {
-    name: "Teri Beef Fries",
-    src: "/media/menu/teri-beef-fries.webp",
-    href: "https://generationskitchenvegas.com/menu?item=teri-beef-fries-sS8t",
-  },
-  {
-    name: "Spicy Poke Bowl",
-    src: "/media/menu/poke-bowl-spicy.webp",
-    href: "https://generationskitchenvegas.com/menu?item=poke-bowl-spicy-v2TB",
   },
   {
     name: "Hawaiian Poke Bowl",

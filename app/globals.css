@@ -265,14 +265,14 @@ nav a:not(.order-link):focus-visible {
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.86rem 1.35rem 0.82rem;
+  padding: 1.05rem 1.7rem 1rem;
   color: var(--ink);
   background: var(--gold);
   border: 0.15rem solid var(--gold);
   border-radius: 999px;
   box-shadow: 0 0.55rem 1.8rem rgba(0, 0, 0, 0.38);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
   font-weight: 950;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -409,7 +409,7 @@ h1 strong {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1.35rem;
+  margin-top: clamp(1.5rem, 6.667vh, 4.5rem);
   padding-bottom: 0.28rem;
   color: var(--gold);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
@@ -514,8 +514,9 @@ h1 strong {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 1.35rem;
+  gap: clamp(2.5rem, 11.111vh, 7.5rem);
   padding: clamp(3rem, 7vw, 6.5rem) clamp(1.25rem, 4.2vw, 4.5rem);
+  padding-bottom: clamp(6.5rem, 16.963vh, 11.45rem);
   text-align: center;
 }
 
@@ -525,7 +526,7 @@ h1 strong {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.12em;
+  gap: clamp(0.18em, 8vh, 0.54em);
   text-shadow:
     0 0.06rem 0.16rem rgba(0, 0, 0, 0.86),
     0 0.2rem 0.85rem rgba(0, 0, 0, 0.55);
@@ -573,7 +574,7 @@ h1 strong {
 }
 
 .visit-address {
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-size: clamp(1.1rem, 1.7vw, 1.5rem);
   font-weight: 800;
   line-height: 1.42;
   text-shadow:
@@ -595,7 +596,7 @@ h1 strong {
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem 2rem;
-  margin-top: 1.6rem;
+  margin-top: clamp(1.5rem, 6.667vh, 4.5rem);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
   font-size: 1rem;
   font-weight: 950;
@@ -706,6 +707,7 @@ h1 strong {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    gap: 1.35rem;
     padding: 2.4rem 1.25rem 5.4rem;
   }
 
@@ -713,6 +715,10 @@ h1 strong {
   .visit-passage h2 {
     font-size: clamp(3.25rem, 14vw, 4.7rem);
     line-height: 0.79;
+  }
+
+  .visit-passage h2 {
+    gap: 0.12em;
   }
 
   .dish-cta {
@@ -756,6 +762,7 @@ h1 strong {
   }
 
   .visit-links {
+    margin-top: 1.6rem;
     font-size: 1rem;
   }
 }
