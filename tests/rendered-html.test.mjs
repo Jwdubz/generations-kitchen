@@ -1079,6 +1079,11 @@ test("exports the offer climax and first-party dish carousel", async () => {
   assert.match(css, /\.offer-carousel \{[\s\S]*?max-width:\s*100%;/);
   assert.match(
     css,
+    /@media \(min-width: 761px\) \{[\s\S]*?\.offer-carousel \{[\s\S]*?--offer-card-width:\s*clamp\(20rem, min\(31vw, 46vh\), 30rem\);/,
+    "desktop dish cards must carry the larger, height-aware offer composition",
+  );
+  assert.match(
+    css,
     /@media \(max-width: 760px\) \{[\s\S]*?\.offer-action \{[\s\S]*?font-size:\s*clamp\(1rem, 4\.7vw, 1\.15rem\);/,
     "the complete coupon line must fit a representative mobile viewport",
   );

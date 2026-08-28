@@ -1244,7 +1244,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-action {
   }
 
   .offer-carousel {
-    --offer-card-width: 15.5rem;
+    --offer-card-width: clamp(20rem, min(31vw, 46vh), 30rem);
   }
 }
 
