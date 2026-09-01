@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   title: "Generations Kitchen | Hawai‘i Kine Grindz in Las Vegas",
   description:
     "Hawaiian food cooked from the heart at Generations Kitchen in Las Vegas.",
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
   icons: {
     icon: "/media/generations-kitchen-icon.png",
     shortcut: "/media/generations-kitchen-icon.png",
