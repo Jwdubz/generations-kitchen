@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./accessibility.css";
-import { motionPreferenceBootstrap } from "./motion-preference.mjs";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://generations.jarrettwroten.com"),
@@ -51,10 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: motionPreferenceBootstrap }} />
-      </head>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

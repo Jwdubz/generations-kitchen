@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { isMotionPaused, MOTION_CHANGE_EVENT } from "./motion-preference.mjs";
 
 /*
 Maintained asset: single-active-video lifecycle for the full-screen passage.
@@ -24,6 +23,10 @@ export function ViewportVideoPlayback() {
     if (videos.length === 0) return;
 
     const main = document.querySelector('main');
+    if (!main?.classList.contains('force-motion')) {
+      videos.forEach((video) => video.pause());
+      return;
+    }
 
     const visibility = new Map<HTMLVideoElement, number>(
       videos.map((video) => [video, 0]),
@@ -32,9 +35,7 @@ export function ViewportVideoPlayback() {
 
     const activate = (nextVideo: HTMLVideoElement | null) => {
       const visibleVideo =
-        document.visibilityState === 'visible' &&
-        main?.classList.contains('force-motion') && !isMotionPaused()
-          ? nextVideo : null;
+        document.visibilityState === 'visible' ? nextVideo : null;
 
       videos.forEach((video) => {
         const isActive = video === visibleVideo;
@@ -56,7 +57,7 @@ export function ViewportVideoPlayback() {
         [...visibility.entries()]
           .filter(([, ratio]) => ratio >= 0.18)
           .sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-      if (isMotionPaused() || nextVideo !== activeVideo || nextVideo?.paused) activate(nextVideo);
+      if (nextVideo !== activeVideo || nextVideo?.paused) activate(nextVideo);
     };
 
     const observer = new IntersectionObserver(
@@ -78,12 +79,10 @@ export function ViewportVideoPlayback() {
       else syncActiveVideo();
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener(MOTION_CHANGE_EVENT, syncActiveVideo);
 
     return () => {
       observer.disconnect();
       document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener(MOTION_CHANGE_EVENT, syncActiveVideo);
       videos.forEach((video) => video.pause());
     };
   }, []);

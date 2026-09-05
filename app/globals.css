@@ -28,6 +28,12 @@ rendered treatment over the footage.
   --beat-viewport-height: 100vh;
 }
 
+@property --comet-distance {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 @supports (height: 100dvh) {
   :root {
     --beat-viewport-height: 100dvh;
@@ -227,17 +233,21 @@ nav a:not(.order-link):focus-visible {
 .order-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
-  padding: 0.9rem 1.25rem;
+  width: 194px;
+  padding: 18px 16px;
   color: var(--ink);
   background: var(--gold);
-  border: 0.15rem solid var(--gold);
+  border: 2px solid var(--gold);
   border-radius: 999px;
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
   font-weight: 950;
   letter-spacing: -0.04em;
   text-transform: uppercase;
   white-space: nowrap;
+  line-height: 1.5;
 }
 
 .order-link > span {
@@ -260,22 +270,23 @@ nav a:not(.order-link):focus-visible {
   position: fixed;
   z-index: 21;
   left: 50%;
+  width: min(252px, calc(100vw - 48px));
   bottom: max(1rem, env(safe-area-inset-bottom));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 1.05rem 1.7rem 1rem;
+  padding: 18px 30px;
   color: var(--ink);
   background: var(--gold);
-  border: 0.15rem solid var(--gold);
+  border: 2px solid var(--gold);
   border-radius: 999px;
   box-shadow: 0 0.55rem 1.8rem rgba(0, 0, 0, 0.38);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  font-size: 18px;
   font-weight: 950;
   letter-spacing: -0.04em;
-  line-height: 1;
+  line-height: 1.5;
   text-transform: uppercase;
   white-space: nowrap;
   transform: translate3d(-50%, 0, 0);
@@ -304,12 +315,87 @@ nav a:not(.order-link):focus-visible {
   color: var(--white);
 }
 
+/*
+  One green comet. Numeric dash distances use a normalized SVG perimeter, so
+  every visible part of the trail travels at the same speed through curves,
+  straightaways and the loop seam. The SVG uses CSS pixels, never a stretched
+  viewBox, so resizing the button cannot distort its path speed.
+*/
+.order-link {
+  position: relative;
+}
+
+:where(.order-link, .floating-order) {
+  isolation: isolate;
+}
+
+.comet-aura {
+  position: absolute;
+  inset: -4px;
+  z-index: -1;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  overflow: visible;
+  fill: none;
+  stroke: var(--leaf);
+  pointer-events: none;
+  animation: generations-comet-perimeter 3.8s linear infinite;
+}
+
+.comet-perimeter {
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  ry: calc(50% - 1px);
+}
+
+.comet-segment {
+  stroke-dashoffset: calc(var(--comet-distance) + var(--comet-segment-offset));
+}
+
+.comet-ribbon {
+  stroke-width: 2px;
+  opacity: 0.94;
+}
+
+.comet-glow {
+  stroke-width: 4px;
+  opacity: 0.28;
+  filter: blur(6px);
+}
+
+.order-link .comet-glow {
+  opacity: 0.22;
+}
+
+:where(.order-link, .floating-order):focus-visible .comet-glow {
+  opacity: 0;
+}
+
+main:not(.force-motion) .comet-aura {
+  --comet-distance: -8;
+  animation: none;
+}
+
+main:not(.force-motion) .comet-quiet-tail {
+  display: none;
+}
+
+:where(main:not(.force-motion)) .comet-glow {
+  opacity: 0.14;
+}
+
+@keyframes generations-comet-perimeter {
+  from { --comet-distance: 0; }
+  to { --comet-distance: -100; }
+}
+
 .opening-copy {
   position: absolute;
   z-index: 2;
   left: clamp(1.25rem, 4.2vw, 4.5rem);
   right: clamp(1.25rem, 4.2vw, 4.5rem);
-  bottom: clamp(5.3rem, 9vh, 7.7rem);
+  /* Keep the opening type clear of the 67px fixed pill and its green aura. */
+  bottom: calc(67px + max(1rem, env(safe-area-inset-bottom)) + clamp(2.5rem, 5vh, 4rem));
 }
 
 h1,
@@ -656,7 +742,9 @@ h1 strong {
   }
 
   .order-link {
-    padding: 0.76rem 0.9rem;
+    width: 175px;
+    padding: 15px 16px;
+    font-size: 17px;
   }
 
   .opening-copy {
@@ -698,8 +786,9 @@ h1 strong {
 
   .floating-order {
     bottom: max(0.85rem, env(safe-area-inset-bottom));
-    padding: 0.82rem 1.2rem 0.78rem;
-    font-size: 1rem;
+    width: min(228px, calc(100vw - 40px));
+    padding: 15px 25px;
+    font-size: 17px;
   }
 
   .visit-content {

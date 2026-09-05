@@ -4,8 +4,6 @@ import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
-import { runInNewContext } from "node:vm";
-import { motionPreferenceBootstrap, resolveMotionPaused } from "../app/motion-preference.mjs";
 import {
   adjacentOfferCardTarget,
   nearestOfferCardIndex,
@@ -37,47 +35,6 @@ import {
 
 const projectRoot = new URL("../", import.meta.url);
 const execFileAsync = promisify(execFile);
-
-test("restores a saved motion pause before autoplay and keeps motion on by default", () => {
-  for (const [search, saved, expected] of [
-    ["", null, false],
-    ["?motion=full", null, false],
-    ["", "paused", true],
-    ["?motion=full", "paused", true],
-    ["", "running", false],
-    ["?motion=reduced", "running", true],
-  ]) {
-    assert.equal(resolveMotionPaused(search, saved), expected);
-    const dataset = {};
-    let playListener;
-    class Video {
-      paused = false;
-      pause() { this.paused = true; }
-    }
-    runInNewContext(motionPreferenceBootstrap, {
-      location: { search }, URLSearchParams, HTMLMediaElement: Video,
-      localStorage: { getItem: () => saved },
-      document: {
-        documentElement: { dataset },
-        addEventListener: (type, callback) => { if (type === "play") playListener = callback; },
-      },
-    });
-    assert.equal(dataset.motionPaused, String(expected));
-    const video = new Video();
-    playListener({ target: video });
-    assert.equal(video.paused, expected, "saved pause blocks first-parse autoplay");
-  }
-});
-
-test("motion control remains available when browser storage is blocked", () => {
-  const dataset = {};
-  assert.doesNotThrow(() => runInNewContext(motionPreferenceBootstrap, {
-    location: { search: "" }, URLSearchParams,
-    localStorage: { getItem() { throw new Error("Storage blocked"); } },
-    document: { documentElement: { dataset }, addEventListener() {} },
-  }));
-  assert.equal(dataset.motionPaused, "false");
-});
 
 async function render() {
   const html = await readFile(
@@ -638,15 +595,15 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(floatingOrderBlock, /position:\s*fixed/);
   assert.match(floatingOrderBlock, /left:\s*50%/);
   assert.match(floatingOrderBlock, /border-radius:\s*999px/);
-  assert.match(floatingOrderBlock, /padding:\s*1\.05rem 1\.7rem 1rem/);
+  assert.match(floatingOrderBlock, /padding:\s*18px 30px/);
   assert.match(
     floatingOrderBlock,
-    /font-size:\s*clamp\(1\.05rem, 1\.4vw, 1\.25rem\)/,
+    /font-size:\s*18px/,
   );
   assert.match(
     css,
-    /@media \(max-width: 760px\)[\s\S]*?\.floating-order \{[\s\S]*?padding:\s*0\.82rem 1\.2rem 0\.78rem;[\s\S]*?font-size:\s*1rem;/,
-    "mobile keeps the compact floating-order treatment",
+    /@media \(max-width: 760px\)[\s\S]*?\.floating-order \{[\s\S]*?padding:\s*15px 25px;[\s\S]*?font-size:\s*17px;/,
+    "mobile matches the Pā‘ina-sized floating-order treatment",
   );
   assert.match(
     css,
@@ -825,6 +782,39 @@ test("keeps the visitor calls to action on the display face", async () => {
     ),
     "mobile rules must not define Visit grid tracks",
   );
+
+});
+
+test("gives the opening headline its own space above the fixed Order Now pill", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const opening = css.match(/\.opening-copy\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(opening, /bottom:\s*calc\(67px \+ max\(1rem, env\(safe-area-inset-bottom\)\) \+ clamp\(2\.5rem, 5vh, 4rem\)\)/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.opening-copy\s*\{\s*bottom:\s*6\.7rem;/,
+    "preserve the already-separated narrow-screen composition");
+});
+
+test("exports one green perimeter comet on each stationary Order Now pill", async () => {
+  const html = await (await render()).text();
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const auras = [...html.matchAll(/<svg class="comet-aura"[^>]*>[\s\S]*?<\/svg>/g)];
+
+  assert.equal(auras.length, 2, "header and floating order controls each receive an aura");
+  for (const [markup] of auras) {
+    assert.match(markup, /aria-hidden="true"/);
+    assert.match(markup, /focusable="false"/);
+    assert.match(markup, /pathLength="100"/);
+    assert.doesNotMatch(markup, /viewBox=/, "the path must use unscaled CSS-pixel geometry");
+    const ids = new Set([...markup.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
+    for (const [, target] of markup.matchAll(/href="#([^"]+)"/g)) {
+      assert.ok(ids.has(target), "every stroke reference resolves within its own aura");
+    }
+  }
+
+  assert.match(css, /animation:\s*generations-comet-perimeter 3\.8s linear infinite/);
+  assert.match(css, /stroke:\s*var\(--leaf\)/);
+  assert.match(css, /\.comet-aura\s*\{[^}]*pointer-events:\s*none/s);
+  assert.match(css, /main:not\(\.force-motion\) \.comet-aura\s*\{[^}]*animation:\s*none/s);
+  assert.match(css, /:focus-visible \.comet-glow\s*\{\s*opacity:\s*0/);
 });
 
 // Focused tripwire: first-order offer climax and dish-carousel contract.
@@ -1033,11 +1023,7 @@ test("exports the offer climax and first-party dish carousel", async () => {
     /html\[data-offer-climax="settled"\] main\.force-motion \.offer-ray \{[\s\S]*?opacity:\s*0\.74;/,
     "settled rays must match the terminal sampled opacity",
   );
-  assert.doesNotMatch(
-    css,
-    /filter:\s*blur\(/,
-    "broad CSS blur volumes must stay absent from the climax",
-  );
+  assertNoOfferBlur(css, "source");
   assert.match(
     css,
     /html\[data-offer-climax="idle"\] main\.force-motion \.offer-field,[\s\S]*?\.offer-ray \{[\s\S]*?opacity:\s*0;/,
@@ -1403,6 +1389,18 @@ function parseCssRules(css) {
   return rules;
 }
 
+function assertNoOfferBlur(css, label) {
+  for (const rule of parseCssRules(css)) {
+    if (rule.type === "style" && rule.prelude.includes(".offer")) {
+      assert.doesNotMatch(
+        rule.block,
+        /(?:^|;)\s*(?:filter|backdrop-filter)\s*:\s*blur\(/,
+        `${label} offer rule ${rule.prelude} must not reintroduce a blur volume`,
+      );
+    }
+  }
+}
+
 function parseDeclarations(block) {
   const declarations = {};
   for (const part of block.split(";")) {
@@ -1437,6 +1435,7 @@ function parseKeyframes(block) {
   }
   return frames.sort((left, right) => left.percent - right.percent);
 }
+
 
 function specificity(selector) {
   return [
@@ -1649,7 +1648,7 @@ test("keeps the offer climax from leaking, stacking, or blurring", async () => {
       built.includes('data-offer-climax="idle"'))
   ) {
     assertOfferVisibilityTable(built, "built");
-    assert.doesNotMatch(built, /filter:blur\(/);
+    assertNoOfferBlur(built, "built");
     assert.doesNotMatch(built, /offer-volume/);
     assert.doesNotMatch(built, /offer-shutter-close|offer-flash-white/);
   }

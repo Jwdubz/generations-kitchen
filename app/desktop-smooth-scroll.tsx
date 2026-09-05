@@ -278,7 +278,7 @@ export function DesktopSmoothScroll() {
         event.defaultPrevented ||
         event.repeat ||
         !(event.target instanceof Element) ||
-        event.target.closest("button, [role='button'], input, textarea, select, [contenteditable='true']")
+        event.target.matches("input, textarea, select, [contenteditable='true']")
       ) {
         return;
       }
@@ -360,20 +360,6 @@ export function DesktopSmoothScroll() {
       }
     }
 
-    function handleFocusIn(event: FocusEvent) {
-      if (!active || !(event.target instanceof Element)) return;
-      const beat = event.target.closest<HTMLElement>(beatSelector);
-      const index = beat ? beatElements.indexOf(beat) : -1;
-      if (index < 0) return;
-      stopAnimation();
-      targetY = beatOffsets[index];
-      currentY = targetY;
-      beatTransitionLocked = false;
-      markActiveBeat(index);
-      renderPosition();
-      window.scrollTo({ top: targetY, behavior: "auto" });
-    }
-
     function enable() {
       if (active || explicitlyDisabled || !desktop.matches) return;
 
@@ -391,7 +377,6 @@ export function DesktopSmoothScroll() {
       window.addEventListener("keydown", handleKeydown);
       window.addEventListener("popstate", handleHistoryChange);
       document.addEventListener("click", handleAnchorClick);
-      document.addEventListener("focusin", handleFocusIn);
 
       if (window.location.hash) {
         requestAnimationFrame(() => scrollToHash(window.location.hash, false));
@@ -413,7 +398,6 @@ export function DesktopSmoothScroll() {
       window.removeEventListener("keydown", handleKeydown);
       window.removeEventListener("popstate", handleHistoryChange);
       document.removeEventListener("click", handleAnchorClick);
-      document.removeEventListener("focusin", handleFocusIn);
       html.classList.remove("smooth-scroll-active");
       html.classList.remove("scroll-beat-lock-active");
       delete html.dataset.scrollTau;

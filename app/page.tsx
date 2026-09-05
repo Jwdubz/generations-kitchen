@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { DesktopSmoothScroll } from "./desktop-smooth-scroll";
-import { MotionControl } from "./motion-control";
+import { CometAura } from "./comet-aura";
 import { OfferMenuTrack, OfferTransition } from "./offer-climax";
 
 import { ViewportVideoPlayback } from './viewport-video-playback';
@@ -149,7 +149,6 @@ export default async function Home({ searchParams }: HomeProps) {
     <main className={motion !== "reduced" ? "force-motion" : undefined}>
       <DesktopSmoothScroll />
       <ViewportVideoPlayback />
-      <MotionControl />
 
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Generations Kitchen home">
@@ -173,6 +172,7 @@ export default async function Home({ searchParams }: HomeProps) {
             rel="noreferrer"
           >
             Order Now <span aria-hidden="true">↗</span>
+            <CometAura id="header-order-comet" />
           </a>
         </nav>
       </header>
@@ -184,6 +184,7 @@ export default async function Home({ searchParams }: HomeProps) {
         rel="noreferrer"
       >
         Order Now <span aria-hidden="true">↗</span>
+        <CometAura id="floating-order-comet" />
       </a>
 
       <OfferTransition />
