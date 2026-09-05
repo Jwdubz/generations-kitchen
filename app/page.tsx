@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { DesktopSmoothScroll } from "./desktop-smooth-scroll";
+import { MotionControl } from "./motion-control";
 import { OfferMenuTrack, OfferTransition } from "./offer-climax";
 
 import { ViewportVideoPlayback } from './viewport-video-playback';
@@ -148,6 +149,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <main className={motion !== "reduced" ? "force-motion" : undefined}>
       <DesktopSmoothScroll />
       <ViewportVideoPlayback />
+      <MotionControl />
 
       <header className="site-header">
         <a className="brand" href="#top" aria-label="Generations Kitchen home">

@@ -30,6 +30,7 @@ width-plus-gap jumps.
 */
 
 import { useEffect, useRef } from "react";
+import { isMotionPaused, MOTION_CHANGE_EVENT } from "./motion-preference.mjs";
 import {
   offerCarouselGlideDurationMs,
   offerCarouselSmoothstep,
@@ -79,6 +80,7 @@ function prefersExplicitReducedMotion() {
 }
 
 function lockOfferClimaxInput(event: Event) {
+  if (event.target instanceof Element && event.target.closest("button, [role='button']")) return;
   if (event instanceof KeyboardEvent && !climaxLockKeys.has(event.key)) return;
   event.preventDefault();
   event.stopPropagation();
@@ -285,6 +287,13 @@ export function OfferTransition() {
         return;
       }
 
+      if (isMotionPaused() || offer.contains(document.activeElement)) {
+        detachLock();
+        stopClimaxClock();
+        setClimax("settled");
+        return;
+      }
+
       setClimax("playing");
       if (!locked) {
         attachOfferClimaxInputLock();
@@ -347,7 +356,16 @@ export function OfferTransition() {
     const onResize = () => {
       sizeCanvas();
     };
+    const revealForAccess = () => {
+      if (offer.contains(document.activeElement)) enterOffer();
+      if (inOffer && (isMotionPaused() || offer.contains(document.activeElement))) {
+        stopClimaxClock();
+        finishSettled();
+      }
+    };
     window.addEventListener("resize", onResize);
+    window.addEventListener(MOTION_CHANGE_EVENT, revealForAccess);
+    document.addEventListener("focusin", revealForAccess);
     sizeCanvas();
 
     if (prefersExplicitReducedMotion()) setClimax("settled");
@@ -356,6 +374,8 @@ export function OfferTransition() {
 
     return () => {
       window.removeEventListener("resize", onResize);
+      window.removeEventListener(MOTION_CHANGE_EVENT, revealForAccess);
+      document.removeEventListener("focusin", revealForAccess);
       detachLock();
       stopClimaxClock();
       attributeObserver.disconnect();

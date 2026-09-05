@@ -4,6 +4,8 @@ import { access, readFile, stat } from "node:fs/promises";
 import test from "node:test";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { runInNewContext } from "node:vm";
+import { motionPreferenceBootstrap, resolveMotionPaused } from "../app/motion-preference.mjs";
 import {
   adjacentOfferCardTarget,
   nearestOfferCardIndex,
@@ -35,6 +37,47 @@ import {
 
 const projectRoot = new URL("../", import.meta.url);
 const execFileAsync = promisify(execFile);
+
+test("restores a saved motion pause before autoplay and keeps motion on by default", () => {
+  for (const [search, saved, expected] of [
+    ["", null, false],
+    ["?motion=full", null, false],
+    ["", "paused", true],
+    ["?motion=full", "paused", true],
+    ["", "running", false],
+    ["?motion=reduced", "running", true],
+  ]) {
+    assert.equal(resolveMotionPaused(search, saved), expected);
+    const dataset = {};
+    let playListener;
+    class Video {
+      paused = false;
+      pause() { this.paused = true; }
+    }
+    runInNewContext(motionPreferenceBootstrap, {
+      location: { search }, URLSearchParams, HTMLMediaElement: Video,
+      localStorage: { getItem: () => saved },
+      document: {
+        documentElement: { dataset },
+        addEventListener: (type, callback) => { if (type === "play") playListener = callback; },
+      },
+    });
+    assert.equal(dataset.motionPaused, String(expected));
+    const video = new Video();
+    playListener({ target: video });
+    assert.equal(video.paused, expected, "saved pause blocks first-parse autoplay");
+  }
+});
+
+test("motion control remains available when browser storage is blocked", () => {
+  const dataset = {};
+  assert.doesNotThrow(() => runInNewContext(motionPreferenceBootstrap, {
+    location: { search: "" }, URLSearchParams,
+    localStorage: { getItem() { throw new Error("Storage blocked"); } },
+    document: { documentElement: { dataset }, addEventListener() {} },
+  }));
+  assert.equal(dataset.motionPaused, "false");
+});
 
 async function render() {
   const html = await readFile(
