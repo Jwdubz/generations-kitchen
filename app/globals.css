@@ -233,21 +233,17 @@ nav a:not(.order-link):focus-visible {
 .order-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 0.4rem;
-  width: 194px;
-  padding: 18px 16px;
+  padding: 0.9rem 1.25rem;
   color: var(--ink);
   background: var(--gold);
-  border: 2px solid var(--gold);
+  border: 0.15rem solid var(--gold);
   border-radius: 999px;
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  font-size: 18px;
   font-weight: 950;
   letter-spacing: -0.04em;
   text-transform: uppercase;
   white-space: nowrap;
-  line-height: 1.5;
 }
 
 .order-link > span {
@@ -270,23 +266,22 @@ nav a:not(.order-link):focus-visible {
   position: fixed;
   z-index: 21;
   left: 50%;
-  width: min(252px, calc(100vw - 48px));
   bottom: max(1rem, env(safe-area-inset-bottom));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 18px 30px;
+  padding: 1.05rem 1.7rem 1rem;
   color: var(--ink);
   background: var(--gold);
-  border: 2px solid var(--gold);
+  border: 0.15rem solid var(--gold);
   border-radius: 999px;
   box-shadow: 0 0.55rem 1.8rem rgba(0, 0, 0, 0.38);
   font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
-  font-size: 18px;
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
   font-weight: 950;
   letter-spacing: -0.04em;
-  line-height: 1.5;
+  line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
   transform: translate3d(-50%, 0, 0);
@@ -394,7 +389,7 @@ main:not(.force-motion) .comet-quiet-tail {
   z-index: 2;
   left: clamp(1.25rem, 4.2vw, 4.5rem);
   right: clamp(1.25rem, 4.2vw, 4.5rem);
-  /* Keep the opening type clear of the 67px fixed pill and its green aura. */
+  /* Preserve the approved opening placement above the fixed Order Now pill. */
   bottom: calc(67px + max(1rem, env(safe-area-inset-bottom)) + clamp(2.5rem, 5vh, 4rem));
 }
 
@@ -742,9 +737,7 @@ h1 strong {
   }
 
   .order-link {
-    width: 175px;
-    padding: 15px 16px;
-    font-size: 17px;
+    padding: 0.76rem 0.9rem;
   }
 
   .opening-copy {
@@ -786,9 +779,8 @@ h1 strong {
 
   .floating-order {
     bottom: max(0.85rem, env(safe-area-inset-bottom));
-    width: min(228px, calc(100vw - 40px));
-    padding: 15px 25px;
-    font-size: 17px;
+    padding: 0.82rem 1.2rem 0.78rem;
+    font-size: 1rem;
   }
 
   .visit-content {

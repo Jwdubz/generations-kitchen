@@ -595,15 +595,15 @@ test("keeps the visitor calls to action on the display face", async () => {
   assert.match(floatingOrderBlock, /position:\s*fixed/);
   assert.match(floatingOrderBlock, /left:\s*50%/);
   assert.match(floatingOrderBlock, /border-radius:\s*999px/);
-  assert.match(floatingOrderBlock, /padding:\s*18px 30px/);
+  assert.match(floatingOrderBlock, /padding:\s*1\.05rem 1\.7rem 1rem/);
   assert.match(
     floatingOrderBlock,
-    /font-size:\s*18px/,
+    /font-size:\s*clamp\(1\.05rem, 1\.4vw, 1\.25rem\)/,
   );
   assert.match(
     css,
-    /@media \(max-width: 760px\)[\s\S]*?\.floating-order \{[\s\S]*?padding:\s*15px 25px;[\s\S]*?font-size:\s*17px;/,
-    "mobile matches the Pā‘ina-sized floating-order treatment",
+    /@media \(max-width: 760px\)[\s\S]*?\.floating-order \{[\s\S]*?padding:\s*0\.82rem 1\.2rem 0\.78rem;[\s\S]*?font-size:\s*1rem;/,
+    "mobile keeps the original compact floating-order treatment",
   );
   assert.match(
     css,
