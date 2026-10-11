@@ -824,13 +824,14 @@ h1 strong {
   }
 
   .dish-poke .dish-cta h3 {
-    font-size: clamp(3.25rem, 14vw, 4.7rem);
+    font-size: clamp(2.6rem, 11.4vw, 4.7rem);
     line-height: 0.79;
     margin-right: 1.65rem;
   }
 
   .dish-poke h2 {
     color: var(--white);
+    font-size: clamp(2.6rem, 11.4vw, 4.7rem);
   }
 
   .visit-address {
@@ -1355,5 +1356,18 @@ html[data-offer-climax="settled"] main.force-motion .offer-action {
 
   .offer-carousel {
     --offer-card-width: calc(100% - 3.4rem);
+  }
+}
+
+/* Short phone viewports: keep the offer code and card clear of the header. */
+@media (max-width: 760px) and (max-height: 720px) {
+  .offer-carousel {
+    --offer-card-width: clamp(9rem, calc(100svh - 21.5rem), calc(100% - 3.4rem));
+    align-self: center;
+    width: 100%;
+  }
+
+  .offer-content {
+    align-items: center;
   }
 }
