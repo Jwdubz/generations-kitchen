@@ -1362,7 +1362,7 @@ html[data-offer-climax="settled"] main.force-motion .offer-action {
 /* Short phone viewports: keep the offer code and card clear of the header. */
 @media (max-width: 760px) and (max-height: 720px) {
   .offer-carousel {
-    --offer-card-width: clamp(9rem, calc(100svh - 21.5rem), calc(100% - 3.4rem));
+    --offer-card-width: clamp(9rem, calc(var(--beat-viewport-height) - 21.5rem), calc(100% - 3.4rem));
     align-self: center;
     width: 100%;
   }
